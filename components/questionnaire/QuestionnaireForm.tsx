@@ -54,17 +54,26 @@ export default function QuestionnaireForm() {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Scroll to form area (not page top)
+  const scrollToForm = () => {
+    const el = document.getElementById("questionnaire-form");
+    if (el) {
+      const top = el.getBoundingClientRect().top + window.scrollY - 20;
+      window.scrollTo({ top, behavior: "smooth" });
+    }
+  };
+
   // Next step
   const handleNext = () => {
     if (!validateStep()) return;
     setCurrentStep((prev) => Math.min(prev + 1, questionnaireSteps.length - 1));
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    scrollToForm();
   };
 
   // Previous step
   const handlePrev = () => {
     setCurrentStep((prev) => Math.max(prev - 1, 0));
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    scrollToForm();
   };
 
   // Submit form
@@ -109,7 +118,7 @@ export default function QuestionnaireForm() {
       </div>
 
       {/* Step card */}
-      <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+      <div id="questionnaire-form" className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
         {/* Step header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
