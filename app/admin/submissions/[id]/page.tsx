@@ -83,7 +83,7 @@ export default function SubmissionDetailPage({
   useEffect(() => {
     params.then(({ id }) => {
       setId(id);
-      fetch(`/api/questionnaire/${id}`)
+      fetch(`/api/admin/submissions/${id}`)
         .then((res) => {
           if (res.status === 401) {
             router.push("/admin/login");
