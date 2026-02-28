@@ -77,16 +77,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-dark-900 text-dark-400 py-12">
-        <div className="max-w-6xl mx-auto px-6 text-center">
-          <p className="font-bold text-white text-lg mb-2">惠邦行銷</p>
-          <p className="text-sm">讓每個品牌都找到對的人</p>
-          <p className="text-xs mt-6">
-            © {new Date().getFullYear()} 惠邦行銷. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      {/* Footer is in layout */}
     </main>
   );
 }
