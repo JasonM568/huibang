@@ -98,6 +98,7 @@ export const questionnaireSteps: QuestionnaireStep[] = [
         options: [
           { value: "Facebook 粉專", label: "Facebook 粉絲專頁" },
           { value: "Instagram", label: "Instagram" },
+          { value: "Threads", label: "Threads" },
           { value: "LINE 官方帳號", label: "LINE 官方帳號" },
           { value: "YouTube", label: "YouTube" },
           { value: "TikTok", label: "TikTok" },
