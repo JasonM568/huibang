@@ -26,7 +26,7 @@ export async function POST(request: Request) {
         foundedYear: answers.a3 || null,
         mainProducts: answers.a4 || null,
         website: answers.a5 || null,
-        socialMedia: answers.a6 || null,
+        socialMedia: Array.isArray(answers.a6) ? answers.a6.join(", ") : answers.a6 || null,
         contactName: answers.a7 || null,
         contactInfo: answers.a8 || null,
         teamSize: answers.a9 || null,
