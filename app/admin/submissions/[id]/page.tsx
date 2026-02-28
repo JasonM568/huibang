@@ -51,6 +51,7 @@ const answerLabels: Record<string, string> = {
   a20: "補充說明",
   a21: "聯絡人姓名",
   a22: "聯絡方式",
+  a23: "Email",
 };
 
 function getScoreColor(score: number) {

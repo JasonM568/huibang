@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { submissions, emailLogs } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { analyzeBrand } from "@/lib/analyze";
-import { notifyTeam } from "@/lib/email";
+import { notifyTeam, notifyCustomer } from "@/lib/email";
 
 export async function POST(request: Request) {
   try {
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
         website: answers.a5 || null,
         socialMedia: Array.isArray(answers.a6) ? answers.a6.join(", ") : answers.a6 || null,
         contactName: answers.a7 || null,
-        contactInfo: answers.a8 || null,
+        contactInfo: answers.a23 || answers.a8 || null,
         teamSize: answers.a9 || null,
         revenueRange: answers.a10 || null,
         answers: answers,
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       })
       .returning();
 
-    // 2. 非同步觸發 AI 分析（不阻塞回應）
+    // 2. AI 分析
     const analyzePromise = analyzeBrand(
       answers,
       answers.a1 || "未提供",
@@ -46,16 +46,37 @@ export async function POST(request: Request) {
         .update(submissions)
         .set({ analysis, status: "analyzed" })
         .where(eq(submissions.id, submission.id));
+
+      // 3. 分析完成後寄訪客確認信
+      if (answers.a23) {
+        const score = (analysis as { overall_score?: number })?.overall_score || 0;
+        await notifyCustomer({
+          email: answers.a23,
+          contactName: answers.a7 || "你好",
+          brandName: answers.a1 || "你的品牌",
+          submissionId: submission.id,
+          overallScore: score,
+        }).then(async () => {
+          await db.insert(emailLogs).values({
+            submissionId: submission.id,
+            emailType: "customer_report",
+            recipient: answers.a23,
+            status: "sent",
+          });
+        }).catch((err) => {
+          console.error("Customer email failed:", err);
+        });
+      }
     }).catch((err) => {
       console.error("Analysis failed:", err);
     });
 
-    // 3. 非同步發送 Email 通知
+    // 4. 團隊通知信（不等待）
     const emailPromise = notifyTeam({
       brandName: answers.a1 || "未提供",
       industry: answers.a2 || "未提供",
       contactName: answers.a7 || "未提供",
-      contactInfo: answers.a8 || "未提供",
+      contactInfo: answers.a23 || answers.a8 || "未提供",
       submissionId: submission.id,
     }).then(async () => {
       await db.insert(emailLogs).values({
@@ -65,12 +86,12 @@ export async function POST(request: Request) {
         status: "sent",
       });
     }).catch((err) => {
-      console.error("Email failed:", err);
+      console.error("Team email failed:", err);
     });
 
-    // 等待分析完成（讓客戶可以馬上看到結果）
+    // 等待分析完成（含訪客寄信）
     await analyzePromise;
-    // Email 不等待
+    // 團隊通知不等待
     void emailPromise;
 
     return NextResponse.json({

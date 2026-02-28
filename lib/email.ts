@@ -61,3 +61,78 @@ export async function notifyTeam(params: NotifyTeamParams) {
 
   return data;
 }
+
+// === 訪客確認信 ===
+interface NotifyCustomerParams {
+  email: string;
+  contactName: string;
+  brandName: string;
+  submissionId: string;
+  overallScore: number;
+}
+
+export async function notifyCustomer(params: NotifyCustomerParams) {
+  const { email, contactName, brandName, submissionId, overallScore } = params;
+
+  const resultUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://huibang.com.tw"}/result/${submissionId}`;
+
+  const scoreColor = overallScore >= 80 ? "#22c55e" : overallScore >= 60 ? "#3b82f6" : overallScore >= 40 ? "#eab308" : "#ef4444";
+  const scoreLabel = overallScore >= 80 ? "優秀" : overallScore >= 60 ? "良好" : overallScore >= 40 ? "待加強" : "需改善";
+
+  const { data, error } = await resend.emails.send({
+    from: "惠邦行銷 <noreply@huibang.com.tw>",
+    to: email,
+    subject: `你的品牌健檢報告已完成 — ${brandName}`,
+    html: `
+      <div style="font-family: -apple-system, 'Noto Sans TC', sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc;">
+        <div style="background: linear-gradient(135deg, #2563eb, #1d4ed8); padding: 32px 24px; text-align: center;">
+          <h1 style="color: #fff; font-size: 22px; margin: 0 0 8px 0;">品牌健檢報告已完成</h1>
+          <p style="color: #bfdbfe; font-size: 14px; margin: 0;">${brandName} 的專屬分析</p>
+        </div>
+
+        <div style="background: #fff; padding: 32px 24px;">
+          <p style="color: #334155; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+            ${contactName} 你好，
+          </p>
+          <p style="color: #334155; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+            感謝你填寫惠邦行銷的品牌健檢問卷！AI 已經完成分析，以下是你的品牌健康概覽：
+          </p>
+
+          <!-- Score -->
+          <div style="text-align: center; padding: 24px; background: #f8fafc; border-radius: 12px; margin: 0 0 24px 0;">
+            <p style="color: #64748b; font-size: 13px; margin: 0 0 8px 0;">品牌健康總分</p>
+            <div style="font-size: 48px; font-weight: 700; color: ${scoreColor}; margin: 0 0 4px 0;">
+              ${overallScore}
+            </div>
+            <p style="color: ${scoreColor}; font-size: 14px; font-weight: 600; margin: 0;">${scoreLabel}</p>
+          </div>
+
+          <!-- CTA -->
+          <div style="text-align: center; margin: 0 0 24px 0;">
+            <a href="${resultUrl}" style="display: inline-block; background: #2563eb; color: #fff; padding: 14px 36px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px;">
+              查看完整報告 →
+            </a>
+          </div>
+
+          <p style="color: #94a3b8; font-size: 13px; line-height: 1.5; margin: 0 0 16px 0;">
+            報告包含五大維度分析與具體改善建議。如果你想進一步了解如何提升品牌行銷效果，歡迎預約免費諮詢。
+          </p>
+
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;">
+
+          <p style="color: #64748b; font-size: 13px; margin: 0;">
+            惠邦行銷｜讓每個品牌都找到對的人<br>
+            如有任何問題，歡迎回覆此信件或聯繫我們
+          </p>
+        </div>
+      </div>
+    `,
+  });
+
+  if (error) {
+    console.error("Customer email error:", error);
+    throw error;
+  }
+
+  return data;
+}
