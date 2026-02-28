@@ -25,13 +25,46 @@ export async function GET(
       );
     }
 
-    // 回傳所有欄位給管理員
     return NextResponse.json(submission);
   } catch (error: unknown) {
     if (error instanceof Error && error.message === "Unauthorized") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     console.error("Admin detail error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    await requireAuth();
+    const { id } = await params;
+    const body = await request.json();
+    const { status, internalNote, assignedTo } = body;
+
+    const updates: Record<string, any> = {};
+    if (status) updates.status = status;
+    if (internalNote !== undefined) updates.internalNote = internalNote;
+    if (assignedTo !== undefined) updates.assignedTo = assignedTo;
+
+    const [updated] = await db
+      .update(submissions)
+      .set(updates)
+      .where(eq(submissions.id, id))
+      .returning();
+
+    return NextResponse.json(updated);
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === "Unauthorized") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    console.error("Status update error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

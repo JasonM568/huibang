@@ -106,10 +106,10 @@ export default function SubmissionDetailPage({
     if (!submission) return;
     setSaving(true);
     try {
-      await fetch("/api/admin/submissions/status", {
+      await fetch(`/api/admin/submissions/${submission.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: submission.id, status: newStatus }),
+        body: JSON.stringify({ status: newStatus }),
       });
       setSubmission({ ...submission, status: newStatus });
     } catch (err) {
@@ -123,10 +123,10 @@ export default function SubmissionDetailPage({
     if (!submission) return;
     setSaving(true);
     try {
-      await fetch("/api/admin/submissions/status", {
+      await fetch(`/api/admin/submissions/${submission.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: submission.id, internalNote }),
+        body: JSON.stringify({ internalNote }),
       });
       alert("備註已儲存");
     } catch (err) {
