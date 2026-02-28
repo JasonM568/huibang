@@ -1,13 +1,15 @@
 // Run with: npx tsx scripts/seed.ts
-// Make sure .env.local is set up first
+// Make sure .env.development.local is set up first
 
-import { sql } from "@vercel/postgres";
-import { drizzle } from "drizzle-orm/vercel-postgres";
+import "dotenv/config";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import bcrypt from "bcryptjs";
 import { adminUsers } from "../lib/db/schema";
 
 async function seed() {
-  const db = drizzle(sql);
+  const client = postgres(process.env.POSTGRES_URL!, { prepare: false });
+  const db = drizzle(client);
 
   // Create default admin user
   const email = process.env.ADMIN_EMAIL || "admin@huibang.com";
@@ -23,6 +25,7 @@ async function seed() {
 
   console.log(`✅ Admin user created: ${email}`);
   console.log(`⚠️  Please change the default password after first login!`);
+  await client.end();
   process.exit(0);
 }
 

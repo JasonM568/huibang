@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { submissions, emailLogs } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 import { analyzeBrand } from "@/lib/analyze";
 import { notifyTeam } from "@/lib/email";
 
@@ -44,7 +45,7 @@ export async function POST(request: Request) {
       await db
         .update(submissions)
         .set({ analysis, status: "analyzed" })
-        .where(require("drizzle-orm").eq(submissions.id, submission.id));
+        .where(eq(submissions.id, submission.id));
     }).catch((err) => {
       console.error("Analysis failed:", err);
     });
