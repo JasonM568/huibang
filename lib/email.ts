@@ -14,10 +14,10 @@ export async function notifyTeam(params: NotifyTeamParams) {
   const { brandName, industry, contactName, contactInfo, submissionId } =
     params;
 
-  const adminUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://your-domain.com"}/admin/submissions/${submissionId}`;
+  const adminUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://huibang.com.tw"}/admin/submissions/${submissionId}`;
 
   const { data, error } = await resend.emails.send({
-    from: "惠邦行銷問卷系統 <noreply@your-domain.com>",
+    from: "惠邦行銷問卷系統 <noreply@huibang.com.tw>",
     to: process.env.NOTIFY_EMAIL || "team@huibang.com",
     subject: `📋 新問卷提交：${brandName}（${industry}）`,
     html: `
