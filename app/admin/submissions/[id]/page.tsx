@@ -71,7 +71,7 @@ function getScoreBg(score: number) {
 export default function SubmissionDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string } | Promise<{ id: string }>;
 }) {
   const router = useRouter();
   const [submission, setSubmission] = useState<Submission | null>(null);
@@ -81,25 +81,28 @@ export default function SubmissionDetailPage({
   const [internalNote, setInternalNote] = useState("");
 
   useEffect(() => {
-    params.then(({ id }) => {
-      setId(id);
-      fetch(`/api/admin/submissions/${id}`)
-        .then((res) => {
-          if (res.status === 401) {
-            router.push("/admin/login");
-            return null;
-          }
-          return res.json();
-        })
-        .then((data) => {
-          if (data) {
-            setSubmission(data);
-            setInternalNote(data.internalNote || "");
-          }
-        })
-        .catch(console.error)
-        .finally(() => setLoading(false));
-    });
+    const resolve = async () => {
+      const resolved = params instanceof Promise ? await params : params;
+      const pid = resolved.id;
+      setId(pid);
+      try {
+        const res = await fetch(`/api/admin/submissions/${pid}`);
+        if (res.status === 401) {
+          router.push("/admin/login");
+          return;
+        }
+        const data = await res.json();
+        if (data && !data.error) {
+          setSubmission(data);
+          setInternalNote(data.internalNote || "");
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    resolve();
   }, [params, router]);
 
   const updateStatus = async (newStatus: string) => {
