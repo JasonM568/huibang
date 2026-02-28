@@ -13,30 +13,30 @@ const values = [
   {
     icon: "📊",
     title: "數據驅動",
-    desc: "【待補】每個決策都以數據為依據，用科學方法優化行銷成效。",
+    desc: "每一次投放、每一則貼文，我們都用數據說話。從廣告成效到受眾行為，用科學方法持續優化，讓每一分預算發揮最大效益。",
   },
   {
     icon: "🤝",
     title: "夥伴關係",
-    desc: "【待補】不只是代理商，我們是品牌成長路上的策略夥伴。",
+    desc: "我們不只是接案的廣告代操公司，而是與客戶站在同一陣線的策略夥伴。你的品牌成長，就是我們最大的成就感。",
   },
   {
     icon: "🎯",
     title: "結果導向",
-    desc: "【待補】不做表面功夫，專注在能帶來實際營收的行銷策略。",
+    desc: "不做華而不實的行銷包裝，專注在能帶來實際營收的策略。每月定期檢視 KPI，確保每個行動都在推進目標。",
   },
   {
     icon: "💡",
     title: "持續創新",
-    desc: "【待補】掌握最新行銷趨勢與工具，讓客戶永遠領先一步。",
+    desc: "從 AI 行銷分析到最新廣告投放技術，我們持續學習並導入新工具，讓客戶的行銷策略永遠走在市場前端。",
   },
 ];
 
 const milestones = [
-  { year: "20XX", event: "【待補】惠邦行銷成立" },
-  { year: "20XX", event: "【待補】服務客戶突破 XX 家" },
-  { year: "20XX", event: "【待補】擴展至 XX 產業" },
-  { year: "20XX", event: "【待補】導入 AI 行銷分析系統" },
+  { year: "2020", event: "惠邦行銷正式成立，從 Facebook 廣告代操起步" },
+  { year: "2021", event: "拓展 Google 關鍵字廣告與 LINE 行銷服務" },
+  { year: "2023", event: "服務客戶橫跨旅遊、電商、餐飲、教育四大產業" },
+  { year: "2025", event: "導入 AI 品牌分析系統，打造智慧行銷顧問服務" },
 ];
 
 export default function AboutPage() {
@@ -51,7 +51,7 @@ export default function AboutPage() {
               關於<span className="text-gradient">惠邦行銷</span>
             </h1>
             <p className="text-dark-400 text-lg leading-relaxed">
-              【待補：公司簡介，約 2-3 句話。例如：惠邦行銷成立於 20XX 年，專注於協助中小企業建立品牌定位與數位行銷策略。我們相信，每個品牌都有獨特的價值，值得被對的人看見。】
+              惠邦行銷成立於 2020 年，專注於協助中小企業與品牌主建立清晰的品牌定位，並透過精準的數位廣告投放觸及目標客群。我們相信，每個認真經營的品牌都有獨特的價值，值得被對的人看見。
             </p>
           </motion.div>
         </div>
@@ -64,7 +64,7 @@ export default function AboutPage() {
             <p className="text-brand-500 font-semibold mb-4">OUR MISSION</p>
             <h2 className="text-3xl font-bold mb-6">我們的使命</h2>
             <p className="text-dark-500 text-lg leading-relaxed">
-              【待補：公司使命宣言，約 3-4 句話。例如：我們的使命是讓每一個認真經營的品牌，都能透過精準的行銷策略被對的客群看見。不論是剛起步的新創品牌，或是希望轉型升級的成熟企業，惠邦行銷都能提供量身打造的解決方案。】
+              讓每一個認真經營的品牌，都能透過精準的行銷策略被對的客群看見。不論是剛起步的新品牌，還是希望突破瓶頸的成熟企業，惠邦行銷都能根據品牌的產業特性與成長階段，提供量身打造的數位行銷解決方案，陪伴品牌走過從 0 到 1、從 1 到 100 的每一步。
             </p>
           </motion.div>
         </div>
@@ -131,14 +131,14 @@ export default function AboutPage() {
             <p className="text-brand-500 font-semibold mb-4">OUR TEAM</p>
             <h2 className="text-3xl font-bold">我們的團隊</h2>
             <p className="text-dark-500 mt-4">
-              【待補：團隊簡介，約 1-2 句話】
+              一群熱愛行銷、深耕數位領域的專業團隊，涵蓋策略、企劃與設計，為你的品牌全方位加速。
             </p>
           </motion.div>
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { role: "創辦人 / 策略總監", name: "【待補】" },
-              { role: "行銷企劃", name: "【待補】" },
-              { role: "設計師", name: "【待補】" },
+              { role: "創辦人 / 策略總監", name: "Jason", desc: "10 年以上數位行銷經驗，擅長品牌策略與廣告投放" },
+              { role: "行銷企劃", name: "行銷企劃團隊", desc: "3 位資深企劃，專精社群經營、內容策略與活動規劃" },
+              { role: "視覺設計", name: "設計團隊", desc: "2 位設計師，負責品牌視覺、廣告素材與社群圖文" },
             ].map((member, i) => (
               <motion.div
                 key={i}
@@ -149,11 +149,12 @@ export default function AboutPage() {
                 className="bg-white rounded-2xl overflow-hidden shadow-sm"
               >
                 <div className="h-48 bg-gradient-to-br from-brand-100 to-brand-200 flex items-center justify-center">
-                  <span className="text-6xl">👤</span>
+                  <span className="text-6xl">{i === 0 ? "👨‍💼" : i === 1 ? "👩‍💻" : "🎨"}</span>
                 </div>
                 <div className="p-6 text-center">
                   <h3 className="font-bold text-lg mb-1">{member.name}</h3>
-                  <p className="text-dark-500 text-sm">{member.role}</p>
+                  <p className="text-brand-500 text-sm font-medium mb-2">{member.role}</p>
+                  <p className="text-dark-500 text-sm">{member.desc}</p>
                 </div>
               </motion.div>
             ))}

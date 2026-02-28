@@ -14,22 +14,22 @@ const contactInfo = [
   {
     icon: "📍",
     title: "地址",
-    content: "【待補：公司地址】",
+    content: "高雄市三民區九如一路61號5F-2",
   },
   {
     icon: "📞",
     title: "電話",
-    content: "【待補：公司電話】",
+    content: "07-2810889",
   },
   {
     icon: "✉️",
     title: "Email",
-    content: "【待補：公司 Email】",
+    content: "chief@huibang.com.tw",
   },
   {
     icon: "💬",
     title: "LINE",
-    content: "【待補：LINE 官方帳號 ID】",
+    content: "@213dtnty",
   },
 ];
 
@@ -104,10 +104,10 @@ export default function ContactPage() {
               {/* LINE QR Code placeholder */}
               <div className="mt-8 p-6 bg-brand-50 rounded-2xl text-center">
                 <p className="font-bold mb-3">加入 LINE 官方帳號</p>
-                <div className="w-32 h-32 bg-white rounded-xl mx-auto flex items-center justify-center border-2 border-dashed border-brand-200">
-                  <span className="text-dark-400 text-xs">【QR Code 待補】</span>
+                <div className="w-32 h-32 bg-white rounded-xl mx-auto flex items-center justify-center border-2 border-brand-200">
+                  <span className="text-4xl">💬</span>
                 </div>
-                <p className="text-sm text-dark-500 mt-3">掃描加入，即時諮詢</p>
+                <p className="text-sm text-dark-500 mt-3">搜尋 @213dtnty 加入好友</p>
               </div>
             </motion.div>
 

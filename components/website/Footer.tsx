@@ -77,7 +77,7 @@ export default function Footer() {
           </p>
           {/* TODO: 替換為真實聯絡資訊 */}
           <p className="text-xs">
-            📍 地址待補 ｜ 📞 電話待補 ｜ ✉️ email@huibang.com
+            📍 高雄市三民區九如一路61號5F-2 ｜ 📞 07-2810889 ｜ ✉️ chief@huibang.com.tw
           </p>
         </div>
       </div>
