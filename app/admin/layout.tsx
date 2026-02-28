@@ -4,6 +4,12 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 
+interface Session {
+  userId: string;
+  email: string;
+  role: string;
+}
+
 export default function AdminLayout({
   children,
 }: {
@@ -11,7 +17,7 @@ export default function AdminLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [userName, setUserName] = useState("");
+  const [session, setSession] = useState<Session | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Skip auth check on login page
@@ -20,12 +26,16 @@ export default function AdminLayout({
   useEffect(() => {
     if (isLoginPage) return;
 
-    // Check auth by calling a protected endpoint
-    fetch("/api/admin/submissions?limit=1")
+    fetch("/api/admin/me")
       .then((res) => {
         if (res.status === 401) {
           router.push("/admin/login");
+          return null;
         }
+        return res.json();
+      })
+      .then((data) => {
+        if (data && !data.error) setSession(data);
       })
       .catch(() => {
         router.push("/admin/login");
@@ -41,11 +51,14 @@ export default function AdminLayout({
     router.push("/admin/login");
   };
 
+  const isAdmin = session?.role === "admin";
+
   const navItems = [
-    { href: "/admin/dashboard", label: "儀表板", icon: "📊" },
-    { href: "/admin/submissions", label: "問卷列表", icon: "📋" },
-    { href: "/admin/contacts", label: "聯絡表單", icon: "💬" },
-  ];
+    { href: "/admin/dashboard", label: "儀表板", icon: "📊", show: true },
+    { href: "/admin/submissions", label: "問卷列表", icon: "📋", show: true },
+    { href: "/admin/contacts", label: "聯絡表單", icon: "💬", show: true },
+    { href: "/admin/users", label: "人員管理", icon: "👥", show: isAdmin },
+  ].filter((item) => item.show);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -104,7 +117,7 @@ export default function AdminLayout({
 
         <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-gray-100">
           <div className="flex items-center justify-between px-3 py-2">
-            <span className="text-sm text-gray-500">{userName || "管理員"}</span>
+            <span className="text-sm text-gray-500">{session?.email?.split("@")[0] || "管理員"}</span>
             <button
               onClick={handleLogout}
               className="text-xs text-gray-400 hover:text-red-500 transition-colors"
