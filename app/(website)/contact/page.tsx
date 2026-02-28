@@ -43,11 +43,26 @@ export default function ContactPage() {
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: 接後端 API
-    setSubmitted(true);
+    setSubmitting(true);
+    setError("");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (!res.ok) throw new Error("送出失敗");
+      setSubmitted(true);
+    } catch (err) {
+      setError("送出失敗，請稍後再試或直接來電聯繫");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -238,11 +253,18 @@ export default function ContactPage() {
                       />
                     </div>
 
+                    {error && (
+                      <div className="p-3 bg-red-50 text-red-600 rounded-lg text-sm">
+                        {error}
+                      </div>
+                    )}
+
                     <button
                       type="submit"
-                      className="w-full py-4 bg-gradient-to-r from-brand-500 to-brand-600 text-white font-bold rounded-xl text-lg hover:shadow-lg hover:shadow-brand-500/25 transition-all duration-300 hover:-translate-y-0.5"
+                      disabled={submitting}
+                      className="w-full py-4 bg-gradient-to-r from-brand-500 to-brand-600 text-white font-bold rounded-xl text-lg hover:shadow-lg hover:shadow-brand-500/25 transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      送出訊息 →
+                      {submitting ? "送出中..." : "送出訊息 →"}
                     </button>
                   </form>
                 </>

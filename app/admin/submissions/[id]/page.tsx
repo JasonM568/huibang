@@ -77,6 +77,8 @@ export default function SubmissionDetailPage({
   const [submission, setSubmission] = useState<Submission | null>(null);
   const [loading, setLoading] = useState(true);
   const [id, setId] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [internalNote, setInternalNote] = useState("");
 
   useEffect(() => {
     params.then(({ id }) => {
@@ -90,12 +92,49 @@ export default function SubmissionDetailPage({
           return res.json();
         })
         .then((data) => {
-          if (data) setSubmission(data);
+          if (data) {
+            setSubmission(data);
+            setInternalNote(data.internalNote || "");
+          }
         })
         .catch(console.error)
         .finally(() => setLoading(false));
     });
   }, [params, router]);
+
+  const updateStatus = async (newStatus: string) => {
+    if (!submission) return;
+    setSaving(true);
+    try {
+      await fetch("/api/admin/submissions/status", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: submission.id, status: newStatus }),
+      });
+      setSubmission({ ...submission, status: newStatus });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveNote = async () => {
+    if (!submission) return;
+    setSaving(true);
+    try {
+      await fetch("/api/admin/submissions/status", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: submission.id, internalNote }),
+      });
+      alert("備註已儲存");
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -132,23 +171,25 @@ export default function SubmissionDetailPage({
           <h1 className="text-2xl font-bold text-gray-900">
             {submission.brandName || "未提供品牌名"}
           </h1>
-          <span
-            className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+          <select
+            value={submission.status}
+            onChange={(e) => updateStatus(e.target.value)}
+            disabled={saving}
+            className={`text-xs px-2 py-1 rounded-full font-medium border-0 cursor-pointer ${
               submission.status === "analyzed"
                 ? "bg-green-100 text-green-700"
                 : submission.status === "contacted"
                 ? "bg-blue-100 text-blue-700"
+                : submission.status === "converted"
+                ? "bg-purple-100 text-purple-700"
                 : "bg-yellow-100 text-yellow-700"
             }`}
           >
-            {submission.status === "analyzed"
-              ? "已分析"
-              : submission.status === "contacted"
-              ? "已聯繫"
-              : submission.status === "pending"
-              ? "待分析"
-              : submission.status}
-          </span>
+            <option value="pending">待分析</option>
+            <option value="analyzed">已分析</option>
+            <option value="contacted">已聯繫</option>
+            <option value="converted">已成交</option>
+          </select>
         </div>
         <p className="text-sm text-gray-400 mt-1">
           提交於{" "}
@@ -265,6 +306,25 @@ export default function SubmissionDetailPage({
               );
             })}
           </div>
+        </div>
+
+        {/* Internal Notes */}
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <h2 className="font-semibold text-gray-900 mb-3">內部備註</h2>
+          <textarea
+            value={internalNote}
+            onChange={(e) => setInternalNote(e.target.value)}
+            placeholder="輸入內部備註，例如跟進記錄、客戶回饋..."
+            rows={4}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            onClick={saveNote}
+            disabled={saving}
+            className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+          >
+            {saving ? "儲存中..." : "儲存備註"}
+          </button>
         </div>
       </div>
     </div>

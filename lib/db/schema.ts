@@ -57,8 +57,24 @@ export const emailLogs = pgTable("email_logs", {
   status: varchar("status", { length: 20 }).default("sent").notNull(),
 });
 
+// ===== 聯絡表單 =====
+export const contactSubmissions = pgTable("contact_submissions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  name: varchar("name", { length: 100 }).notNull(),
+  company: varchar("company", { length: 100 }),
+  email: varchar("email", { length: 100 }).notNull(),
+  phone: varchar("phone", { length: 30 }),
+  service: varchar("service", { length: 50 }),
+  message: text("message").notNull(),
+  status: varchar("status", { length: 20 }).default("unread").notNull(),
+  // status flow: unread → read → replied
+  internalNote: text("internal_note"),
+});
+
 // ===== Types =====
 export type Submission = typeof submissions.$inferSelect;
 export type NewSubmission = typeof submissions.$inferInsert;
 export type AdminUser = typeof adminUsers.$inferSelect;
 export type EmailLog = typeof emailLogs.$inferSelect;
+export type ContactSubmission = typeof contactSubmissions.$inferSelect;

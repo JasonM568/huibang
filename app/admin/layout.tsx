@@ -42,7 +42,9 @@ export default function AdminLayout({
   };
 
   const navItems = [
+    { href: "/admin/dashboard", label: "儀表板", icon: "📊" },
     { href: "/admin/submissions", label: "問卷列表", icon: "📋" },
+    { href: "/admin/contacts", label: "聯絡表單", icon: "💬" },
   ];
 
   return (
