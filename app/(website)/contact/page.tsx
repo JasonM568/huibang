@@ -104,10 +104,10 @@ export default function ContactPage() {
               {/* LINE QR Code placeholder */}
               <div className="mt-8 p-6 bg-brand-50 rounded-2xl text-center">
                 <p className="font-bold mb-3">加入 LINE 官方帳號</p>
-                <div className="w-32 h-32 bg-white rounded-xl mx-auto flex items-center justify-center border-2 border-brand-200">
-                  <span className="text-4xl">💬</span>
+                <div className="w-40 h-40 mx-auto">
+                  <img src="/line-qrcode.png" alt="LINE 官方帳號 QR Code" className="w-full h-full object-contain rounded-xl" />
                 </div>
-                <p className="text-sm text-dark-500 mt-3">搜尋 @213dtnty 加入好友</p>
+                <p className="text-sm text-dark-500 mt-3">掃描加入，即時諮詢</p>
               </div>
             </motion.div>
 
