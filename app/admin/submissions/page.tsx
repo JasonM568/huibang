@@ -66,6 +66,23 @@ export default function AdminSubmissionsPage() {
     fetchData();
   }, [fetchData]);
 
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`確定要刪除「${name}」的問卷資料嗎？此操作無法復原。`)) return;
+
+    try {
+      const res = await fetch(`/api/admin/submissions/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setSubmissions((prev) => prev.filter((s) => s.id !== id));
+        setPagination((prev) => ({ ...prev, total: prev.total - 1 }));
+      } else {
+        const data = await res.json();
+        alert(data.error || "刪除失敗");
+      }
+    } catch {
+      alert("刪除失敗");
+    }
+  };
+
   const handleExport = async () => {
     setExporting(true);
     try {
@@ -219,12 +236,20 @@ export default function AdminSubmissionsPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <Link
-                          href={`/admin/submissions/${s.id}`}
-                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                        >
-                          查看
-                        </Link>
+                        <div className="flex items-center gap-3">
+                          <Link
+                            href={`/admin/submissions/${s.id}`}
+                            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                          >
+                            查看
+                          </Link>
+                          <button
+                            onClick={() => handleDelete(s.id, s.brandName || "此筆")}
+                            className="text-red-400 hover:text-red-600 text-sm"
+                          >
+                            刪除
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );

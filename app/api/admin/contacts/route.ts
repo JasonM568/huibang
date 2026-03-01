@@ -57,7 +57,31 @@ export async function GET(request: Request) {
   }
 }
 
-export async function PATCH(request: Request) {
+export async function DELETE(request: Request) {
+  try {
+    const session = await requireAuth();
+    if (session.role !== "admin") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "Missing id" }, { status: 400 });
+    }
+
+    await db.delete(contactSubmissions).where(eq(contactSubmissions.id, id));
+
+    return NextResponse.json({ success: true });
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === "Unauthorized") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    console.error("Delete contact error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
   try {
     await requireAuth();
     const body = await request.json();

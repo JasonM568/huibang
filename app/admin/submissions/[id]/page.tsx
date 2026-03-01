@@ -34,24 +34,24 @@ const answerLabels: Record<string, string> = {
   a3: "成立時間",
   a4: "主要產品/服務",
   a5: "官方網站",
-  a6: "社群平台",
-  a7: "團隊規模",
-  a8: "月營收範圍",
-  a9: "廣告投放狀態",
-  a10: "使用廣告平台",
-  a11: "每月廣告預算",
-  a12: "行銷困擾",
-  a13: "核心優勢",
-  a14: "目標客群",
-  a15: "競爭對手",
-  a16: "客戶選擇原因",
-  a17: "行銷目標",
-  a18: "感興趣服務",
-  a19: "預算範圍",
-  a20: "補充說明",
-  a21: "聯絡人姓名",
-  a22: "聯絡方式",
+  a6: "主要社群平台",
+  a9: "公司/團隊規模",
+  a10: "目前月營收範圍",
+  b1: "數位廣告投放狀態",
+  b2: "使用廣告平台",
+  b3: "每月廣告預算",
+  b4: "目前行銷最大困擾",
+  c1: "品牌核心優勢",
+  c2: "目標客群",
+  c3: "主要競爭對手",
+  c4: "客戶選擇你的原因",
+  d1: "最想達成的行銷目標",
+  d2: "感興趣的服務",
+  d3: "行銷預算範圍",
+  d4: "補充說明",
+  a7: "聯絡人姓名",
   a23: "Email",
+  a8: "手機號碼",
 };
 
 function getScoreColor(score: number) {
@@ -214,11 +214,11 @@ export default function SubmissionDetailPage({
               <p className="font-medium text-gray-900">{submission.foundedYear || "—"}</p>
             </div>
             <div>
-              <span className="text-gray-400">團隊規模</span>
+              <span className="text-gray-400">公司/團隊規模</span>
               <p className="font-medium text-gray-900">{submission.teamSize || "—"}</p>
             </div>
             <div>
-              <span className="text-gray-400">月營收</span>
+              <span className="text-gray-400">月營收範圍</span>
               <p className="font-medium text-gray-900">{submission.revenueRange || "—"}</p>
             </div>
             <div>
@@ -226,8 +226,8 @@ export default function SubmissionDetailPage({
               <p className="font-medium text-gray-900">{submission.contactName || "—"}</p>
             </div>
             <div>
-              <span className="text-gray-400">聯絡方式</span>
-              <p className="font-medium text-gray-900">{submission.contactInfo || "—"}</p>
+              <span className="text-gray-400">Email / 電話</span>
+              <p className="font-medium text-gray-900">{submission.contactInfo || submission.answers?.a23 || "—"}</p>
             </div>
           </div>
         </div>

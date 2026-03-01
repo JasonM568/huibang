@@ -17,8 +17,9 @@ export async function notifyTeam(params: NotifyTeamParams) {
   const adminUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://huibang.com.tw"}/admin/submissions/${submissionId}`;
 
   const { data, error } = await resend.emails.send({
-    from: "惠邦行銷問卷系統 <noreply@huibang.com.tw>",
-    to: process.env.NOTIFY_EMAIL || "team@huibang.com",
+    from: "惠邦行銷 <hello@huibang.com.tw>",
+    replyTo: process.env.NOTIFY_EMAIL || "chief@huibang.com.tw",
+    to: process.env.NOTIFY_EMAIL || "chief@huibang.com.tw",
     subject: `📋 新問卷提交：${brandName}（${industry}）`,
     html: `
       <div style="font-family: 'Noto Sans TC', sans-serif; max-width: 600px; margin: 0 auto;">
@@ -80,7 +81,8 @@ export async function notifyCustomer(params: NotifyCustomerParams) {
   const scoreLabel = overallScore >= 80 ? "優秀" : overallScore >= 60 ? "良好" : overallScore >= 40 ? "待加強" : "需改善";
 
   const { data, error } = await resend.emails.send({
-    from: "惠邦行銷 <noreply@huibang.com.tw>",
+    from: "惠邦行銷 <hello@huibang.com.tw>",
+    replyTo: process.env.NOTIFY_EMAIL || "chief@huibang.com.tw",
     to: email,
     subject: `你的品牌健檢報告已完成 — ${brandName}`,
     html: `

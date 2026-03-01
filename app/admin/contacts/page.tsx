@@ -85,6 +85,23 @@ export default function ContactsPage() {
     }
   };
 
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`確定要刪除「${name}」的聯絡訊息嗎？此操作無法復原。`)) return;
+
+    try {
+      const res = await fetch(`/api/admin/contacts?id=${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setContacts((prev) => prev.filter((c) => c.id !== id));
+        if (selectedId === id) setSelectedId(null);
+      } else {
+        const data = await res.json();
+        alert(data.error || "刪除失敗");
+      }
+    } catch {
+      alert("刪除失敗");
+    }
+  };
+
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
     return `${d.getMonth() + 1}/${d.getDate()} ${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
@@ -231,6 +248,12 @@ export default function ContactsPage() {
                   className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
                 >
                   {saving ? "儲存中..." : "儲存備註"}
+                </button>
+                <button
+                  onClick={() => handleDelete(selected.id, selected.name)}
+                  className="mt-2 ml-2 px-4 py-2 border border-red-300 text-red-500 rounded-lg text-sm font-medium hover:bg-red-50"
+                >
+                  刪除此訊息
                 </button>
               </div>
             </div>
