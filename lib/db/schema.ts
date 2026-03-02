@@ -72,9 +72,18 @@ export const contactSubmissions = pgTable("contact_submissions", {
   internalNote: text("internal_note"),
 });
 
+// ===== 網站設定（Key-Value） =====
+export const siteSettings = pgTable("site_settings", {
+  key: varchar("key", { length: 100 }).primaryKey(),
+  value: text("value").notNull().default(""),
+  description: varchar("description", { length: 200 }),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // ===== Types =====
 export type Submission = typeof submissions.$inferSelect;
 export type NewSubmission = typeof submissions.$inferInsert;
 export type AdminUser = typeof adminUsers.$inferSelect;
 export type EmailLog = typeof emailLogs.$inferSelect;
 export type ContactSubmission = typeof contactSubmissions.$inferSelect;
+export type SiteSetting = typeof siteSettings.$inferSelect;

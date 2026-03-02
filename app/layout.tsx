@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { getTrackingCodes } from "@/lib/tracking";
+import TrackingScripts from "@/components/TrackingScripts";
 
 export const metadata: Metadata = {
   title: "惠邦行銷 | 讓每個品牌都找到對的人",
@@ -14,14 +16,24 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const tracking = await getTrackingCodes();
+
   return (
     <html lang="zh-TW">
-      <body>{children}</body>
+      <body>
+        <TrackingScripts
+          ga4={tracking.ga4}
+          googleAds={tracking.googleAds}
+          metaPixel={tracking.metaPixel}
+          lineTag={tracking.lineTag}
+        />
+        {children}
+      </body>
     </html>
   );
 }
