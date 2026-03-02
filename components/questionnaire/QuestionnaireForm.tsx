@@ -96,6 +96,22 @@ export default function QuestionnaireForm() {
         throw new Error(data.error || "提交失敗");
       }
 
+      // 觸發 Meta Pixel 自訂轉換事件
+      if (typeof window !== "undefined" && (window as any).fbq) {
+        (window as any).fbq("track", "CompleteRegistration", {
+          content_name: "品牌健檢問卷",
+          status: true,
+        });
+      }
+
+      // 觸發 GA4 自訂事件
+      if (typeof window !== "undefined" && (window as any).gtag) {
+        (window as any).gtag("event", "questionnaire_complete", {
+          event_category: "engagement",
+          event_label: "品牌健檢問卷完成",
+        });
+      }
+
       // Redirect to result page
       router.push(`/result/${data.id}`);
     } catch (err) {

@@ -184,6 +184,30 @@ export default function ResultContent({ result, id }: { result: ResultData; id: 
         </div>
       </div>
 
+      {/* Social Media Plan Promo */}
+      <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 mb-6 border border-orange-100">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
+          <div className="flex gap-2">
+            <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold shadow">F</span>
+            <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white font-bold shadow">I</span>
+            <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white font-bold shadow">T</span>
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-gray-900">🔥 社群經營方案</h3>
+            <p className="text-sm text-gray-500">FB + IG + Threads 三平台同步經營，文案、圖片、短影音全包</p>
+          </div>
+        </div>
+        <p className="text-sm text-gray-600 mb-4">
+          根據你的品牌健檢結果，建議從社群經營著手，持續累積品牌聲量與客戶信任。我們提供三種方案，幫你的品牌每天都在線。
+        </p>
+        <Link
+          href="/plans/social-media"
+          className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-orange-500/25 transition-all duration-300 hover:-translate-y-0.5"
+        >
+          查看社群經營方案 →
+        </Link>
+      </div>
+
       {/* CTA */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-6 sm:p-8 text-center text-white">
         <h3 className="text-xl font-bold mb-2">想要更深入的行銷策略規劃？</h3>
