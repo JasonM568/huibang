@@ -1,17 +1,13 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 
 const platformOptions = ["Facebook", "Instagram", "LINE", "TikTok", "YouTube", "Threads", "X (Twitter)", "LinkedIn"];
 
-export default function StrategyPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = use(params);
+export default function StrategyPage() {
+  const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

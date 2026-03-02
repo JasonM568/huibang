@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 
 interface ClientStrategy {
   id: string;
@@ -57,12 +57,8 @@ const statusMap: Record<string, { label: string; color: string }> = {
   ended: { label: "已結束", color: "bg-red-100 text-red-700" },
 };
 
-export default function ClientDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = use(params);
+export default function ClientDetailPage() {
+  const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [client, setClient] = useState<ClientData | null>(null);
   const [loading, setLoading] = useState(true);
