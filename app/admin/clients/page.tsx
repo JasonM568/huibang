@@ -4,18 +4,17 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-interface Submission {
+interface Client {
   id: string;
   createdAt: string;
-  brandName: string | null;
+  brandName: string;
   industry: string | null;
   contactName: string | null;
-  contactInfo: string | null;
-  teamSize: string | null;
-  revenueRange: string | null;
+  contactEmail: string | null;
   status: string;
+  planTier: string | null;
+  monthlyFee: number | null;
   assignedTo: string | null;
-  analysis: { overall_score?: number } | null;
 }
 
 interface Pagination {
@@ -26,55 +25,64 @@ interface Pagination {
 }
 
 const statusMap: Record<string, { label: string; color: string }> = {
-  pending: { label: "待分析", color: "bg-yellow-100 text-yellow-700" },
-  analyzed: { label: "已分析", color: "bg-green-100 text-green-700" },
-  contacted: { label: "已聯繫", color: "bg-blue-100 text-blue-700" },
-  converted: { label: "已轉化", color: "bg-purple-100 text-purple-700" },
+  prospect: { label: "洽談中", color: "bg-yellow-100 text-yellow-700" },
+  active: { label: "合作中", color: "bg-green-100 text-green-700" },
+  paused: { label: "暫停", color: "bg-gray-100 text-gray-700" },
+  ended: { label: "已結束", color: "bg-red-100 text-red-700" },
 };
 
-export default function AdminSubmissionsPage() {
+const planMap: Record<string, string> = {
+  basic: "基礎方案",
+  growth: "品牌成長",
+  flagship: "旗艦方案",
+  custom: "客製方案",
+};
+
+export default function AdminClientsPage() {
   const router = useRouter();
-  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
     page: 1, limit: 20, total: 0, totalPages: 0,
   });
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [industryFilter, setIndustryFilter] = useState("");
-  const [exporting, setExporting] = useState(false);
+
+  // 新增客戶 modal
+  const [showModal, setShowModal] = useState(false);
+  const [newBrandName, setNewBrandName] = useState("");
+  const [creating, setCreating] = useState(false);
 
   const fetchData = useCallback(async (page = 1) => {
     setLoading(true);
     const params = new URLSearchParams({ page: String(page), limit: "20" });
     if (search) params.set("search", search);
     if (statusFilter) params.set("status", statusFilter);
-    if (industryFilter) params.set("industry", industryFilter);
 
     try {
-      const res = await fetch(`/api/admin/submissions?${params}`);
+      const res = await fetch(`/api/admin/clients?${params}`);
       if (res.status === 401) return;
       const data = await res.json();
-      setSubmissions(data.data || []);
+      setClients(data.data || []);
       setPagination(data.pagination || { page: 1, limit: 20, total: 0, totalPages: 0 });
     } catch (err) {
       console.error("Fetch error:", err);
     } finally {
       setLoading(false);
     }
-  }, [search, statusFilter, industryFilter]);
+  }, [search, statusFilter]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`確定要刪除「${name}」的問卷資料嗎？此操作無法復原。`)) return;
+    if (!confirm(`確定要刪除客戶「${name}」嗎？此操作無法復原。`)) return;
 
     try {
-      const res = await fetch(`/api/admin/submissions/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/clients/${id}`, { method: "DELETE" });
       if (res.ok) {
-        setSubmissions((prev) => prev.filter((s) => s.id !== id));
+        setClients((prev) => prev.filter((c) => c.id !== id));
         setPagination((prev) => ({ ...prev, total: prev.total - 1 }));
       } else {
         const data = await res.json();
@@ -85,64 +93,33 @@ export default function AdminSubmissionsPage() {
     }
   };
 
-  const handleConvert = async (submissionId: string, brandName: string) => {
-    if (!confirm(`確定要將「${brandName}」轉為客戶嗎？`)) return;
-
+  const handleCreate = async () => {
+    if (!newBrandName.trim()) return;
+    setCreating(true);
     try {
-      const res = await fetch("/api/admin/clients/convert", {
+      const res = await fetch("/api/admin/clients", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ submissionId }),
+        body: JSON.stringify({ brandName: newBrandName.trim() }),
       });
-      const data = await res.json();
-
-      if (res.status === 409) {
-        // 已經轉過，跳轉到該客戶
-        if (data.clientId) {
-          router.push(`/admin/clients/${data.clientId}`);
-        } else {
-          alert(data.error || "此問卷已轉為客戶");
-        }
-        return;
-      }
-
       if (res.ok) {
-        // 更新本地狀態
-        setSubmissions((prev) =>
-          prev.map((s) => s.id === submissionId ? { ...s, status: "converted" } : s)
-        );
-        router.push(`/admin/clients/${data.id}`);
+        const client = await res.json();
+        setShowModal(false);
+        setNewBrandName("");
+        router.push(`/admin/clients/${client.id}`);
       } else {
-        alert(data.error || "轉換失敗");
+        alert("建立失敗");
       }
     } catch {
-      alert("轉換失敗");
-    }
-  };
-
-  const handleExport = async () => {
-    setExporting(true);
-    try {
-      const res = await fetch("/api/admin/export", { method: "POST" });
-      if (!res.ok) throw new Error("Export failed");
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `questionnaire_export_${new Date().toISOString().slice(0, 10)}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("Export error:", err);
-      alert("匯出失敗");
+      alert("建立失敗");
     } finally {
-      setExporting(false);
+      setCreating(false);
     }
   };
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
-    return `${d.getMonth() + 1}/${d.getDate()} ${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
+    return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
   };
 
   return (
@@ -150,17 +127,16 @@ export default function AdminSubmissionsPage() {
       {/* Page header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">問卷提交列表</h1>
+          <h1 className="text-2xl font-bold text-gray-900">客戶管理</h1>
           <p className="text-sm text-gray-500 mt-1">
-            共 {pagination.total} 筆提交
+            共 {pagination.total} 位客戶
           </p>
         </div>
         <button
-          onClick={handleExport}
-          disabled={exporting}
-          className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+          onClick={() => setShowModal(true)}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
         >
-          {exporting ? "匯出中..." : "📥 匯出 CSV"}
+          + 新增客戶
         </button>
       </div>
 
@@ -181,24 +157,10 @@ export default function AdminSubmissionsPage() {
             className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">全部狀態</option>
-            <option value="pending">待分析</option>
-            <option value="analyzed">已分析</option>
-            <option value="contacted">已聯繫</option>
-            <option value="converted">已轉化</option>
-          </select>
-          <select
-            value={industryFilter}
-            onChange={(e) => setIndustryFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">全部產業</option>
-            <option value="旅遊活動">旅遊活動</option>
-            <option value="電商零售">電商零售</option>
-            <option value="餐飲美食">餐飲美食</option>
-            <option value="教育課程">教育課程</option>
-            <option value="美容保養">美容保養</option>
-            <option value="健康醫療">健康醫療</option>
-            <option value="科技軟體">科技軟體</option>
+            <option value="prospect">洽談中</option>
+            <option value="active">合作中</option>
+            <option value="paused">暫停</option>
+            <option value="ended">已結束</option>
           </select>
           <button
             onClick={() => fetchData()}
@@ -215,55 +177,47 @@ export default function AdminSubmissionsPage() {
           <div className="flex justify-center py-20">
             <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
           </div>
-        ) : submissions.length === 0 ? (
+        ) : clients.length === 0 ? (
           <div className="text-center py-20 text-gray-400">
-            <div className="text-4xl mb-3">📭</div>
-            <p>還沒有問卷提交紀錄</p>
+            <div className="text-4xl mb-3">🏢</div>
+            <p>還沒有客戶資料</p>
+            <p className="text-xs mt-1">可以手動新增或從問卷列表轉入</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="text-left px-4 py-3 font-medium text-gray-500">時間</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">品牌名稱</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">產業</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-500">聯絡人</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-500">分數</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-500">方案</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-500">月費</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">狀態</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-500">負責人</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-500">建立日期</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">操作</th>
                 </tr>
               </thead>
               <tbody>
-                {submissions.map((s) => {
-                  const status = statusMap[s.status] || {
-                    label: s.status,
+                {clients.map((c) => {
+                  const status = statusMap[c.status] || {
+                    label: c.status,
                     color: "bg-gray-100 text-gray-700",
                   };
                   return (
                     <tr
-                      key={s.id}
+                      key={c.id}
                       className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                     >
-                      <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
-                        {formatDate(s.createdAt)}
-                      </td>
                       <td className="px-4 py-3 font-medium text-gray-900">
-                        {s.brandName || "—"}
+                        {c.brandName}
                       </td>
-                      <td className="px-4 py-3 text-gray-600">{s.industry || "—"}</td>
-                      <td className="px-4 py-3">
-                        <div className="text-gray-900">{s.contactName || "—"}</div>
-                        <div className="text-xs text-gray-400">{s.contactInfo || ""}</div>
+                      <td className="px-4 py-3 text-gray-600">{c.industry || "—"}</td>
+                      <td className="px-4 py-3 text-gray-600">
+                        {c.planTier ? planMap[c.planTier] || c.planTier : "—"}
                       </td>
-                      <td className="px-4 py-3">
-                        {s.analysis?.overall_score != null ? (
-                          <span className="font-bold text-blue-600">
-                            {s.analysis.overall_score}
-                          </span>
-                        ) : (
-                          <span className="text-gray-300">—</span>
-                        )}
+                      <td className="px-4 py-3 text-gray-600">
+                        {c.monthlyFee ? `$${c.monthlyFee.toLocaleString()}` : "—"}
                       </td>
                       <td className="px-4 py-3">
                         <span
@@ -272,24 +226,20 @@ export default function AdminSubmissionsPage() {
                           {status.label}
                         </span>
                       </td>
+                      <td className="px-4 py-3 text-gray-600">{c.assignedTo || "—"}</td>
+                      <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
+                        {formatDate(c.createdAt)}
+                      </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <Link
-                            href={`/admin/submissions/${s.id}`}
+                            href={`/admin/clients/${c.id}`}
                             className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                           >
                             查看
                           </Link>
-                          {s.status !== "converted" && (
-                            <button
-                              onClick={() => handleConvert(s.id, s.brandName || "此筆")}
-                              className="text-green-600 hover:text-green-800 text-sm font-medium"
-                            >
-                              轉為客戶
-                            </button>
-                          )}
                           <button
-                            onClick={() => handleDelete(s.id, s.brandName || "此筆")}
+                            onClick={() => handleDelete(c.id, c.brandName)}
                             className="text-red-400 hover:text-red-600 text-sm"
                           >
                             刪除
@@ -329,6 +279,46 @@ export default function AdminSubmissionsPage() {
           </div>
         )}
       </div>
+
+      {/* 新增客戶 Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">新增客戶</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  品牌名稱 <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={newBrandName}
+                  onChange={(e) => setNewBrandName(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+                  placeholder="輸入品牌名稱"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  autoFocus
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => { setShowModal(false); setNewBrandName(""); }}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleCreate}
+                disabled={!newBrandName.trim() || creating}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+              >
+                {creating ? "建立中..." : "建立"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

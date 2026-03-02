@@ -5,6 +5,9 @@ import {
   text,
   timestamp,
   jsonb,
+  integer,
+  date,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 // ===== 問卷提交紀錄 =====
@@ -80,6 +83,75 @@ export const siteSettings = pgTable("site_settings", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// ===== 客戶管理 =====
+export const clients = pgTable("clients", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+
+  // 品牌基本資料
+  brandName: varchar("brand_name", { length: 100 }).notNull(),
+  industry: varchar("industry", { length: 50 }),
+  contactName: varchar("contact_name", { length: 50 }),
+  contactEmail: varchar("contact_email", { length: 100 }),
+  contactPhone: varchar("contact_phone", { length: 30 }),
+  company: varchar("company", { length: 100 }),
+  website: varchar("website", { length: 200 }),
+
+  // 合作狀態
+  status: varchar("status", { length: 20 }).default("prospect").notNull(),
+  // status: prospect（洽談中）/ active（合作中）/ paused（暫停）/ ended（已結束）
+
+  // 方案資訊
+  planTier: varchar("plan_tier", { length: 20 }),
+  // planTier: basic / growth / flagship / custom
+  monthlyFee: integer("monthly_fee"),
+  contractStart: date("contract_start"),
+  contractEnd: date("contract_end"),
+
+  // 關聯
+  submissionId: uuid("submission_id").references(() => submissions.id),
+  assignedTo: varchar("assigned_to", { length: 50 }),
+  note: text("note"),
+});
+
+// ===== 品牌策略建檔 =====
+export const clientStrategies = pgTable("client_strategies", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  clientId: uuid("client_id")
+    .references(() => clients.id, { onDelete: "cascade" })
+    .notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+
+  // 品牌人設
+  brandPersonality: text("brand_personality"), // 品牌個性描述
+  brandTone: text("brand_tone"), // 說話語氣
+  brandTaboos: text("brand_taboos"), // 禁用詞彙/風格禁區
+
+  // 受眾輪廓
+  audienceAge: varchar("audience_age", { length: 50 }),
+  audienceGender: varchar("audience_gender", { length: 30 }),
+  audienceLocation: varchar("audience_location", { length: 100 }),
+  audienceOccupation: varchar("audience_occupation", { length: 100 }),
+  audiencePainPoints: text("audience_pain_points"),
+  audiencePlatforms: text("audience_platforms"), // JSON 陣列字串
+  audienceDecisionFactors: text("audience_decision_factors"),
+
+  // 品牌聲量
+  valueProposition: text("value_proposition"), // 核心價值主張
+  keyMessages: text("key_messages"), // JSON 陣列字串
+  competitorDiff: text("competitor_diff"), // 競品差異化
+
+  // 經營設定
+  platforms: text("platforms"), // JSON 陣列字串
+  platformPositions: text("platform_positions"), // JSON 物件字串
+  postFrequency: varchar("post_frequency", { length: 50 }),
+  kpiTargets: text("kpi_targets"), // JSON 物件字串
+}, (table) => ({
+  clientIdIdx: uniqueIndex("client_strategies_client_id_idx").on(table.clientId),
+}));
+
 // ===== Types =====
 export type Submission = typeof submissions.$inferSelect;
 export type NewSubmission = typeof submissions.$inferInsert;
@@ -87,3 +159,7 @@ export type AdminUser = typeof adminUsers.$inferSelect;
 export type EmailLog = typeof emailLogs.$inferSelect;
 export type ContactSubmission = typeof contactSubmissions.$inferSelect;
 export type SiteSetting = typeof siteSettings.$inferSelect;
+export type Client = typeof clients.$inferSelect;
+export type NewClient = typeof clients.$inferInsert;
+export type ClientStrategy = typeof clientStrategies.$inferSelect;
+export type NewClientStrategy = typeof clientStrategies.$inferInsert;
