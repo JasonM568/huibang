@@ -46,6 +46,7 @@ const services = [
       "社群互動與粉絲經營",
       "成效追蹤與策略調整",
     ],
+    link: "/plans/social-media",
   },
   {
     icon: "✍️",
@@ -125,6 +126,14 @@ export default function ServicesPage() {
                       </li>
                     ))}
                   </ul>
+                  {"link" in s && s.link && (
+                    <Link
+                      href={s.link}
+                      className="inline-flex items-center mt-6 px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-brand-500/25 transition-all duration-300 hover:-translate-y-0.5"
+                    >
+                      了解完整方案 →
+                    </Link>
+                  )}
                 </div>
               </motion.div>
             ))}

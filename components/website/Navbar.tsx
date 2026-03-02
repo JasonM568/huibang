@@ -8,6 +8,7 @@ const navLinks = [
   { href: "/", label: "首頁" },
   { href: "/about", label: "關於惠邦" },
   { href: "/services", label: "服務項目" },
+  { href: "/plans/social-media", label: "社群方案" },
   { href: "/cases", label: "成功案例" },
   { href: "/blog", label: "專欄文章" },
   { href: "/contact", label: "聯絡我們" },

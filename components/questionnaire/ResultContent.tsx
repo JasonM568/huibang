@@ -117,132 +117,6 @@ function DimensionCard({ data, icon }: { data: DimensionData; icon: string }) {
   );
 }
 
-function getWeakestDimension(dimensions: AnalysisData["dimensions"]) {
-  const entries = Object.entries(dimensions) as [string, DimensionData][];
-  return entries.reduce((weakest, current) =>
-    current[1].score < weakest[1].score ? current : weakest
-  );
-}
-
-function getRecommendedPlan(overallScore: number) {
-  if (overallScore <= 40) {
-    return {
-      name: "基礎經營方案",
-      price: "18,000",
-      tag: "適合你的起步階段",
-      color: "from-green-500 to-green-600",
-      tagBg: "bg-green-100 text-green-700",
-    };
-  }
-  if (overallScore <= 65) {
-    return {
-      name: "品牌成長方案",
-      price: "32,000",
-      tag: "最適合你的成長階段 ⭐",
-      color: "from-orange-500 to-orange-600",
-      tagBg: "bg-orange-100 text-orange-700",
-    };
-  }
-  return {
-    name: "全方位旗艦方案",
-    price: "55,000",
-    tag: "幫你的品牌全力衝刺",
-    color: "from-purple-500 to-purple-600",
-    tagBg: "bg-purple-100 text-purple-700",
-  };
-}
-
-function getRecommendationReason(weakestKey: string, score: number) {
-  const reasons: Record<string, { title: string; desc: string }> = {
-    brand_clarity: {
-      title: "建立品牌識別度",
-      desc: "你的品牌定位還不夠清晰，透過持續的社群內容輸出，能幫助受眾更快認識你、記住你。",
-    },
-    target_audience: {
-      title: "精準觸及目標客群",
-      desc: "你對目標客群的認知還有提升空間，透過社群經營能持續測試內容方向，找到真正能引起共鳴的受眾。",
-    },
-    competitive_diff: {
-      title: "建立競爭差異化",
-      desc: "你的品牌需要跟競品拉開差距，透過有策略的社群內容，讓受眾感受到你的獨特價值。",
-    },
-    marketing_health: {
-      title: "提升行銷體質",
-      desc: "你的行銷投入還有很大的成長空間，從社群經營開始是最有效率的第一步，用內容持續累積品牌聲量。",
-    },
-    growth_readiness: {
-      title: "為成長做好準備",
-      desc: "你的品牌有成長的潛力，但需要更穩定的社群經營節奏，讓品牌在目標客群心中持續保持存在感。",
-    },
-  };
-  return reasons[weakestKey] || reasons.marketing_health;
-}
-
-function PlanRecommendation({ analysis }: { analysis: AnalysisData }) {
-  const [weakestKey, weakestData] = getWeakestDimension(analysis.dimensions);
-  const plan = getRecommendedPlan(analysis.overall_score);
-  const reason = getRecommendationReason(weakestKey, weakestData.score);
-
-  return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 mb-6 border border-orange-100 overflow-hidden relative">
-      {/* Recommendation badge */}
-      <div className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-4 ${plan.tagBg}`}>
-        📊 根據你的分數（{analysis.overall_score} 分）推薦
-      </div>
-
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
-        <div className="flex gap-2">
-          <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold shadow">F</span>
-          <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white font-bold shadow">I</span>
-          <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white font-bold shadow">T</span>
-        </div>
-        <div>
-          <h3 className="text-lg font-bold text-gray-900">
-            🔥 社群經營 — {plan.name}
-          </h3>
-          <p className="text-sm text-gray-500">
-            FB + IG + Threads 三平台同步經營，文案、圖片、短影音全包
-          </p>
-        </div>
-      </div>
-
-      {/* Why this plan */}
-      <div className="bg-orange-50 rounded-xl p-4 mb-4">
-        <h4 className="text-sm font-bold text-orange-800 mb-1">
-          💡 為什麼推薦你「{reason.title}」？
-        </h4>
-        <p className="text-sm text-orange-700 leading-relaxed">
-          {reason.desc}
-        </p>
-      </div>
-
-      {/* Plan highlight */}
-      <div className="flex items-center justify-between bg-gray-50 rounded-xl p-4 mb-5">
-        <div>
-          <p className="text-sm text-gray-500">{plan.tag}</p>
-          <p className="text-2xl font-black text-gray-900">
-            NT$ {plan.price}
-            <span className="text-sm font-normal text-gray-400"> / 月</span>
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="text-xs text-gray-400">你的品牌總分</p>
-          <p className={`text-3xl font-black ${getScoreColor(analysis.overall_score)}`}>
-            {analysis.overall_score}
-          </p>
-        </div>
-      </div>
-
-      <Link
-        href="/plans/social-media"
-        className={`inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r ${plan.color} text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5`}
-      >
-        查看完整方案內容 →
-      </Link>
-    </div>
-  );
-}
-
 export default function ResultContent({ result, id }: { result: ResultData; id: string }) {
   const analysis = result.analysis;
   const dimensionIcons = {
@@ -310,8 +184,31 @@ export default function ResultContent({ result, id }: { result: ResultData; id: 
         </div>
       </div>
 
-      {/* Smart Plan Recommendation */}
-      <PlanRecommendation analysis={analysis} />
+      {/* Social Media Plan Promotion */}
+      <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 sm:p-8 mb-6 border border-orange-200">
+        <div className="flex items-start gap-4">
+          <span className="text-3xl flex-shrink-0">📱</span>
+          <div className="flex-1">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">
+              想讓品牌社群動起來？
+            </h3>
+            <p className="text-gray-600 text-sm leading-relaxed mb-4">
+              我們用系統化的五步驟流程經營品牌社群 — 從品牌人設定義、黃金比例內容策略到每月數據優化，不是幫你發文而已。
+            </p>
+            <div className="flex flex-wrap gap-2 mb-4">
+              <span className="px-3 py-1 bg-white rounded-full text-xs font-medium text-orange-700">3 平台同步經營</span>
+              <span className="px-3 py-1 bg-white rounded-full text-xs font-medium text-orange-700">品牌人設建檔</span>
+              <span className="px-3 py-1 bg-white rounded-full text-xs font-medium text-orange-700">月度成效報告</span>
+            </div>
+            <Link
+              href="/plans/social-media"
+              className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-medium text-sm hover:shadow-lg hover:shadow-orange-500/25 transition-all duration-300"
+            >
+              了解社群經營方案 →
+            </Link>
+          </div>
+        </div>
+      </div>
 
       {/* CTA */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-6 sm:p-8 text-center text-white">
