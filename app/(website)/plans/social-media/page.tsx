@@ -383,44 +383,37 @@ export default function SocialMediaPlanPage() {
                   {/* Right: Pricing card */}
                   <div className="bg-white rounded-2xl shadow-lg border border-indigo-100 p-6 sm:p-8 text-center">
                     <p className="text-sm text-gray-500 mb-3">深度健診費用</p>
-                    <p className="text-gray-400 line-through text-lg mb-1">
-                      NT$ 5,000
-                    </p>
-                    <div className="flex items-center justify-center gap-2 mb-1">
+                    <div className="flex items-center justify-center gap-2 mb-2">
                       <span className="text-4xl font-black text-indigo-600">
-                        NT$ 2,500
+                        NT$ 5,000
                       </span>
                     </div>
-                    <span className="inline-block px-3 py-1 bg-red-100 text-red-600 rounded-full text-xs font-bold mb-4">
-                      填寫品牌問卷享 5 折
-                    </span>
+                    <p className="text-sm text-gray-500 mb-4">
+                      填寫品牌問卷可享 5 折優惠
+                    </p>
 
                     <div className="bg-green-50 rounded-xl p-3 mb-6">
                       <p className="text-xs text-green-700 font-medium">
-                        ✨ 簽約社群經營方案，健診費用 $2,500 可全額折抵第一個月費用
+                        ✨ 簽約社群經營方案，健診費用可全額折抵第一個月費用
                       </p>
                     </div>
 
                     <div className="space-y-3">
                       <a
-                        href="https://p.ecpay.com.tw/120B010"
+                        href="https://p.ecpay.com.tw/9227750"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-indigo-500/25 transition-all duration-300 hover:-translate-y-0.5"
+                        className="block w-full py-3 bg-gray-100 text-gray-600 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-300"
                       >
-                        立即購買健診 — NT$ 2,500
+                        放棄優惠直接健診
                       </a>
                       <Link
                         href="/questionnaire"
-                        className="block w-full py-3 border border-indigo-200 text-indigo-600 rounded-xl font-semibold hover:bg-indigo-50 transition-all duration-300"
+                        className="block w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-indigo-500/25 transition-all duration-300 hover:-translate-y-0.5"
                       >
                         先填品牌問卷享 5 折 →
                       </Link>
                     </div>
-
-                    <p className="text-xs text-gray-400 mt-4">
-                      原價 $5,000，完成品牌問卷即享半價優惠
-                    </p>
                   </div>
                 </div>
 
