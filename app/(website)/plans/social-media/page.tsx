@@ -28,7 +28,6 @@ const plans = [
       { text: "每月 12 篇貼文（每平台 4 篇）", included: true },
       { text: "基礎圖片設計", included: true },
       { text: "內容企劃 / 每月排程表", included: true },
-      { text: "Reels / 短影音（每月 2 支）", included: false },
       { text: "社群數據月報", included: false },
       { text: "專屬品牌顧問", included: false },
     ],
@@ -45,7 +44,6 @@ const plans = [
       { text: "每月 24 篇貼文（每平台 8 篇）", included: true },
       { text: "專業圖片設計 + 品牌視覺統一", included: true },
       { text: "內容企劃 / 每月排程表", included: true },
-      { text: "Reels / 短影音（每月 4 支）", included: true },
       { text: "社群數據月報", included: true },
       { text: "專屬品牌顧問", included: false },
     ],
@@ -61,7 +59,6 @@ const plans = [
       { text: "每月 36 篇貼文（每平台 12 篇）", included: true },
       { text: "專業圖片設計 + 品牌視覺統一", included: true },
       { text: "內容企劃 / 每月排程表", included: true },
-      { text: "Reels / 短影音（每月 8 支）", included: true },
       { text: "社群數據月報 + 策略建議", included: true },
       { text: "專屬品牌顧問（即時溝通）", included: true },
     ],
@@ -78,11 +75,6 @@ const deliverables = [
     icon: "🎨",
     title: "專業圖片設計",
     desc: "每篇貼文搭配品牌風格一致的視覺圖片，提升品牌識別度與貼文觸及率。",
-  },
-  {
-    icon: "🎬",
-    title: "Reels / 短影音",
-    desc: "製作吸睛的短影音內容，搭配趨勢音樂與腳本，有效提升互動率與觸及量。",
   },
   {
     icon: "📅",
@@ -105,7 +97,7 @@ const process_steps = [
   {
     step: "03",
     title: "內容製作",
-    desc: "文案撰寫、圖片設計、影音拍攝剪輯",
+    desc: "文案撰寫、圖片設計、內容排版",
   },
   {
     step: "04",
@@ -136,10 +128,6 @@ const faqs = [
     q: "圖片素材需要我們提供嗎？",
     a: "不需要。我們會根據品牌風格進行設計製作，但如果有產品照或品牌素材，提供給我們可以讓內容更豐富。",
   },
-  {
-    q: "短影音需要我們出鏡嗎？",
-    a: "不一定。我們可以製作不需出鏡的短影音（圖文動畫、產品展示等），如果你願意出鏡，效果會更好。",
-  },
 ];
 
 export default function SocialMediaPlanPage() {
@@ -160,7 +148,7 @@ export default function SocialMediaPlanPage() {
               <span className="text-gradient">讓品牌每天都在線</span>
             </h1>
             <p className="text-dark-400 text-lg max-w-2xl mx-auto mb-8">
-              FB、IG、Threads 三平台同步經營，從文案、圖片到短影音全包。
+              FB、IG、Threads 三平台同步經營，從文案到圖片設計全包。
               <br className="hidden sm:block" />
               你只需要專心做好產品，社群的事交給我們。
             </p>
