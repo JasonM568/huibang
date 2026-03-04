@@ -336,8 +336,111 @@ export default function SocialMediaPlanPage() {
         </div>
       </section>
 
-      {/* Process */}
+      {/* Social Audit Promo */}
       <section className="py-24 bg-white">
+        <div className="max-w-4xl mx-auto px-6">
+          <motion.div {...fadeUp}>
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-50 via-purple-50 to-indigo-50 border border-indigo-100">
+              {/* Background decoration */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-indigo-100/60 to-transparent rounded-bl-full" />
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-purple-100/40 to-transparent rounded-tr-full" />
+
+              <div className="relative p-8 sm:p-12">
+                {/* Badge */}
+                <span className="inline-block px-4 py-1.5 bg-indigo-100 text-indigo-600 rounded-full text-xs font-bold mb-6">
+                  🔍 簽約前推薦先做
+                </span>
+
+                <div className="grid md:grid-cols-2 gap-10 items-center">
+                  {/* Left: Content */}
+                  <div>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
+                      深度社群帳號分析健診
+                    </h2>
+                    <p className="text-gray-600 leading-relaxed mb-6">
+                      在選擇方案之前，先透過專業分析了解你的社群現況。
+                      我們會實際分析你的 FB、IG、Threads 帳號數據，
+                      找出真正的問題和機會，讓你選對方案、錢花在刀口上。
+                    </p>
+
+                    <div className="space-y-3 mb-6">
+                      {[
+                        "各平台帳號現況與互動率分析",
+                        "競品社群比較（2~3 個競品）",
+                        "受眾輪廓解析 + 具體改善建議",
+                        "5~15 頁 PDF 報告 + 30 分鐘說明會議",
+                      ].map((item) => (
+                        <div key={item} className="flex items-start gap-2.5 text-sm text-gray-700">
+                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-500 text-white flex items-center justify-center text-xs mt-0.5">
+                            ✓
+                          </span>
+                          <span>{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Right: Pricing card */}
+                  <div className="bg-white rounded-2xl shadow-lg border border-indigo-100 p-6 sm:p-8 text-center">
+                    <p className="text-sm text-gray-500 mb-3">深度健診費用</p>
+                    <p className="text-gray-400 line-through text-lg mb-1">
+                      NT$ 5,000
+                    </p>
+                    <div className="flex items-center justify-center gap-2 mb-1">
+                      <span className="text-4xl font-black text-indigo-600">
+                        NT$ 2,500
+                      </span>
+                    </div>
+                    <span className="inline-block px-3 py-1 bg-red-100 text-red-600 rounded-full text-xs font-bold mb-4">
+                      填寫品牌問卷享 5 折
+                    </span>
+
+                    <div className="bg-green-50 rounded-xl p-3 mb-6">
+                      <p className="text-xs text-green-700 font-medium">
+                        ✨ 簽約社群經營方案，健診費用 $2,500 可全額折抵第一個月費用
+                      </p>
+                    </div>
+
+                    <div className="space-y-3">
+                      <a
+                        href="https://p.ecpay.com.tw/120B010"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-indigo-500/25 transition-all duration-300 hover:-translate-y-0.5"
+                      >
+                        立即購買健診 — NT$ 2,500
+                      </a>
+                      <Link
+                        href="/questionnaire"
+                        className="block w-full py-3 border border-indigo-200 text-indigo-600 rounded-xl font-semibold hover:bg-indigo-50 transition-all duration-300"
+                      >
+                        先填品牌問卷享 5 折 →
+                      </Link>
+                    </div>
+
+                    <p className="text-xs text-gray-400 mt-4">
+                      原價 $5,000，完成品牌問卷即享半價優惠
+                    </p>
+                  </div>
+                </div>
+
+                {/* Bottom info */}
+                <div className="mt-8 pt-6 border-t border-indigo-100">
+                  <Link
+                    href="/plans/social-audit"
+                    className="inline-flex items-center text-sm text-indigo-600 font-medium hover:text-indigo-700 transition-colors"
+                  >
+                    了解深度健診完整內容 →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Process */}
+      <section className="py-24 bg-gray-50">
         <div className="max-w-5xl mx-auto px-6">
           <motion.div {...fadeUp} className="text-center mb-16">
             <h2 className="text-3xl font-bold mb-4">合作流程</h2>
@@ -368,7 +471,7 @@ export default function SocialMediaPlanPage() {
       </section>
 
       {/* FAQ */}
-      <section className="py-24 bg-gray-50">
+      <section className="py-24 bg-white">
         <div className="max-w-3xl mx-auto px-6">
           <motion.div {...fadeUp} className="text-center mb-16">
             <h2 className="text-3xl font-bold mb-4">常見問題</h2>

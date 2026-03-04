@@ -173,12 +173,22 @@ function SocialAuditPromo({ analysis }: { analysis: AnalysisData }) {
           ✨ 若之後簽約社群經營方案，健診費用 $2,500 可全額折抵第一個月費用
         </p>
 
-        <Link
-          href="/plans/social-audit"
-          className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-indigo-500/25 transition-all duration-300 hover:-translate-y-0.5"
-        >
-          了解深度健診內容 →
-        </Link>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <a
+            href="https://p.ecpay.com.tw/120B010"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-indigo-500/25 transition-all duration-300 hover:-translate-y-0.5"
+          >
+            立即購買深度健診 — NT$ 2,500 →
+          </a>
+          <Link
+            href="/plans/social-audit"
+            className="inline-flex items-center justify-center px-6 py-3 border border-indigo-200 text-indigo-600 rounded-xl font-semibold hover:bg-indigo-50 transition-all duration-300"
+          >
+            了解更多內容
+          </Link>
+        </div>
       </div>
     </div>
   );
@@ -268,7 +278,7 @@ function PlanRecommendation({ analysis }: { analysis: AnalysisData }) {
             🔥 社群經營 — {plan.name}
           </h3>
           <p className="text-sm text-gray-500">
-            FB + IG + Threads 三平台同步經營，文案、圖片、短影音全包
+            FB + IG + Threads 三平台同步經營，文案、圖片設計全包
           </p>
         </div>
       </div>
