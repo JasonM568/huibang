@@ -139,6 +139,71 @@ export async function notifyCustomer(params: NotifyCustomerParams) {
   return data;
 }
 
+// ===== 付款成功：寄送健診連結 =====
+interface SendDiagnosticTokenParams {
+  email: string;
+  contactName: string;
+  tokenUrl: string;
+  tradeNo: string;
+}
+
+export async function sendDiagnosticToken(params: SendDiagnosticTokenParams) {
+  const { email, contactName, tokenUrl, tradeNo } = params;
+  const name = contactName || "您";
+
+  const { data, error } = await resend.emails.send({
+    from: "惠邦行銷 <hello@huibang.com.tw>",
+    replyTo: process.env.NOTIFY_EMAIL || "chief@huibang.com.tw",
+    to: email,
+    subject: `付款成功！你的 AI 社群深度健診連結 🔬`,
+    html: `
+      <div style="font-family: -apple-system, 'Noto Sans TC', sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc;">
+        <div style="background: linear-gradient(135deg, #059669, #10b981); padding: 32px 24px; text-align: center;">
+          <h1 style="color: #fff; font-size: 22px; margin: 0 0 8px 0;">✅ 付款成功</h1>
+          <p style="color: #a7f3d0; font-size: 14px; margin: 0;">AI 社群帳號深度健診</p>
+        </div>
+        <div style="background: #fff; padding: 32px 24px;">
+          <p style="color: #334155; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+            ${name} 你好，<br><br>
+            感謝你購買惠邦行銷的 AI 社群帳號深度健診！你的付款已確認（訂單編號：${tradeNo}），請點擊下方按鈕開始填寫深度健診問卷：
+          </p>
+
+          <div style="text-align: center; padding: 24px; background: #f0fdf4; border: 2px solid #86efac; border-radius: 12px; margin: 0 0 24px 0;">
+            <p style="color: #166534; font-size: 14px; font-weight: 600; margin: 0 0 16px 0;">
+              🔬 你的專屬健診連結（30天有效）
+            </p>
+            <a href="${tokenUrl}" style="display: inline-block; background: linear-gradient(135deg, #059669, #10b981); color: #fff; padding: 16px 40px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 16px;">
+              開始填寫健診問卷 →
+            </a>
+          </div>
+
+          <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 16px; margin: 0 0 24px 0;">
+            <p style="color: #92400e; font-size: 13px; line-height: 1.5; margin: 0;">
+              ⚡ <strong>填寫提示：</strong><br>
+              • 共 21 題，約需 8-10 分鐘<br>
+              • 填完後 AI 會立即產出專屬報告<br>
+              • 此連結為一次性使用，請一次填寫完畢<br>
+              • $999 可全額折抵社群經營方案第一個月費用
+            </p>
+          </div>
+
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;">
+          <p style="color: #64748b; font-size: 13px; margin: 0;">
+            惠邦行銷｜讓每個品牌都找到對的人<br>
+            如有問題，歡迎回覆此信件聯繫我們
+          </p>
+        </div>
+      </div>
+    `,
+  });
+
+  if (error) {
+    console.error("Send diagnostic token email error:", error);
+    throw error;
+  }
+  return data;
+}
+
 // ===== 深度社群健診：客戶報告通知信 =====
 interface NotifyDiagnosticCustomerParams {
   email: string;

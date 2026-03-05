@@ -163,30 +163,27 @@ function SocialAuditPromo({ analysis }: { analysis: AnalysisData }) {
           </p>
         )}
 
-        {/* Pricing */}
+        {/* Pricing — $999 AI 即時報告 */}
         <div className="flex items-end gap-3 mb-2">
-          <span className="text-sm text-gray-400 line-through">原價 NT$ 5,000</span>
-          <span className="text-3xl font-black text-indigo-600">NT$ 2,500</span>
-          <span className="text-sm text-gray-500">問卷專屬價</span>
+          <span className="text-3xl font-black text-indigo-600">NT$ 999</span>
+          <span className="text-sm text-gray-500">AI 即時健診報告</span>
         </div>
         <p className="text-xs text-green-600 font-medium mb-5">
-          ✨ 若之後簽約社群經營方案，健診費用 $2,500 可全額折抵第一個月費用
+          ✨ $999 可全額折抵社群經營方案第一個月費用
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3">
-          <a
-            href="https://p.ecpay.com.tw/120B010"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/checkout/diagnostic"
             className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-indigo-500/25 transition-all duration-300 hover:-translate-y-0.5"
           >
-            立即購買深度健診 — NT$ 2,500 →
-          </a>
+            立即購買 AI 深度健診 — NT$ 999 →
+          </Link>
           <Link
             href="/plans/social-audit"
             className="inline-flex items-center justify-center px-6 py-3 border border-indigo-200 text-indigo-600 rounded-xl font-semibold hover:bg-indigo-50 transition-all duration-300"
           >
-            了解更多內容
+            了解 $2,500 人工深度健診
           </Link>
         </div>
       </div>
