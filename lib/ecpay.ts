@@ -103,16 +103,18 @@ export function createOrderParams(options: {
   const now = new Date();
   const tradeDate = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
 
+  const tradeNo = generateTradeNo();
+
   const params: Record<string, string> = {
     MerchantID: ECPAY_MERCHANT_ID,
-    MerchantTradeNo: generateTradeNo(),
+    MerchantTradeNo: tradeNo,
     MerchantTradeDate: tradeDate,
     PaymentType: "aio",
     TotalAmount: "999",
     TradeDesc: "AI社群帳號深度健診",
     ItemName: "AI 社群帳號深度健診報告 x1",
     ReturnURL: `${options.baseUrl}/api/ecpay/callback`,
-    OrderResultURL: `${options.baseUrl}/checkout/diagnostic/success`,
+    OrderResultURL: `${options.baseUrl}/checkout/diagnostic/success?trade_no=${tradeNo}`,
     ChoosePayment: "ALL",
     EncryptType: "1",
     CustomField1: options.email,
