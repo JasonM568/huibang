@@ -8,6 +8,7 @@ import {
   integer,
   date,
   uniqueIndex,
+  boolean,
 } from "drizzle-orm/pg-core";
 
 // ===== 問卷提交紀錄 =====
@@ -152,7 +153,52 @@ export const clientStrategies = pgTable("client_strategies", {
   clientIdIdx: uniqueIndex("client_strategies_client_id_idx").on(table.clientId),
 }));
 
+// ===== 深度社群健診 Token =====
+export const diagnosticTokens = pgTable("diagnostic_tokens", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  token: uuid("token").defaultRandom().notNull().unique(),
+  email: varchar("email", { length: 100 }).notNull(),
+  contactName: varchar("contact_name", { length: 50 }),
+  status: varchar("status", { length: 20 }).default("unused").notNull(),
+  // status: unused / used / expired
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  usedAt: timestamp("used_at"),
+  // 填完問卷後關聯 submission
+  submissionId: uuid("submission_id"),
+  // 備註（例如：ECPay 訂單號碼）
+  note: varchar("note", { length: 200 }),
+});
+
+// ===== 深度社群健診 提交紀錄 =====
+export const diagnosticSubmissions = pgTable("diagnostic_submissions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  status: varchar("status", { length: 20 }).default("pending").notNull(),
+  // status: pending / analyzed
+
+  // 來自 token
+  tokenId: uuid("token_id").references(() => diagnosticTokens.id),
+
+  // 基本識別（從 token 帶入）
+  email: varchar("email", { length: 100 }),
+  contactName: varchar("contact_name", { length: 50 }),
+
+  // 問卷答案（JSONB）
+  answers: jsonb("answers").notNull(),
+
+  // AI 分析結果（六區塊書面報告）
+  analysis: jsonb("analysis"),
+
+  // 內部管理
+  internalNote: text("internal_note"),
+});
+
 // ===== Types =====
+export type DiagnosticToken = typeof diagnosticTokens.$inferSelect;
+export type NewDiagnosticToken = typeof diagnosticTokens.$inferInsert;
+export type DiagnosticSubmission = typeof diagnosticSubmissions.$inferSelect;
+export type NewDiagnosticSubmission = typeof diagnosticSubmissions.$inferInsert;
 export type Submission = typeof submissions.$inferSelect;
 export type NewSubmission = typeof submissions.$inferInsert;
 export type AdminUser = typeof adminUsers.$inferSelect;

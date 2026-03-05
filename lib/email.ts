@@ -138,3 +138,110 @@ export async function notifyCustomer(params: NotifyCustomerParams) {
 
   return data;
 }
+
+// ===== 深度社群健診：客戶報告通知信 =====
+interface NotifyDiagnosticCustomerParams {
+  email: string;
+  contactName: string;
+  submissionId: string;
+  overallScore: number;
+  healthLevel: string;
+}
+
+export async function notifyDiagnosticCustomer(params: NotifyDiagnosticCustomerParams) {
+  const { email, contactName, submissionId, overallScore, healthLevel } = params;
+  const resultUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://huibang.com.tw"}/diagnostic/result/${submissionId}`;
+
+  const levelColor =
+    healthLevel === "良好" ? "#22c55e" :
+    healthLevel === "尚可" ? "#3b82f6" :
+    healthLevel === "待改善" ? "#f59e0b" : "#ef4444";
+
+  const { data, error } = await resend.emails.send({
+    from: "惠邦行銷 <hello@huibang.com.tw>",
+    replyTo: process.env.NOTIFY_EMAIL || "chief@huibang.com.tw",
+    to: email,
+    subject: `你的社群帳號深度健診報告已完成 🎯`,
+    html: `
+      <div style="font-family: -apple-system, 'Noto Sans TC', sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc;">
+        <div style="background: linear-gradient(135deg, #4f46e5, #7c3aed); padding: 32px 24px; text-align: center;">
+          <h1 style="color: #fff; font-size: 22px; margin: 0 0 8px 0;">社群帳號深度健診報告</h1>
+          <p style="color: #c4b5fd; font-size: 14px; margin: 0;">你的專屬社群診斷分析</p>
+        </div>
+        <div style="background: #fff; padding: 32px 24px;">
+          <p style="color: #334155; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+            ${contactName} 你好，<br><br>
+            AI 已完成你的社群帳號深度健診分析，以下是你的帳號健康概覽：
+          </p>
+          <div style="text-align: center; padding: 24px; background: #f8fafc; border-radius: 12px; margin: 0 0 24px 0;">
+            <p style="color: #64748b; font-size: 13px; margin: 0 0 8px 0;">社群健康總分</p>
+            <div style="font-size: 52px; font-weight: 800; color: ${levelColor}; margin: 0 0 4px 0;">${overallScore}</div>
+            <p style="color: ${levelColor}; font-size: 15px; font-weight: 700; margin: 0;">${healthLevel}</p>
+          </div>
+          <div style="text-align: center; margin: 0 0 24px 0;">
+            <a href="${resultUrl}" style="display: inline-block; background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #fff; padding: 16px 40px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 16px;">
+              查看完整健診報告 →
+            </a>
+          </div>
+          <p style="color: #94a3b8; font-size: 13px; line-height: 1.6; margin: 0 0 16px 0;">
+            報告包含：第一印象診斷、內容策略分析、數據盲點、優先改善清單，以及本週就能執行的具體行動步驟。
+          </p>
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;">
+          <p style="color: #64748b; font-size: 13px; margin: 0;">
+            惠邦行銷｜讓每個品牌都找到對的人<br>
+            如有問題，歡迎回覆此信件聯繫我們
+          </p>
+        </div>
+      </div>
+    `,
+  });
+
+  if (error) {
+    console.error("Diagnostic customer email error:", error);
+    throw error;
+  }
+  return data;
+}
+
+// ===== 深度社群健診：團隊通知信 =====
+interface NotifyTeamDiagnosticParams {
+  contactName: string;
+  email: string;
+  submissionId: string;
+}
+
+export async function notifyTeamDiagnostic(params: NotifyTeamDiagnosticParams) {
+  const { contactName, email, submissionId } = params;
+  const adminUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://huibang.com.tw"}/admin/diagnostic/${submissionId}`;
+
+  const { data, error } = await resend.emails.send({
+    from: "惠邦行銷 <hello@huibang.com.tw>",
+    replyTo: process.env.NOTIFY_EMAIL || "chief@huibang.com.tw",
+    to: process.env.NOTIFY_EMAIL || "chief@huibang.com.tw",
+    subject: `🔍 新深度健診提交：${contactName}（${email}）`,
+    html: `
+      <div style="font-family: 'Noto Sans TC', sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #4f46e5, #7c3aed); padding: 24px; border-radius: 12px 12px 0 0;">
+          <h1 style="color: #fff; font-size: 20px; margin: 0;">🔍 新深度社群健診提交</h1>
+        </div>
+        <div style="background: #fff; padding: 24px; border: 1px solid #e2e8f0; border-top: 0; border-radius: 0 0 12px 12px;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr><td style="padding: 8px 0; color: #64748b; width: 100px;">聯絡人</td><td style="padding: 8px 0; font-weight: 600;">${contactName}</td></tr>
+            <tr><td style="padding: 8px 0; color: #64748b;">Email</td><td style="padding: 8px 0;">${email}</td></tr>
+          </table>
+          <div style="margin-top: 20px; text-align: center;">
+            <a href="${adminUrl}" style="display: inline-block; background: #4f46e5; color: #fff; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+              查看健診報告 →
+            </a>
+          </div>
+        </div>
+      </div>
+    `,
+  });
+
+  if (error) {
+    console.error("Team diagnostic email error:", error);
+    throw error;
+  }
+  return data;
+}
