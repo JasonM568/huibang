@@ -11,6 +11,7 @@ interface TokenRecord {
   createdAt: string;
   expiresAt: string;
   usedAt: string | null;
+  submissionId: string | null;
   note: string | null;
 }
 
