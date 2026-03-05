@@ -61,6 +61,7 @@ export default function AdminLayout({
     { href: "/admin/content-studio", label: "貼文產生器", icon: "✨", show: true },
     { href: "/admin/users", label: "人員管理", icon: "👥", show: isAdmin },
     { href: "/admin/tracking", label: "追蹤碼管理", icon: "📈", show: true },
+    { href: "/admin/diagnostic", label: "深度健診", icon: "🔬", show: true },
   ].filter((item) => item.show);
 
   return (
