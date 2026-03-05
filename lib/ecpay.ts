@@ -1,11 +1,24 @@
 import crypto from "crypto";
 
-const ECPAY_MERCHANT_ID = process.env.ECPAY_MERCHANT_ID || "";
-const ECPAY_HASH_KEY = process.env.ECPAY_HASH_KEY || "";
-const ECPAY_HASH_IV = process.env.ECPAY_HASH_IV || "";
+// 綠界測試/正式環境切換
+// ECPAY_ENV=test → 使用綠界官方測試帳號（免真實扣款）
+// ECPAY_ENV=production 或未設定 → 使用正式帳號
+const isTestMode = process.env.ECPAY_ENV === "test";
 
-// 綠界正式環境
-const ECPAY_API_URL = "https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5";
+// 測試環境使用綠界官方提供的測試商店
+const ECPAY_MERCHANT_ID = isTestMode
+  ? "3002607"
+  : (process.env.ECPAY_MERCHANT_ID || "");
+const ECPAY_HASH_KEY = isTestMode
+  ? "pwFHCqoQZGmho4w6"
+  : (process.env.ECPAY_HASH_KEY || "");
+const ECPAY_HASH_IV = isTestMode
+  ? "EkRm7iFT261dpevs"
+  : (process.env.ECPAY_HASH_IV || "");
+
+const ECPAY_API_URL = isTestMode
+  ? "https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5"
+  : "https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5";
 
 /**
  * ECPay URL encode 規則（與 .NET 的 Server.UrlEncode 相容）
