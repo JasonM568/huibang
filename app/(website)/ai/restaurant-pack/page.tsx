@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 
 const fadeUp = {
@@ -118,6 +119,36 @@ const gpts = [
   },
 ];
 
+const plans = [
+  {
+    id: 1,
+    name: "入門方案",
+    agents: 2,
+    originalPrice: 1980,
+    salePrice: 990,
+    included: [1, 2],
+    highlight: false,
+  },
+  {
+    id: 2,
+    name: "進階方案",
+    agents: 6,
+    originalPrice: 4680,
+    salePrice: 1990,
+    included: [1, 2, 3, 4, 5, 6],
+    highlight: false,
+  },
+  {
+    id: 3,
+    name: "全配方案",
+    agents: 10,
+    originalPrice: 9880,
+    salePrice: 3990,
+    included: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    highlight: true,
+  },
+];
+
 const steps = [
   {
     step: "01",
@@ -195,12 +226,12 @@ export default function RestaurantAIPackPage() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/contact"
+              <a
+                href="#pricing"
                 className="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-emerald-500 to-cyan-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 transition-all duration-300 hover:-translate-y-0.5"
               >
-                立即諮詢方案 →
-              </Link>
+                查看方案與價格 →
+              </a>
               <Link
                 href="/questionnaire"
                 className="inline-flex items-center justify-center px-8 py-4 border-2 border-dark-600 text-dark-300 font-semibold rounded-xl hover:border-dark-400 hover:text-white transition-all duration-300"
@@ -319,8 +350,179 @@ export default function RestaurantAIPackPage() {
         </div>
       </section>
 
-      {/* How It Works */}
+      {/* GPT Preview Screenshots */}
       <section className="py-24 bg-white">
+        <div className="max-w-5xl mx-auto px-6">
+          <motion.div {...fadeUp} className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">
+              實際畫面搶先看
+            </h2>
+            <p className="text-dark-500 max-w-xl mx-auto">
+              每位 AI Agent 都有專屬頭像與角色設定，打開 ChatGPT 即可使用
+            </p>
+          </motion.div>
+
+          <motion.div {...fadeUp} className="grid md:grid-cols-2 gap-6">
+            <div className="rounded-2xl overflow-hidden shadow-lg border border-gray-100">
+              <Image
+                src="/images/ai-pack/gpts-preview-1.png"
+                alt="AI Agent 實際畫面 — LINE/客服訊息管家、商家評論回覆手、菜單設計顧問、活動企劃師、社群貼文機"
+                width={800}
+                height={800}
+                className="w-full h-auto"
+              />
+            </div>
+            <div className="rounded-2xl overflow-hidden shadow-lg border border-gray-100">
+              <Image
+                src="/images/ai-pack/gpts-preview-2.png"
+                alt="AI Agent 實際畫面 — 老闆決策顧問、營運覆盤師、廣告投放教練、徵人文案+面試官、食材成本計算機"
+                width={800}
+                height={800}
+                className="w-full h-auto"
+              />
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* GPTs Overview Table */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-4xl mx-auto px-6">
+          <motion.div {...fadeUp} className="text-center mb-10">
+            <h3 className="text-2xl font-bold mb-3">
+              10 位 AI Agent 總覽
+            </h3>
+            <p className="text-dark-500 text-sm">
+              一張圖看懂整包內容 — 角色、功能、使用頻率一目瞭然
+            </p>
+          </motion.div>
+
+          <motion.div {...fadeUp} className="rounded-2xl overflow-hidden shadow-lg border border-gray-100">
+            <Image
+              src="/images/ai-pack/10-GPTs-Kit.png"
+              alt="AI 個體包 10 位 GPTs 總覽表格 — 包含名稱、角色、使用頻率與功能說明"
+              width={1200}
+              height={600}
+              className="w-full h-auto"
+            />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="pricing" className="py-24 bg-white scroll-mt-20">
+        <div className="max-w-6xl mx-auto px-6">
+          <motion.div {...fadeUp} className="text-center mb-16">
+            <h2 className="text-3xl font-bold mb-4">
+              選擇適合你的方案
+            </h2>
+            <p className="text-dark-500 max-w-xl mx-auto">
+              依照需求選擇 AI Agent 數量，付款後立即開通使用
+            </p>
+          </motion.div>
+
+          <div className="grid lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {plans.map((plan, i) => (
+              <motion.div
+                key={plan.id}
+                {...stagger}
+                transition={{ duration: 0.5, delay: i * 0.12 }}
+                className={`relative rounded-2xl p-8 flex flex-col ${
+                  plan.highlight
+                    ? "bg-dark-900 text-white ring-2 ring-emerald-500 shadow-2xl shadow-emerald-500/10 scale-[1.03]"
+                    : "bg-white border-2 border-gray-100"
+                }`}
+              >
+                {plan.highlight && (
+                  <span className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white text-xs font-bold rounded-full">
+                    最超值
+                  </span>
+                )}
+
+                {/* Plan name + agent count */}
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold mb-1">{plan.name}</h3>
+                  <p className={`text-sm ${plan.highlight ? "text-dark-400" : "text-dark-500"}`}>
+                    {plan.agents} 位 AI Agent
+                  </p>
+                </div>
+
+                {/* Price */}
+                <div className="mb-8">
+                  <span className={`text-sm line-through ${plan.highlight ? "text-dark-500" : "text-dark-400"}`}>
+                    NT$ {plan.originalPrice.toLocaleString()}
+                  </span>
+                  <div className="flex items-baseline gap-1 mt-1">
+                    <span className={`text-4xl font-extrabold ${
+                      plan.highlight
+                        ? "bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent"
+                        : "text-emerald-600"
+                    }`}>
+                      NT$ {plan.salePrice.toLocaleString()}
+                    </span>
+                  </div>
+                  <p className={`text-xs mt-2 ${plan.highlight ? "text-emerald-400" : "text-emerald-600"} font-medium`}>
+                    省 NT$ {(plan.originalPrice - plan.salePrice).toLocaleString()}
+                  </p>
+                </div>
+
+                {/* Feature list */}
+                <div className="flex-1 mb-8">
+                  <p className={`text-xs font-semibold mb-3 ${plan.highlight ? "text-dark-400" : "text-dark-500"}`}>
+                    包含的 AI Agent：
+                  </p>
+                  <ul className="space-y-2.5">
+                    {gpts.map((gpt) => {
+                      const included = plan.included.includes(gpt.id);
+                      return (
+                        <li key={gpt.id} className="flex items-center gap-2.5 text-sm">
+                          {included ? (
+                            <span className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs flex-shrink-0">
+                              ✓
+                            </span>
+                          ) : (
+                            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${
+                              plan.highlight ? "bg-dark-700 text-dark-500" : "bg-gray-100 text-gray-400"
+                            }`}>
+                              —
+                            </span>
+                          )}
+                          <span className={
+                            included
+                              ? plan.highlight ? "text-white" : "text-dark-700"
+                              : plan.highlight ? "text-dark-600" : "text-dark-400"
+                          }>
+                            {gpt.name}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+
+                {/* CTA */}
+                <Link
+                  href={`/checkout/ai-pack?plan=${plan.id}`}
+                  className={`block w-full py-4 rounded-xl font-bold text-center transition-all duration-300 hover:-translate-y-0.5 ${
+                    plan.highlight
+                      ? "bg-gradient-to-r from-emerald-500 to-cyan-600 text-white hover:shadow-lg hover:shadow-emerald-500/25"
+                      : "bg-dark-900 text-white hover:bg-dark-800"
+                  }`}
+                >
+                  立即購買
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.p {...fadeUp} className="text-center text-sm text-dark-400 mt-10">
+            付款後立即開通，永久使用不限次數
+          </motion.p>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-24 bg-gray-50">
         <div className="max-w-4xl mx-auto px-6">
           <motion.div {...fadeUp} className="text-center mb-16">
             <h2 className="text-3xl font-bold mb-4">
@@ -390,12 +592,12 @@ export default function RestaurantAIPackPage() {
               10 位 AI 專家隨時待命，餐飲經營不再只靠你一個人
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/contact"
+              <a
+                href="#pricing"
                 className="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-emerald-500 to-cyan-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 transition-all duration-300 hover:-translate-y-0.5"
               >
-                聯繫我們諮詢方案 →
-              </Link>
+                查看方案與價格 →
+              </a>
               <Link
                 href="/questionnaire"
                 className="inline-flex items-center justify-center px-8 py-4 border-2 border-dark-600 text-dark-300 font-semibold rounded-xl hover:border-dark-400 hover:text-white transition-all duration-300"

@@ -107,31 +107,45 @@ export function generateTradeNo(): string {
 
 /**
  * 產生綠界 AIO 訂單參數
+ * 支援不同產品類型（健診、AI 個體包等）
  */
 export function createOrderParams(options: {
   email: string;
   contactName: string;
   baseUrl: string;
+  amount?: number;
+  itemName?: string;
+  tradeDesc?: string;
+  successUrl?: string;
+  productType?: string;
+  planId?: string;
 }): { params: Record<string, string>; apiUrl: string } {
   const now = new Date();
   const tradeDate = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
 
   const tradeNo = generateTradeNo();
 
+  const amount = options.amount || 999;
+  const itemName = options.itemName || "AI 社群帳號深度健診報告 x1";
+  const tradeDesc = options.tradeDesc || "AI社群帳號深度健診";
+  const successUrl = options.successUrl || `${options.baseUrl}/checkout/diagnostic/success?trade_no=${tradeNo}`;
+
   const params: Record<string, string> = {
     MerchantID: ECPAY_MERCHANT_ID,
     MerchantTradeNo: tradeNo,
     MerchantTradeDate: tradeDate,
     PaymentType: "aio",
-    TotalAmount: "999",
-    TradeDesc: "AI社群帳號深度健診",
-    ItemName: "AI 社群帳號深度健診報告 x1",
+    TotalAmount: String(amount),
+    TradeDesc: tradeDesc,
+    ItemName: itemName,
     ReturnURL: `${options.baseUrl}/api/ecpay/callback`,
-    OrderResultURL: `${options.baseUrl}/checkout/diagnostic/success?trade_no=${tradeNo}`,
+    OrderResultURL: successUrl,
     ChoosePayment: "ALL",
     EncryptType: "1",
     CustomField1: options.email,
     CustomField2: options.contactName,
+    CustomField3: options.productType || "",
+    CustomField4: options.planId || "",
     NeedExtraPaidInfo: "N",
   };
 

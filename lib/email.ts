@@ -204,6 +204,85 @@ export async function sendDiagnosticToken(params: SendDiagnosticTokenParams) {
   return data;
 }
 
+// ===== AI 個體包：付款成功寄送 Google Sheet 連結 =====
+interface SendAiPackEmailParams {
+  email: string;
+  contactName: string;
+  tradeNo: string;
+  planId: string;
+}
+
+const AI_PACK_SHEET_URLS: Record<string, string> = {
+  "1": "https://docs.google.com/spreadsheets/d/1uVZDt6c6TZ9pn3lLNY5riWUAti1i88d0Eg164X86-o8/edit?usp=sharing",
+  "2": "https://docs.google.com/spreadsheets/d/1zifC9U1smty22qlrugaV-JiWOj6jnQUtooPf4keMoeE/edit?usp=sharing",
+  "3": "https://docs.google.com/spreadsheets/d/1TY6ZvifbdzSta-KmzcwBJKwJxmmwon7NCSCRYzQR74o/edit?usp=sharing",
+};
+
+const AI_PACK_PLAN_NAMES: Record<string, string> = {
+  "1": "入門方案（2 位 AI Agent）",
+  "2": "進階方案（6 位 AI Agent）",
+  "3": "全配方案（10 位 AI Agent）",
+};
+
+export async function sendAiPackEmail(params: SendAiPackEmailParams) {
+  const { email, contactName, tradeNo, planId } = params;
+  const name = contactName || "您";
+  const planName = AI_PACK_PLAN_NAMES[planId] || "AI 個體包";
+  const sheetUrl = AI_PACK_SHEET_URLS[planId] || AI_PACK_SHEET_URLS["3"];
+
+  const { data, error } = await resend.emails.send({
+    from: "惠邦行銷 <hello@huibang.com.tw>",
+    replyTo: process.env.NOTIFY_EMAIL || "service@huibang.com.tw",
+    to: email,
+    subject: `付款成功！你的 AI 個體包已開通 🤖`,
+    html: `
+      <div style="font-family: -apple-system, 'Noto Sans TC', sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc;">
+        <div style="background: linear-gradient(135deg, #059669, #06b6d4); padding: 32px 24px; text-align: center;">
+          <h1 style="color: #fff; font-size: 22px; margin: 0 0 8px 0;">✅ 付款成功</h1>
+          <p style="color: #a7f3d0; font-size: 14px; margin: 0;">AI 個體包 — ${planName}</p>
+        </div>
+        <div style="background: #fff; padding: 32px 24px;">
+          <p style="color: #334155; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+            ${name} 你好，<br><br>
+            感謝你購買惠邦行銷的 AI 個體包！你的付款已確認（訂單編號：${tradeNo}）。
+          </p>
+
+          <div style="text-align: center; padding: 24px; background: #f0fdf4; border: 2px solid #86efac; border-radius: 12px; margin: 0 0 24px 0;">
+            <p style="color: #166534; font-size: 14px; font-weight: 600; margin: 0 0 16px 0;">
+              🤖 你的 AI Agent 已準備就緒
+            </p>
+            <a href="${sheetUrl}" style="display: inline-block; background: linear-gradient(135deg, #059669, #06b6d4); color: #fff; padding: 16px 40px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 16px;">
+              前往領取 AI Agent →
+            </a>
+          </div>
+
+          <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 16px; margin: 0 0 24px 0;">
+            <p style="color: #92400e; font-size: 13px; line-height: 1.5; margin: 0;">
+              ⚡ <strong>使用說明：</strong><br>
+              • 點擊上方按鈕後，會看到你的 AI Agent 連結清單<br>
+              • 需要 ChatGPT 帳號才能使用（免費版可用部分功能）<br>
+              • 永久有效，不限使用次數<br>
+              • 可分享給團隊成員一起使用
+            </p>
+          </div>
+
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;">
+          <p style="color: #64748b; font-size: 13px; margin: 0;">
+            惠邦行銷｜讓每個品牌都找到對的人<br>
+            如有問題，歡迎回覆此信件聯繫我們
+          </p>
+        </div>
+      </div>
+    `,
+  });
+
+  if (error) {
+    console.error("Send AI pack email error:", error);
+    throw error;
+  }
+  return data;
+}
+
 // ===== 深度社群健診：客戶報告通知信 =====
 interface NotifyDiagnosticCustomerParams {
   email: string;
