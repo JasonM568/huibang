@@ -283,6 +283,183 @@ export async function sendAiPackEmail(params: SendAiPackEmailParams) {
   return data;
 }
 
+// ===== 付款失敗：通知客戶 =====
+interface SendPaymentFailedEmailParams {
+  email: string;
+  contactName: string;
+  orderNo: string;
+  productName: string;
+}
+
+export async function sendPaymentFailedEmail(params: SendPaymentFailedEmailParams) {
+  const { email, contactName, orderNo, productName } = params;
+  const name = contactName || "您";
+  const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://huibang.com.tw";
+
+  const { data, error } = await resend.emails.send({
+    from: "惠邦行銷 <hello@huibang.com.tw>",
+    replyTo: process.env.NOTIFY_EMAIL || "service@huibang.com.tw",
+    to: email,
+    subject: `付款未完成，請重新操作 — ${productName}`,
+    html: `
+      <div style="font-family: -apple-system, 'Noto Sans TC', sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc;">
+        <div style="background: linear-gradient(135deg, #dc2626, #ef4444); padding: 32px 24px; text-align: center;">
+          <h1 style="color: #fff; font-size: 22px; margin: 0 0 8px 0;">付款未完成</h1>
+          <p style="color: #fecaca; font-size: 14px; margin: 0;">${productName}</p>
+        </div>
+        <div style="background: #fff; padding: 32px 24px;">
+          <p style="color: #334155; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+            ${name} 你好，<br><br>
+            你的訂單（編號：${orderNo}）付款未成功。這可能是因為交易逾時、餘額不足或其他原因。
+          </p>
+
+          <div style="padding: 20px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; margin: 0 0 24px 0;">
+            <p style="color: #991b1b; font-size: 14px; line-height: 1.5; margin: 0;">
+              如果你仍有購買需求，請重新前往產品頁面下單。若持續無法付款，歡迎聯繫我們協助處理。
+            </p>
+          </div>
+
+          <div style="text-align: center; margin: 0 0 24px 0;">
+            <a href="${siteUrl}" style="display: inline-block; background: #2563eb; color: #fff; padding: 14px 36px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px;">
+              回到惠邦行銷 →
+            </a>
+          </div>
+
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;">
+          <p style="color: #64748b; font-size: 13px; margin: 0;">
+            惠邦行銷｜讓每個品牌都找到對的人<br>
+            如有問題，歡迎回覆此信件聯繫我們
+          </p>
+        </div>
+      </div>
+    `,
+  });
+
+  if (error) {
+    console.error("Send payment failed email error:", error);
+    throw error;
+  }
+  return data;
+}
+
+// ===== 發票開立成功：通知客戶 =====
+interface SendInvoiceEmailParams {
+  email: string;
+  contactName: string;
+  orderNo: string;
+  invoiceNo: string;
+  amount: number;
+  itemName: string;
+}
+
+export async function sendInvoiceEmail(params: SendInvoiceEmailParams) {
+  const { email, contactName, orderNo, invoiceNo, amount, itemName } = params;
+  const name = contactName || "您";
+
+  const { data, error } = await resend.emails.send({
+    from: "惠邦行銷 <hello@huibang.com.tw>",
+    replyTo: process.env.NOTIFY_EMAIL || "service@huibang.com.tw",
+    to: email,
+    subject: `電子發票已開立 — ${invoiceNo}`,
+    html: `
+      <div style="font-family: -apple-system, 'Noto Sans TC', sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc;">
+        <div style="background: linear-gradient(135deg, #059669, #10b981); padding: 32px 24px; text-align: center;">
+          <h1 style="color: #fff; font-size: 22px; margin: 0 0 8px 0;">電子發票已開立</h1>
+          <p style="color: #a7f3d0; font-size: 14px; margin: 0;">訂單 ${orderNo}</p>
+        </div>
+        <div style="background: #fff; padding: 32px 24px;">
+          <p style="color: #334155; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+            ${name} 你好，<br><br>
+            你的電子發票已開立完成，以下為發票資訊：
+          </p>
+
+          <div style="background: #f0fdf4; border: 2px solid #86efac; border-radius: 12px; padding: 20px; margin: 0 0 24px 0;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 6px 0; color: #64748b; font-size: 14px; width: 100px;">發票號碼</td>
+                <td style="padding: 6px 0; color: #166534; font-size: 16px; font-weight: 700;">${invoiceNo}</td>
+              </tr>
+              <tr>
+                <td style="padding: 6px 0; color: #64748b; font-size: 14px;">品名</td>
+                <td style="padding: 6px 0; color: #1e293b; font-size: 14px;">${itemName}</td>
+              </tr>
+              <tr>
+                <td style="padding: 6px 0; color: #64748b; font-size: 14px;">金額</td>
+                <td style="padding: 6px 0; color: #1e293b; font-size: 14px;">NT$ ${amount.toLocaleString()}</td>
+              </tr>
+            </table>
+          </div>
+
+          <p style="color: #94a3b8; font-size: 13px; line-height: 1.5; margin: 0 0 16px 0;">
+            此發票為雲端發票，已自動歸戶至你的載具或由財政部統一管理。如需查詢，可至<a href="https://www.einvoice.nat.gov.tw" style="color: #2563eb;">財政部電子發票整合平台</a>查詢。
+          </p>
+
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;">
+          <p style="color: #64748b; font-size: 13px; margin: 0;">
+            惠邦行銷｜讓每個品牌都找到對的人<br>
+            如有問題，歡迎回覆此信件聯繫我們
+          </p>
+        </div>
+      </div>
+    `,
+  });
+
+  if (error) {
+    console.error("Send invoice email error:", error);
+    throw error;
+  }
+  return data;
+}
+
+// ===== 發票開立失敗：通知團隊 =====
+interface NotifyTeamInvoiceFailedParams {
+  orderNo: string;
+  customerEmail: string;
+  amount: number;
+  errorMessage: string;
+}
+
+export async function notifyTeamInvoiceFailed(params: NotifyTeamInvoiceFailedParams) {
+  const { orderNo, customerEmail, amount, errorMessage } = params;
+  const adminUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://huibang.com.tw"}/admin/orders`;
+
+  const { data, error } = await resend.emails.send({
+    from: "惠邦行銷 <hello@huibang.com.tw>",
+    replyTo: process.env.NOTIFY_EMAIL || "service@huibang.com.tw",
+    to: process.env.NOTIFY_EMAIL || "service@huibang.com.tw",
+    subject: `⚠️ 發票開立失敗：${orderNo}`,
+    html: `
+      <div style="font-family: 'Noto Sans TC', sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #dc2626, #ef4444); padding: 24px; border-radius: 12px 12px 0 0;">
+          <h1 style="color: #fff; font-size: 20px; margin: 0;">⚠️ 發票開立失敗</h1>
+        </div>
+        <div style="background: #fff; padding: 24px; border: 1px solid #e2e8f0; border-top: 0; border-radius: 0 0 12px 12px;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr><td style="padding: 8px 0; color: #64748b; width: 100px;">訂單編號</td><td style="padding: 8px 0; font-weight: 600;">${orderNo}</td></tr>
+            <tr><td style="padding: 8px 0; color: #64748b;">客戶 Email</td><td style="padding: 8px 0;">${customerEmail}</td></tr>
+            <tr><td style="padding: 8px 0; color: #64748b;">金額</td><td style="padding: 8px 0;">NT$ ${amount.toLocaleString()}</td></tr>
+            <tr><td style="padding: 8px 0; color: #64748b;">錯誤訊息</td><td style="padding: 8px 0; color: #dc2626;">${errorMessage}</td></tr>
+          </table>
+          <div style="margin-top: 20px; text-align: center;">
+            <a href="${adminUrl}" style="display: inline-block; background: #dc2626; color: #fff; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+              前往後台處理 →
+            </a>
+          </div>
+          <p style="color: #94a3b8; font-size: 12px; margin: 16px 0 0 0;">
+            請至後台手動重新開立發票，或聯繫 ezPay 確認問題。
+          </p>
+        </div>
+      </div>
+    `,
+  });
+
+  if (error) {
+    console.error("Team invoice failed email error:", error);
+    throw error;
+  }
+  return data;
+}
+
 // ===== 深度社群健診：客戶報告通知信 =====
 interface NotifyDiagnosticCustomerParams {
   email: string;

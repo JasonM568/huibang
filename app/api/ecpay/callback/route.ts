@@ -3,7 +3,7 @@ import { verifyCheckMacValue } from "@/lib/ecpay";
 import { db } from "@/lib/db";
 import { diagnosticTokens, orders } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { sendDiagnosticToken, sendAiPackEmail } from "@/lib/email";
+import { sendDiagnosticToken, sendAiPackEmail, sendPaymentFailedEmail, sendInvoiceEmail, notifyTeamInvoiceFailed } from "@/lib/email";
 import { issueInvoice } from "@/lib/ezpay";
 
 /**
@@ -66,6 +66,19 @@ export async function POST(request: NextRequest) {
         } catch (e) {
           console.error("[ECPay Callback] Failed to update order status:", e);
         }
+
+        // 通知客戶付款失敗
+        try {
+          await sendPaymentFailedEmail({
+            email: order.customerEmail,
+            contactName: order.customerName || "",
+            orderNo: order.orderNo,
+            productName: order.itemName || "惠邦行銷服務",
+          });
+          console.log(`[ECPay Callback] 付款失敗通知已寄送至 ${order.customerEmail}`);
+        } catch (emailErr) {
+          console.error("[ECPay Callback] 付款失敗通知寄信失敗:", emailErr);
+        }
       }
       return new NextResponse("1|OK", { status: 200 });
     }
@@ -114,6 +127,21 @@ export async function POST(request: NextRequest) {
             })
             .where(eq(orders.id, order.id));
           console.log(`[ECPay Callback] Invoice issued: ${invoiceResult.invoiceNo}`);
+
+          // 寄送發票通知給客戶
+          try {
+            await sendInvoiceEmail({
+              email: order.customerEmail,
+              contactName: order.customerName || "",
+              orderNo: order.orderNo,
+              invoiceNo: invoiceResult.invoiceNo || "",
+              amount: order.amount,
+              itemName: order.itemName || "惠邦行銷服務",
+            });
+            console.log(`[ECPay Callback] 發票通知已寄送至 ${order.customerEmail}`);
+          } catch (emailErr) {
+            console.error("[ECPay Callback] 發票通知寄信失敗:", emailErr);
+          }
         } else {
           await db.update(orders)
             .set({
@@ -123,6 +151,19 @@ export async function POST(request: NextRequest) {
             })
             .where(eq(orders.id, order.id));
           console.error(`[ECPay Callback] Invoice failed: ${invoiceResult.error}`);
+
+          // 通知團隊發票開立失敗
+          try {
+            await notifyTeamInvoiceFailed({
+              orderNo: order.orderNo,
+              customerEmail: order.customerEmail,
+              amount: order.amount,
+              errorMessage: invoiceResult.error || "Unknown error",
+            });
+            console.log(`[ECPay Callback] 發票失敗通知已寄送給團隊`);
+          } catch (emailErr) {
+            console.error("[ECPay Callback] 發票失敗通知寄信失敗:", emailErr);
+          }
         }
       } catch (invoiceError) {
         try {
