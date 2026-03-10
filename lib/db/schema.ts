@@ -206,6 +206,7 @@ export const orders = pgTable("orders", {
   // 客戶資訊
   customerEmail: varchar("customer_email", { length: 100 }).notNull(),
   customerName: varchar("customer_name", { length: 50 }),
+  customerPhone: varchar("customer_phone", { length: 30 }),
   // 電子發票載具
   carrierType: varchar("carrier_type", { length: 10 }),
   carrierNum: varchar("carrier_num", { length: 20 }),

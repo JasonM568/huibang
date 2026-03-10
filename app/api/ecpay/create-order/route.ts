@@ -13,7 +13,7 @@ const AI_PACK_PLANS: Record<string, { name: string; price: number }> = {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, contactName, product, planId, carrierNum } = body;
+    const { email, contactName, phone, product, planId, carrierNum } = body;
 
     if (!email) {
       return NextResponse.json({ error: "Email 為必填" }, { status: 400 });
@@ -71,6 +71,7 @@ export async function POST(request: NextRequest) {
         itemName,
         customerEmail: email,
         customerName: contactName || null,
+        customerPhone: phone || null,
         carrierType: carrierNum ? "barcode" : null,
         carrierNum: carrierNum || null,
         paymentStatus: "pending",
