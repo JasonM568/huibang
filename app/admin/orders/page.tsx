@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 
 interface Order {
   id: string;
@@ -11,6 +12,7 @@ interface Order {
   itemName: string | null;
   customerEmail: string;
   customerName: string | null;
+  customerPhone: string | null;
   carrierNum: string | null;
   paymentStatus: string;
   invoiceStatus: string;
@@ -119,12 +121,13 @@ export default function AdminOrdersPage() {
       const { data } = await res.json();
 
       // Build CSV
-      const headers = ["訂單編號", "日期", "客戶姓名", "Email", "產品", "方案", "金額", "付款狀態", "發票狀態", "發票號碼", "載具", "ECPay交易號"];
+      const headers = ["訂單編號", "日期", "客戶姓名", "Email", "電話", "產品", "方案", "金額", "付款狀態", "發票狀態", "發票號碼", "載具", "ECPay交易號"];
       const rows = (data as Order[]).map((o) => [
         o.orderNo,
         new Date(o.createdAt).toLocaleString("zh-TW"),
         o.customerName || "",
         o.customerEmail,
+        o.customerPhone || "",
         productTypeMap[o.productType] || o.productType,
         o.planId ? planNameMap[o.planId] || o.planId : "",
         o.amount,
@@ -259,12 +262,20 @@ export default function AdminOrdersPage() {
                       key={o.id}
                       className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                     >
-                      <td className="px-4 py-3 text-gray-900 font-mono text-xs whitespace-nowrap">
-                        {o.orderNo}
+                      <td className="px-4 py-3 font-mono text-xs whitespace-nowrap">
+                        <Link
+                          href={`/admin/orders/${o.id}`}
+                          className="text-blue-600 hover:text-blue-800 hover:underline"
+                        >
+                          {o.orderNo}
+                        </Link>
                       </td>
                       <td className="px-4 py-3">
                         <div className="text-gray-900">{o.customerName || "—"}</div>
                         <div className="text-xs text-gray-400">{o.customerEmail}</div>
+                        {o.customerPhone && (
+                          <div className="text-xs text-gray-400">{o.customerPhone}</div>
+                        )}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="text-gray-900">{productTypeMap[o.productType] || o.productType}</div>

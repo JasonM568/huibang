@@ -31,6 +31,48 @@ export async function GET(
   }
 }
 
+// PATCH: 更新訂單（客戶資訊、載具、備註）
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    await requireAuth();
+    const body = await request.json();
+
+    // 白名單欄位
+    const allowed: Record<string, unknown> = {};
+    const fields = ["customerName", "customerEmail", "customerPhone", "carrierNum", "note"] as const;
+    for (const f of fields) {
+      if (f in body) allowed[f] = body[f] ?? null;
+    }
+
+    if (Object.keys(allowed).length === 0) {
+      return NextResponse.json({ error: "No valid fields" }, { status: 400 });
+    }
+
+    await db
+      .update(orders)
+      .set({ ...allowed, updatedAt: new Date() })
+      .where(eq(orders.id, params.id));
+
+    const [updated] = await db
+      .select()
+      .from(orders)
+      .where(eq(orders.id, params.id));
+
+    return NextResponse.json(updated);
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === "Unauthorized") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
 // POST: 重新開立發票
 export async function POST(
   request: NextRequest,
