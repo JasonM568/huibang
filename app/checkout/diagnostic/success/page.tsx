@@ -163,8 +163,8 @@ export default function DiagnosticPaymentSuccessPage() {
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-8">
               <p className="text-amber-800 text-sm">
                 📧 沒收到信？請檢查垃圾郵件夾。如仍未收到，請聯繫{" "}
-                <a href="mailto:chief@huibang.com.tw" className="underline font-medium">
-                  chief@huibang.com.tw
+                <a href="mailto:service@huibang.com.tw" className="underline font-medium">
+                  service@huibang.com.tw
                 </a>
               </p>
             </div>

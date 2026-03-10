@@ -35,15 +35,14 @@ export default function Footer() {
             <p className="text-sm leading-relaxed max-w-sm">
               讓每個品牌都找到對的人。以數據驅動的品牌策略，協助企業在數位時代建立清晰定位、精準觸及目標客群。
             </p>
-            {/* TODO: 替換為真實社群連結 */}
             <div className="flex gap-4 mt-6">
-              <a href="#" className="text-dark-500 hover:text-brand-500 transition-colors text-sm">
+              <a href="https://www.facebook.com/huibang.889" target="_blank" rel="noopener noreferrer" className="text-dark-500 hover:text-brand-500 transition-colors text-sm">
                 Facebook
               </a>
-              <a href="#" className="text-dark-500 hover:text-brand-500 transition-colors text-sm">
+              <a href="https://www.instagram.com/huibang.889" target="_blank" rel="noopener noreferrer" className="text-dark-500 hover:text-brand-500 transition-colors text-sm">
                 Instagram
               </a>
-              <a href="#" className="text-dark-500 hover:text-brand-500 transition-colors text-sm">
+              <a href="https://lin.ee/6Cibkgs" target="_blank" rel="noopener noreferrer" className="text-dark-500 hover:text-brand-500 transition-colors text-sm">
                 LINE
               </a>
             </div>
@@ -76,9 +75,8 @@ export default function Footer() {
           <p className="text-xs">
             © {new Date().getFullYear()} 惠邦行銷. All rights reserved.
           </p>
-          {/* TODO: 替換為真實聯絡資訊 */}
           <p className="text-xs">
-            📍 高雄市三民區九如一路61號5F-2 ｜ 📞 07-2810889 ｜ ✉️ chief@huibang.com.tw
+            📍 高雄市三民區九如一路61號5F-2 ｜ 📞 07-2810889 ｜ ✉️ service@huibang.com.tw
           </p>
         </div>
       </div>

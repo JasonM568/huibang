@@ -24,7 +24,7 @@ const contactInfo = [
   {
     icon: "✉️",
     title: "Email",
-    content: "chief@huibang.com.tw",
+    content: "service@huibang.com.tw",
   },
   {
     icon: "💬",
@@ -116,13 +116,19 @@ export default function ContactPage() {
                 </p>
               </div>
 
-              {/* LINE QR Code placeholder */}
+              {/* LINE QR Code + Add Friend */}
               <div className="mt-8 p-6 bg-brand-50 rounded-2xl text-center">
                 <p className="font-bold mb-3">加入 LINE 官方帳號</p>
                 <div className="w-40 h-40 mx-auto">
                   <img src="/line-qrcode.png" alt="LINE 官方帳號 QR Code" className="w-full h-full object-contain rounded-xl" />
                 </div>
-                <p className="text-sm text-dark-500 mt-3">掃描加入，即時諮詢</p>
+                <div className="mt-4">
+                  <a href="https://lin.ee/6Cibkgs" target="_blank" rel="noopener noreferrer">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="https://scdn.line-apps.com/n/line_add_friends/btn/zh-Hant.png" alt="加入好友" height="36" style={{ height: 36, display: "inline-block" }} />
+                  </a>
+                </div>
+                <p className="text-sm text-dark-500 mt-3">掃描或點擊加入，即時諮詢</p>
               </div>
             </motion.div>
 

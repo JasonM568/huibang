@@ -18,8 +18,8 @@ export async function notifyTeam(params: NotifyTeamParams) {
 
   const { data, error } = await resend.emails.send({
     from: "惠邦行銷 <hello@huibang.com.tw>",
-    replyTo: process.env.NOTIFY_EMAIL || "chief@huibang.com.tw",
-    to: process.env.NOTIFY_EMAIL || "chief@huibang.com.tw",
+    replyTo: process.env.NOTIFY_EMAIL || "service@huibang.com.tw",
+    to: process.env.NOTIFY_EMAIL || "service@huibang.com.tw",
     subject: `📋 新問卷提交：${brandName}（${industry}）`,
     html: `
       <div style="font-family: 'Noto Sans TC', sans-serif; max-width: 600px; margin: 0 auto;">
@@ -82,7 +82,7 @@ export async function notifyCustomer(params: NotifyCustomerParams) {
 
   const { data, error } = await resend.emails.send({
     from: "惠邦行銷 <hello@huibang.com.tw>",
-    replyTo: process.env.NOTIFY_EMAIL || "chief@huibang.com.tw",
+    replyTo: process.env.NOTIFY_EMAIL || "service@huibang.com.tw",
     to: email,
     subject: `你的品牌健檢報告已完成 — ${brandName}`,
     html: `
@@ -153,7 +153,7 @@ export async function sendDiagnosticToken(params: SendDiagnosticTokenParams) {
 
   const { data, error } = await resend.emails.send({
     from: "惠邦行銷 <hello@huibang.com.tw>",
-    replyTo: process.env.NOTIFY_EMAIL || "chief@huibang.com.tw",
+    replyTo: process.env.NOTIFY_EMAIL || "service@huibang.com.tw",
     to: email,
     subject: `付款成功！你的 AI 社群深度健診連結 🔬`,
     html: `
@@ -224,7 +224,7 @@ export async function notifyDiagnosticCustomer(params: NotifyDiagnosticCustomerP
 
   const { data, error } = await resend.emails.send({
     from: "惠邦行銷 <hello@huibang.com.tw>",
-    replyTo: process.env.NOTIFY_EMAIL || "chief@huibang.com.tw",
+    replyTo: process.env.NOTIFY_EMAIL || "service@huibang.com.tw",
     to: email,
     subject: `你的社群帳號深度健診報告已完成 🎯`,
     html: `
@@ -281,8 +281,8 @@ export async function notifyTeamDiagnostic(params: NotifyTeamDiagnosticParams) {
 
   const { data, error } = await resend.emails.send({
     from: "惠邦行銷 <hello@huibang.com.tw>",
-    replyTo: process.env.NOTIFY_EMAIL || "chief@huibang.com.tw",
-    to: process.env.NOTIFY_EMAIL || "chief@huibang.com.tw",
+    replyTo: process.env.NOTIFY_EMAIL || "service@huibang.com.tw",
+    to: process.env.NOTIFY_EMAIL || "service@huibang.com.tw",
     subject: `🔍 新深度健診提交：${contactName}（${email}）`,
     html: `
       <div style="font-family: 'Noto Sans TC', sans-serif; max-width: 600px; margin: 0 auto;">
