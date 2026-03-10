@@ -7,6 +7,7 @@ const footerLinks = [
       { href: "/services", label: "品牌定位" },
       { href: "/services", label: "廣告投放" },
       { href: "/plans/social-media", label: "社群方案" },
+      { href: "/ai/restaurant-pack", label: "AI 個體包" },
       { href: "/services", label: "內容行銷" },
     ],
   },
