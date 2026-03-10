@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createOrderParams } from "@/lib/ecpay";
+import { db } from "@/lib/db";
+import { orders } from "@/lib/db/schema";
 
 // AI 個體包方案定義
 const AI_PACK_PLANS: Record<string, { name: string; price: number }> = {
@@ -11,7 +13,7 @@ const AI_PACK_PLANS: Record<string, { name: string; price: number }> = {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, contactName, product, planId } = body;
+    const { email, contactName, product, planId, carrierNum } = body;
 
     if (!email) {
       return NextResponse.json({ error: "Email 為必填" }, { status: 400 });
@@ -27,31 +29,57 @@ export async function POST(request: NextRequest) {
       baseUrl,
     };
 
+    // 決定金額與品名
+    let amount = 999;
+    let itemName = "AI 社群帳號深度健診報告 x1";
+    const productType = product || "diagnostic";
+
     if (product === "ai-pack" && planId && AI_PACK_PLANS[planId]) {
       const plan = AI_PACK_PLANS[planId];
+      amount = plan.price;
+      itemName = `${plan.name} x1`;
       orderOptions = {
         ...orderOptions,
         amount: plan.price,
-        itemName: `${plan.name} x1`,
+        itemName,
         tradeDesc: "AI個體包餐飲業客製化GPTs",
         productType: "ai-pack",
         planId,
       };
-      // successUrl 需要在拿到 tradeNo 後組裝，
-      // 所以用 callback 中的方式：先不設，讓 createOrderParams 用預設
-      // 然後我們覆寫 successUrl
     }
 
     const { params, apiUrl } = createOrderParams(orderOptions);
 
+    const tradeNo = params.MerchantTradeNo;
+
     // 如果是 AI 個體包，覆寫 OrderResultURL
     if (product === "ai-pack" && planId) {
-      const tradeNo = params.MerchantTradeNo;
       params.OrderResultURL = `${baseUrl}/checkout/ai-pack/success?trade_no=${tradeNo}&plan=${planId}`;
       // 重新計算 CheckMacValue
       delete params.CheckMacValue;
       const { generateCheckMacValue } = await import("@/lib/ecpay");
       params.CheckMacValue = generateCheckMacValue(params);
+    }
+
+    // 寫入訂單記錄（付款前先建立，status: pending）
+    try {
+      await db.insert(orders).values({
+        orderNo: tradeNo,
+        productType,
+        planId: planId || null,
+        amount,
+        itemName,
+        customerEmail: email,
+        customerName: contactName || null,
+        carrierType: carrierNum ? "barcode" : null,
+        carrierNum: carrierNum || null,
+        paymentStatus: "pending",
+        invoiceStatus: "none",
+      });
+      console.log(`[ECPay] Order created: ${tradeNo}, product=${productType}`);
+    } catch (dbError) {
+      console.error("[ECPay] Failed to create order record:", dbError);
+      // DB 寫入失敗不阻擋付款流程
     }
 
     // 回傳自動提交表單的 HTML

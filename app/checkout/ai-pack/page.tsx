@@ -22,7 +22,7 @@ export default function AiPackCheckoutPage() {
   const plan = PLANS[planId] || PLANS["3"];
   const gptList = PLAN_GPTS[planId] || PLAN_GPTS["3"];
 
-  const [form, setForm] = useState({ email: "", contactName: "" });
+  const [form, setForm] = useState({ email: "", contactName: "", carrierNum: "" });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -33,6 +33,10 @@ export default function AiPackCheckoutPage() {
     e.preventDefault();
     if (!form.email) {
       setError("請填寫 Email");
+      return;
+    }
+    if (form.carrierNum && !/^\/[A-Z0-9.+-]{7}$/.test(form.carrierNum)) {
+      setError("手機條碼格式不正確（應為 / 開頭的 8 碼）");
       return;
     }
     setSubmitting(true);
@@ -149,6 +153,23 @@ export default function AiPackCheckoutPage() {
                   placeholder="你的名字"
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-400 transition-colors"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  手機條碼載具（選填）
+                </label>
+                <input
+                  type="text"
+                  value={form.carrierNum}
+                  onChange={(e) => setForm({ ...form, carrierNum: e.target.value.toUpperCase() })}
+                  placeholder="/ 開頭 8 碼，例如 /ABC1234"
+                  maxLength={8}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-400 transition-colors"
+                />
+                <p className="mt-1 text-xs text-gray-400">
+                  如需存入手機條碼載具請填入，未填則以 Email 寄送電子發票
+                </p>
               </div>
 
               {error && (

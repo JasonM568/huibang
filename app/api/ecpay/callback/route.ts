@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyCheckMacValue } from "@/lib/ecpay";
 import { db } from "@/lib/db";
-import { diagnosticTokens } from "@/lib/db/schema";
+import { diagnosticTokens, orders } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 import { sendDiagnosticToken, sendAiPackEmail } from "@/lib/email";
+import { issueInvoice } from "@/lib/ezpay";
 
 /**
  * ECPay 付款結果通知（Server-side callback）
@@ -21,9 +23,10 @@ export async function POST(request: NextRequest) {
 
     const productType = params.CustomField3 || "";
     const planId = params.CustomField4 || "";
+    const tradeNo = params.MerchantTradeNo || "";
 
     console.log("[ECPay Callback] Received:", {
-      MerchantTradeNo: params.MerchantTradeNo,
+      MerchantTradeNo: tradeNo,
       RtnCode: params.RtnCode,
       RtnMsg: params.RtnMsg,
       TradeAmt: params.TradeAmt,
@@ -39,32 +42,124 @@ export async function POST(request: NextRequest) {
       return new NextResponse("0|ErrorMessage", { status: 200 });
     }
 
-    // 2. 檢查付款是否成功（RtnCode = 1 代表成功）
+    // 2. 查找預建立的訂單記錄
+    let order: typeof orders.$inferSelect | null = null;
+    try {
+      const [found] = await db
+        .select()
+        .from(orders)
+        .where(eq(orders.orderNo, tradeNo))
+        .limit(1);
+      order = found || null;
+    } catch (dbErr) {
+      console.error("[ECPay Callback] DB lookup error:", dbErr);
+    }
+
+    // 3. 付款失敗
     if (params.RtnCode !== "1") {
       console.log(`[ECPay Callback] 付款未成功: RtnCode=${params.RtnCode}, RtnMsg=${params.RtnMsg}`);
+      if (order) {
+        try {
+          await db.update(orders)
+            .set({ paymentStatus: "failed", updatedAt: new Date() })
+            .where(eq(orders.id, order.id));
+        } catch (e) {
+          console.error("[ECPay Callback] Failed to update order status:", e);
+        }
+      }
       return new NextResponse("1|OK", { status: 200 });
     }
 
-    // 3. 取得客戶資訊
-    const email = params.CustomField1;
-    const contactName = params.CustomField2 || "";
-    const tradeNo = params.MerchantTradeNo || "";
+    // 4. 付款成功 — 更新訂單狀態
+    if (order) {
+      try {
+        await db.update(orders)
+          .set({
+            paymentStatus: "paid",
+            ecpayTradeNo: params.TradeNo || null,
+            updatedAt: new Date(),
+          })
+          .where(eq(orders.id, order.id));
+        console.log(`[ECPay Callback] Order ${tradeNo} marked as paid`);
+      } catch (e) {
+        console.error("[ECPay Callback] Failed to update payment status:", e);
+      }
+    }
+
+    // 5. 開立電子發票（非阻塞 — 失敗不影響付款成功流程）
+    if (order) {
+      try {
+        await db.update(orders)
+          .set({ invoiceStatus: "pending", updatedAt: new Date() })
+          .where(eq(orders.id, order.id));
+
+        const invoiceResult = await issueInvoice({
+          orderNo: order.orderNo,
+          amount: order.amount,
+          itemName: order.itemName || "惠邦行銷服務",
+          itemCount: 1,
+          itemUnit: "組",
+          buyerEmail: order.customerEmail,
+          carrierType: order.carrierType,
+          carrierNum: order.carrierNum,
+        });
+
+        if (invoiceResult.success) {
+          await db.update(orders)
+            .set({
+              invoiceStatus: "issued",
+              invoiceNo: invoiceResult.invoiceNo || null,
+              invoiceError: null,
+              updatedAt: new Date(),
+            })
+            .where(eq(orders.id, order.id));
+          console.log(`[ECPay Callback] Invoice issued: ${invoiceResult.invoiceNo}`);
+        } else {
+          await db.update(orders)
+            .set({
+              invoiceStatus: "failed",
+              invoiceError: invoiceResult.error || "Unknown error",
+              updatedAt: new Date(),
+            })
+            .where(eq(orders.id, order.id));
+          console.error(`[ECPay Callback] Invoice failed: ${invoiceResult.error}`);
+        }
+      } catch (invoiceError) {
+        try {
+          await db.update(orders)
+            .set({
+              invoiceStatus: "failed",
+              invoiceError: invoiceError instanceof Error ? invoiceError.message : "Unknown",
+              updatedAt: new Date(),
+            })
+            .where(eq(orders.id, order.id));
+        } catch (e) {
+          console.error("[ECPay Callback] Failed to update invoice error:", e);
+        }
+        console.error("[ECPay Callback] Invoice error:", invoiceError);
+      }
+    }
+
+    // 6. 取得客戶資訊（優先用 order，fallback 到 CustomField）
+    const email = order?.customerEmail || params.CustomField1;
+    const contactName = order?.customerName || params.CustomField2 || "";
 
     if (!email) {
-      console.error("[ECPay Callback] 缺少 CustomField1 (email)");
+      console.error("[ECPay Callback] 缺少 email");
       return new NextResponse("1|OK", { status: 200 });
     }
 
-    // 4. 依產品類型分流處理
-    if (productType === "ai-pack") {
-      // === AI 個體包 ===
-      await handleAiPackCallback({ email, contactName, tradeNo, planId });
+    // 7. 依產品類型分流處理（發送 email）
+    const effectiveProductType = order?.productType || productType;
+    const effectivePlanId = order?.planId || planId;
+
+    if (effectiveProductType === "ai-pack") {
+      await handleAiPackCallback({ email, contactName, tradeNo, planId: effectivePlanId || "" });
     } else {
-      // === 健診訂單（預設） ===
       await handleDiagnosticCallback({ email, contactName, tradeNo });
     }
 
-    // 5. 回傳 "1|OK" 告知綠界處理成功
+    // 8. 回傳 "1|OK" 告知綠界處理成功
     return new NextResponse("1|OK", { status: 200 });
   } catch (error) {
     console.error("[ECPay Callback] 處理錯誤:", error);

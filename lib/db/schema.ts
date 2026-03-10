@@ -194,6 +194,35 @@ export const diagnosticSubmissions = pgTable("diagnostic_submissions", {
   internalNote: text("internal_note"),
 });
 
+// ===== 訂單管理 =====
+export const orders = pgTable("orders", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orderNo: varchar("order_no", { length: 20 }).unique().notNull(),
+  // 產品資訊
+  productType: varchar("product_type", { length: 30 }).notNull(),
+  planId: varchar("plan_id", { length: 10 }),
+  amount: integer("amount").notNull(),
+  itemName: varchar("item_name", { length: 200 }),
+  // 客戶資訊
+  customerEmail: varchar("customer_email", { length: 100 }).notNull(),
+  customerName: varchar("customer_name", { length: 50 }),
+  // 電子發票載具
+  carrierType: varchar("carrier_type", { length: 10 }),
+  carrierNum: varchar("carrier_num", { length: 20 }),
+  // 付款狀態
+  paymentStatus: varchar("payment_status", { length: 10 }).default("pending").notNull(),
+  ecpayTradeNo: varchar("ecpay_trade_no", { length: 30 }),
+  // 發票狀態
+  invoiceStatus: varchar("invoice_status", { length: 10 }).default("none").notNull(),
+  invoiceNo: varchar("invoice_no", { length: 20 }),
+  invoiceError: text("invoice_error"),
+  // 備註
+  note: text("note"),
+  // 時間戳
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // ===== Types =====
 export type DiagnosticToken = typeof diagnosticTokens.$inferSelect;
 export type NewDiagnosticToken = typeof diagnosticTokens.$inferInsert;
@@ -209,3 +238,5 @@ export type Client = typeof clients.$inferSelect;
 export type NewClient = typeof clients.$inferInsert;
 export type ClientStrategy = typeof clientStrategies.$inferSelect;
 export type NewClientStrategy = typeof clientStrategies.$inferInsert;
+export type Order = typeof orders.$inferSelect;
+export type NewOrder = typeof orders.$inferInsert;
