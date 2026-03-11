@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 
 interface TrackingSettings {
+  tracking_gtm: string;
   tracking_ga4: string;
   tracking_google_ads: string;
   tracking_meta_pixel: string;
@@ -10,6 +11,12 @@ interface TrackingSettings {
 }
 
 const trackingFields = [
+  {
+    key: "tracking_gtm" as const,
+    label: "Google Tag Manager",
+    placeholder: "GTM-XXXXXXX",
+    description: "GTM 容器 ID，可在 GTM 後台統一管理所有代碼",
+  },
   {
     key: "tracking_ga4" as const,
     label: "Google Analytics 4",
@@ -38,6 +45,7 @@ const trackingFields = [
 
 export default function TrackingPage() {
   const [settings, setSettings] = useState<TrackingSettings>({
+    tracking_gtm: "",
     tracking_ga4: "",
     tracking_google_ads: "",
     tracking_meta_pixel: "",
@@ -63,6 +71,7 @@ export default function TrackingPage() {
       .then((data) => {
         if (!data.error) {
           setSettings({
+            tracking_gtm: data.tracking_gtm || "",
             tracking_ga4: data.tracking_ga4 || "",
             tracking_google_ads: data.tracking_google_ads || "",
             tracking_meta_pixel: data.tracking_meta_pixel || "",
@@ -96,6 +105,7 @@ export default function TrackingPage() {
 
       if (res.ok) {
         setSettings({
+          tracking_gtm: data.tracking_gtm || "",
           tracking_ga4: data.tracking_ga4 || "",
           tracking_google_ads: data.tracking_google_ads || "",
           tracking_meta_pixel: data.tracking_meta_pixel || "",

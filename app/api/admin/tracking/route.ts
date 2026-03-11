@@ -40,6 +40,7 @@ export async function PATCH(request: Request) {
     const body = await request.json();
 
     const allowedKeys = [
+      "tracking_gtm",
       "tracking_ga4",
       "tracking_google_ads",
       "tracking_meta_pixel",

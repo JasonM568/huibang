@@ -4,6 +4,7 @@ import { siteSettings } from "@/lib/db/schema";
 import { like } from "drizzle-orm";
 
 export interface TrackingCodes {
+  gtm: string;
   ga4: string;
   googleAds: string;
   metaPixel: string;
@@ -25,6 +26,7 @@ export async function getTrackingCodes(): Promise<TrackingCodes> {
     }
 
     return {
+      gtm: map["tracking_gtm"] || "",
       ga4: map["tracking_ga4"] || "",
       googleAds: map["tracking_google_ads"] || "",
       metaPixel: map["tracking_meta_pixel"] || "",
@@ -32,6 +34,6 @@ export async function getTrackingCodes(): Promise<TrackingCodes> {
     };
   } catch (error) {
     console.error("Failed to load tracking codes:", error);
-    return { ga4: "", googleAds: "", metaPixel: "", lineTag: "" };
+    return { gtm: "", ga4: "", googleAds: "", metaPixel: "", lineTag: "" };
   }
 }

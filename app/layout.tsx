@@ -27,6 +27,7 @@ export default async function RootLayout({
     <html lang="zh-TW">
       <body>
         <TrackingScripts
+          gtm={tracking.gtm}
           ga4={tracking.ga4}
           googleAds={tracking.googleAds}
           metaPixel={tracking.metaPixel}
