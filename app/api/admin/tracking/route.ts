@@ -60,9 +60,12 @@ export async function PATCH(request: Request) {
         );
       }
       await db
-        .update(siteSettings)
-        .set({ value: strValue, updatedAt: new Date() })
-        .where(eq(siteSettings.key, key));
+        .insert(siteSettings)
+        .values({ key, value: strValue, updatedAt: new Date() })
+        .onConflictDoUpdate({
+          target: siteSettings.key,
+          set: { value: strValue, updatedAt: new Date() },
+        });
     }
 
     // 回傳更新後的值

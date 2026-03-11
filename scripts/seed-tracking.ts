@@ -11,6 +11,7 @@ async function seedTracking() {
   const db = drizzle(client);
 
   const trackingDefaults = [
+    { key: "tracking_gtm", value: "", description: "Google Tag Manager 容器 ID" },
     { key: "tracking_ga4", value: "G-P0D9HESXBG", description: "Google Analytics 4 測量 ID" },
     { key: "tracking_google_ads", value: "", description: "Google Ads 轉換追蹤 ID" },
     { key: "tracking_meta_pixel", value: "26910819901839061", description: "Meta Pixel ID" },
