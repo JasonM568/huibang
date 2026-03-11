@@ -123,7 +123,20 @@ export default function ContactPage() {
                   <img src="/line-qrcode.png" alt="LINE 官方帳號 QR Code" className="w-full h-full object-contain rounded-xl" />
                 </div>
                 <div className="mt-4">
-                  <a href="https://lin.ee/6Cibkgs" target="_blank" rel="noopener noreferrer">
+                  <a
+                    href="https://lin.ee/6Cibkgs"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => {
+                      if (typeof window !== "undefined" && typeof window.gtag === "function") {
+                        window.gtag("event", "add_line_friend", {
+                          event_category: "engagement",
+                          event_label: "contact_page",
+                          link_url: "https://lin.ee/6Cibkgs",
+                        });
+                      }
+                    }}
+                  >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="https://scdn.line-apps.com/n/line_add_friends/btn/zh-Hant.png" alt="加入好友" height="36" style={{ height: 36, display: "inline-block" }} />
                   </a>
