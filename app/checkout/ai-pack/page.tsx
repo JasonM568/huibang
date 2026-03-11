@@ -59,6 +59,32 @@ export default function AiPackCheckoutPage() {
     setSubmitting(true);
     setError("");
 
+    // Meta Pixel: InitiateCheckout 事件（帶方案資訊）
+    if (typeof window !== "undefined" && window.fbq) {
+      window.fbq("track", "InitiateCheckout", {
+        content_ids: [`ai-pack-plan-${effectivePlanId}`],
+        content_name: plan.name,
+        content_type: "product",
+        value: plan.price,
+        currency: "TWD",
+        num_items: plan.agents,
+      });
+    }
+
+    // GA4: begin_checkout 事件
+    if (typeof window !== "undefined" && window.gtag) {
+      window.gtag("event", "begin_checkout", {
+        currency: "TWD",
+        value: plan.price,
+        items: [{
+          item_id: `ai-pack-plan-${effectivePlanId}`,
+          item_name: plan.name,
+          price: plan.price,
+          quantity: 1,
+        }],
+      });
+    }
+
     try {
       const res = await fetch("/api/ecpay/create-order", {
         method: "POST",
@@ -256,6 +282,7 @@ export default function AiPackCheckoutPage() {
               )}
 
               <button
+                id={`checkout-plan-${effectivePlanId}`}
                 type="submit"
                 disabled={submitting}
                 className="w-full py-3.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 disabled:opacity-50 transition-all text-base"
