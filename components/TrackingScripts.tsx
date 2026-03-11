@@ -51,6 +51,7 @@ export default function TrackingScripts({
             {`
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
+              window.gtag = gtag;
               gtag('js', new Date());
               gtag('config', '${ga4}');
               ${googleAds ? `gtag('config', '${googleAds}');` : ""}
@@ -70,6 +71,7 @@ export default function TrackingScripts({
             {`
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
+              window.gtag = gtag;
               gtag('js', new Date());
               gtag('config', '${googleAds}');
             `}
