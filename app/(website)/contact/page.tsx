@@ -128,8 +128,10 @@ export default function ContactPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => {
-                      if (typeof window !== "undefined" && typeof window.gtag === "function") {
-                        window.gtag("event", "add_line_friend", {
+                      if (typeof window !== "undefined") {
+                        window.dataLayer = window.dataLayer || [];
+                        window.dataLayer.push({
+                          event: "add_line_friend",
                           event_category: "engagement",
                           event_label: "contact_page",
                           link_url: "https://lin.ee/6Cibkgs",
