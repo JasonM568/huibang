@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import Anthropic from "@anthropic-ai/sdk";
+import { logApiUsage } from "@/lib/api-usage";
 
 const SYSTEM_PROMPT = `你是一位專業的社群媒體內容策略師，擅長為品牌創作高互動率的社群貼文。
 
@@ -57,6 +58,8 @@ export async function POST(request: Request) {
         content: m.content,
       })),
     });
+
+    logApiUsage("content-studio", "claude-sonnet-4-20250514", response.usage);
 
     const text = response.content
       .filter((b: any) => b.type === "text")

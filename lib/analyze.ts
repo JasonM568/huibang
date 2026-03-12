@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { logApiUsage } from "@/lib/api-usage";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -63,6 +64,8 @@ ${JSON.stringify(answers, null, 2)}`;
       max_tokens: 1024,
       messages: [{ role: "user", content: prompt }],
     });
+
+    logApiUsage("analyze", "claude-sonnet-4-20250514", message.usage, undefined, { brandName });
 
     const text =
       message.content[0].type === "text" ? message.content[0].text : "";

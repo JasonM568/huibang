@@ -224,6 +224,20 @@ export const orders = pgTable("orders", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// ===== API 用量紀錄 =====
+export const apiUsageLogs = pgTable("api_usage_logs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  endpoint: varchar("endpoint", { length: 50 }).notNull(),
+  // "analyze" | "analyze-deep" | "content-studio"
+  model: varchar("model", { length: 50 }).notNull(),
+  inputTokens: integer("input_tokens").notNull(),
+  outputTokens: integer("output_tokens").notNull(),
+  costUsd: varchar("cost_usd", { length: 20 }).notNull(), // 存字串避免浮點誤差
+  userId: varchar("user_id", { length: 50 }),
+  metadata: jsonb("metadata"),
+});
+
 // ===== Types =====
 export type DiagnosticToken = typeof diagnosticTokens.$inferSelect;
 export type NewDiagnosticToken = typeof diagnosticTokens.$inferInsert;
@@ -241,3 +255,4 @@ export type ClientStrategy = typeof clientStrategies.$inferSelect;
 export type NewClientStrategy = typeof clientStrategies.$inferInsert;
 export type Order = typeof orders.$inferSelect;
 export type NewOrder = typeof orders.$inferInsert;
+export type ApiUsageLog = typeof apiUsageLogs.$inferSelect;
