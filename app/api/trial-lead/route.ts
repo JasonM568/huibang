@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { trialLeads } from "@/lib/db/schema";
+import { notifyTrialLead } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,6 +22,9 @@ export async function POST(request: NextRequest) {
       source: "restaurant-pack",
       agentDelivered: true,
     });
+
+    // 非同步發送 Email 通知，不阻擋回應
+    notifyTrialLead({ name: name.trim(), email: email.trim(), phone: phone?.trim() }).catch(() => {});
 
     const agentUrl = process.env.TRIAL_AGENT_URL || null;
 

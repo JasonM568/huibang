@@ -63,6 +63,7 @@ export default function AdminLayout({
     { href: "/admin/tracking", label: "追蹤碼管理", icon: "📈", show: true },
     { href: "/admin/diagnostic", label: "深度健診", icon: "🔬", show: true },
     { href: "/admin/orders", label: "訂單管理", icon: "🧾", show: true },
+    { href: "/admin/trial-leads", label: "試用名單", icon: "🎁", show: true },
     { href: "/admin/usage", label: "API 用量", icon: "💰", show: isAdmin },
   ].filter((item) => item.show);
 

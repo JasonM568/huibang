@@ -460,6 +460,58 @@ export async function notifyTeamInvoiceFailed(params: NotifyTeamInvoiceFailedPar
   return data;
 }
 
+// ===== 試用名單：通知團隊 =====
+interface NotifyTrialLeadParams {
+  name: string;
+  email: string;
+  phone?: string | null;
+}
+
+export async function notifyTrialLead(params: NotifyTrialLeadParams) {
+  const { name, email, phone } = params;
+  const adminUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://huibang.com.tw"}/admin/trial-leads`;
+
+  const { data, error } = await resend.emails.send({
+    from: "惠邦行銷 <hello@huibang.com.tw>",
+    replyTo: process.env.NOTIFY_EMAIL || "service@huibang.com.tw",
+    to: process.env.NOTIFY_EMAIL || "service@huibang.com.tw",
+    subject: `🎁 新試用名單：${name}（${email}）`,
+    html: `
+      <div style="font-family: 'Noto Sans TC', sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #059669, #06b6d4); padding: 24px; border-radius: 12px 12px 0 0;">
+          <h1 style="color: #fff; font-size: 20px; margin: 0;">🎁 新社群文案機器人試用申請</h1>
+        </div>
+        <div style="background: #fff; padding: 24px; border: 1px solid #E2E8F0; border-top: 0; border-radius: 0 0 12px 12px;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 8px 0; color: #64748B; width: 80px;">姓名</td>
+              <td style="padding: 8px 0; color: #1E293B; font-weight: 600;">${name}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748B;">Email</td>
+              <td style="padding: 8px 0; color: #1E293B;">${email}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748B;">手機</td>
+              <td style="padding: 8px 0; color: #1E293B;">${phone || "未填寫"}</td>
+            </tr>
+          </table>
+          <div style="margin-top: 20px; text-align: center;">
+            <a href="${adminUrl}" style="display: inline-block; background: #059669; color: #fff; padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+              查看所有試用名單 →
+            </a>
+          </div>
+        </div>
+      </div>
+    `,
+  });
+
+  if (error) {
+    console.error("Trial lead notify email error:", error);
+  }
+  return data;
+}
+
 // ===== 深度社群健診：客戶報告通知信 =====
 interface NotifyDiagnosticCustomerParams {
   email: string;
