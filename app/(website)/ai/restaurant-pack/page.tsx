@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import PixelViewContent from "@/components/PixelViewContent";
 
 const fadeUp = {
   initial: { opacity: 0, y: 30 },
@@ -196,6 +197,14 @@ export default function RestaurantAIPackPage() {
 
   return (
     <div className="min-h-screen">
+      <PixelViewContent
+        contentName="AI 個體包 — 全配方案"
+        contentCategory="AI 產品"
+        contentType="product"
+        contentIds={["ai-pack"]}
+        value={999}
+        currency="TWD"
+      />
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900 text-white">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(16,185,129,0.12),transparent)]" />

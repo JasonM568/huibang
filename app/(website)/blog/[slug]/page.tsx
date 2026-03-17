@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getBlogPostBySlug, getBlogPosts } from "@/lib/notion";
 import { notFound } from "next/navigation";
+import PixelViewContent from "@/components/PixelViewContent";
 
 export const revalidate = 60;
 
@@ -65,6 +66,12 @@ export default async function BlogPostPage({
 
   return (
     <div>
+      <PixelViewContent
+        contentName={post.title}
+        contentCategory={post.category}
+        contentType="article"
+        contentIds={[post.slug]}
+      />
       {/* Hero */}
       <section className="bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900 text-white py-20">
         <div className="max-w-4xl mx-auto px-6">

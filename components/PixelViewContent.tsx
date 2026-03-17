@@ -1,0 +1,39 @@
+"use client";
+
+import { useEffect } from "react";
+
+interface Props {
+  contentName: string;
+  contentCategory: string;
+  contentType?: "product" | "article";
+  contentIds?: string[];
+  value?: number;
+  currency?: string;
+}
+
+/**
+ * 頁面掛載後觸發 Meta Pixel ViewContent 事件
+ * 可放在任何頁面（server / client component 皆可）
+ */
+export default function PixelViewContent({
+  contentName,
+  contentCategory,
+  contentType = "product",
+  contentIds,
+  value,
+  currency = "TWD",
+}: Props) {
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.fbq) {
+      window.fbq("track", "ViewContent", {
+        content_name: contentName,
+        content_category: contentCategory,
+        content_type: contentType,
+        ...(contentIds ? { content_ids: contentIds } : {}),
+        ...(value !== undefined ? { value, currency } : {}),
+      });
+    }
+  }, [contentName, contentCategory, contentType, contentIds, value, currency]);
+
+  return null;
+}

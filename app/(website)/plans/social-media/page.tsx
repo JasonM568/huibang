@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import PixelViewContent from "@/components/PixelViewContent";
 
 const fadeUp = {
   initial: { opacity: 0, y: 30 },
@@ -133,6 +134,12 @@ const faqs = [
 export default function SocialMediaPlanPage() {
   return (
     <div className="min-h-screen">
+      <PixelViewContent
+        contentName="社群媒體經營方案"
+        contentCategory="服務方案"
+        contentType="product"
+        contentIds={["social-media"]}
+      />
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900 text-white">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(249,115,22,0.12),transparent)]" />
