@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getBlogPostBySlug, getBlogPosts } from "@/lib/notion";
 import { notFound } from "next/navigation";
@@ -8,6 +9,41 @@ export const revalidate = 60;
 export async function generateStaticParams() {
   const posts = await getBlogPosts();
   return posts.map((post) => ({ slug: post.slug }));
+}
+
+// 動態 metadata：每篇文章有獨立的標題、描述、og:image
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
+  const post = await getBlogPostBySlug(params.slug);
+  if (!post) return {};
+
+  const ogImages = post.coverImage
+    ? [{ url: post.coverImage, width: 1200, height: 630, alt: post.title }]
+    : [{ url: "/og-default.png", width: 1200, height: 630, alt: post.title }];
+
+  return {
+    title: post.title,
+    description: post.summary || `${post.title} — 惠邦行銷行銷知識庫`,
+    openGraph: {
+      title: post.title,
+      description: post.summary || `${post.title} — 惠邦行銷行銷知識庫`,
+      type: "article",
+      url: `https://huibang.com.tw/blog/${post.slug}`,
+      publishedTime: post.publishDate,
+      authors: [post.author],
+      tags: [post.category],
+      images: ogImages,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.summary || `${post.title} — 惠邦行銷行銷知識庫`,
+      images: ogImages.map((i) => i.url),
+    },
+  };
 }
 
 const categoryColors: Record<string, string> = {

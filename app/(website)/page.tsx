@@ -1,8 +1,47 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "惠邦行銷 | 數位行銷專家 — 品牌定位 • 廣告投放 • 社群經營",
+  description:
+    "惠邦行銷以數據驅動的品牌策略，協助中小企業在數位時代精準觸及目標客群。提供免費品牌健檢、廣告投放、社群經營、AI 行銷等完整解決方案。",
+  openGraph: {
+    title: "惠邦行銷 | 數位行銷專家 — 品牌定位 • 廣告投放 • 社群經營",
+    description: "以數據驅動的品牌策略，協助中小企業在數位時代精準觸及目標客群。",
+    url: "https://huibang.com.tw",
+    images: [{ url: "/og-default.png", width: 1200, height: 630 }],
+  },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "惠邦行銷",
+  alternateName: "惠邦行銷有限公司",
+  url: "https://huibang.com.tw",
+  logo: "https://huibang.com.tw/og-default.png",
+  description: "惠邦行銷提供品牌定位、廣告投放、社群經營、內容行銷等數位行銷服務，協助企業打造強勢品牌。",
+  address: {
+    "@type": "PostalAddress",
+    addressCountry: "TW",
+  },
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "customer service",
+    email: "service@huibang.com.tw",
+  },
+  sameAs: [
+    "https://www.facebook.com/huibangmarketing",
+  ],
+};
 
 export default function HomePage() {
   return (
     <main className="min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900 text-white">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(249,115,22,0.15),transparent)]" />

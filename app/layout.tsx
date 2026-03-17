@@ -4,16 +4,31 @@ import { getTrackingCodes } from "@/lib/tracking";
 import TrackingScripts from "@/components/TrackingScripts";
 
 export const metadata: Metadata = {
-  title: "惠邦行銷 | 讓每個品牌都找到對的人",
+  metadataBase: new URL("https://huibang.com.tw"),
+  title: {
+    default: "惠邦行銷 | 讓每個品牌都找到對的人",
+    template: "%s | 惠邦行銷",
+  },
   description:
     "惠邦行銷提供品牌定位、廣告投放、社群經營、內容行銷等數位行銷服務，協助企業打造強勢品牌。",
-  keywords: "品牌定位,數位行銷,廣告投放,社群經營,惠邦行銷",
+  keywords: "品牌定位,數位行銷,廣告投放,社群經營,惠邦行銷,AI行銷,餐飲行銷",
+  authors: [{ name: "惠邦行銷" }],
   openGraph: {
     title: "惠邦行銷 | 讓每個品牌都找到對的人",
     description: "專業數位行銷服務，協助企業打造強勢品牌",
     type: "website",
     locale: "zh_TW",
+    url: "https://huibang.com.tw",
+    siteName: "惠邦行銷",
+    images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "惠邦行銷 — 讓每個品牌都找到對的人" }],
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "惠邦行銷 | 讓每個品牌都找到對的人",
+    description: "專業數位行銷服務，協助企業打造強勢品牌",
+    images: ["/og-default.png"],
+  },
+  robots: { index: true, follow: true },
 };
 
 export default async function RootLayout({
