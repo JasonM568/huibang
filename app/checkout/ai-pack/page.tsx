@@ -5,15 +5,11 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 const PLANS: Record<string, { name: string; agents: number; price: number; originalPrice: number }> = {
-  "1": { name: "入門方案", agents: 2, price: 990, originalPrice: 1980 },
-  "2": { name: "進階方案", agents: 6, price: 1990, originalPrice: 4680 },
-  "3": { name: "全配方案", agents: 10, price: 3990, originalPrice: 9880 },
+  "3": { name: "全配方案（限時優惠）", agents: 9, price: 999, originalPrice: 9880 },
 };
 
 const PLAN_GPTS: Record<string, string[]> = {
-  "1": ["今日社群貼文機", "活動企劃師"],
-  "2": ["今日社群貼文機", "活動企劃師", "菜單設計顧問", "Google 評論回覆手", "LINE/客服訊息管家", "食材成本計算機"],
-  "3": ["今日社群貼文機", "活動企劃師", "菜單設計顧問", "Google 評論回覆手", "LINE/客服訊息管家", "食材成本計算機", "徵人文案+面試題庫", "廣告投放教練", "每月營運覆盤師", "老闆決策顧問"],
+  "3": ["活動企劃師", "菜單設計顧問", "Google 評論回覆手", "LINE/客服訊息管家", "食材成本計算機", "徵人文案+面試題庫", "廣告投放教練", "每月營運覆盤師", "老闆決策顧問"],
 };
 
 export default function AiPackCheckoutPage() {
@@ -160,9 +156,9 @@ export default function AiPackCheckoutPage() {
               ))}
             </div>
 
-            <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
-              <p className="text-emerald-800 text-xs font-medium">
-                🎉 限時特價省 NT$ {(plan.originalPrice - plan.price).toLocaleString()}，付款後立即開通
+            <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+              <p className="text-amber-800 text-xs font-medium">
+                ⚡ 限時優惠價，省 NT$ {(plan.originalPrice - plan.price).toLocaleString()}｜付款後立即開通，永久使用
               </p>
             </div>
           </div>

@@ -238,6 +238,18 @@ export const apiUsageLogs = pgTable("api_usage_logs", {
   metadata: jsonb("metadata"),
 });
 
+// ===== 試用名單 =====
+export const trialLeads = pgTable("trial_leads", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  name: varchar("name", { length: 50 }).notNull(),
+  email: varchar("email", { length: 100 }).notNull(),
+  phone: varchar("phone", { length: 30 }),
+  source: varchar("source", { length: 50 }).default("restaurant-pack").notNull(),
+  agentDelivered: boolean("agent_delivered").default(false).notNull(),
+  note: text("note"),
+});
+
 // ===== Types =====
 export type DiagnosticToken = typeof diagnosticTokens.$inferSelect;
 export type NewDiagnosticToken = typeof diagnosticTokens.$inferInsert;
@@ -256,3 +268,5 @@ export type NewClientStrategy = typeof clientStrategies.$inferInsert;
 export type Order = typeof orders.$inferSelect;
 export type NewOrder = typeof orders.$inferInsert;
 export type ApiUsageLog = typeof apiUsageLogs.$inferSelect;
+export type TrialLead = typeof trialLeads.$inferSelect;
+export type NewTrialLead = typeof trialLeads.$inferInsert;
