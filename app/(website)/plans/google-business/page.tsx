@@ -20,118 +20,118 @@ const stagger = {
 
 const painPoints = [
   {
-    icon: "\ud83d\udccd",
-    title: "Google \u5730\u5716\u627e\u4e0d\u5230",
-    desc: "\u5ba2\u4eba\u641c\u5c0b\u4f60\u7684\u9910\u5ef3\u985e\u578b\uff0c\u537b\u770b\u4e0d\u5230\u4f60\u7684\u5e97",
+    icon: "📍",
+    title: "Google 地圖找不到",
+    desc: "客人搜尋你的餐廳類型，卻看不到你的店",
   },
   {
-    icon: "\u2b50",
-    title: "\u8a55\u8ad6\u6c92\u4eba\u7ba1",
-    desc: "\u8ca0\u8a55\u6c92\u56de\u8986\u3001\u597d\u8a55\u6c92\u7d93\u71df\uff0c\u6f5b\u5728\u5ba2\u4eba\u770b\u4e86\u5c31\u8d70",
+    icon: "⭐",
+    title: "評論沒人管",
+    desc: "負評沒回覆、好評沒經營，潛在客人看了就走",
   },
   {
-    icon: "\ud83d\udcb8",
-    title: "\u5ee3\u544a\u9322\u767d\u82b1",
-    desc: "Google Ads \u6bcf\u6708\u71d2\u9322\uff0c\u4f46\u8a02\u4f4d\u96fb\u8a71\u6c92\u589e\u52a0",
+    icon: "💸",
+    title: "廣告錢白花",
+    desc: "Google Ads 每月燒錢，但訂位電話沒增加",
   },
   {
-    icon: "\ud83d\udcca",
-    title: "\u6578\u64da\u770b\u4e0d\u61c2",
-    desc: "CTR\u3001CPC\u3001\u8f49\u63db\u7387\u4e00\u5806\u6578\u5b57\uff0c\u4e0d\u77e5\u9053\u600e\u9ebc\u512a\u5316",
+    icon: "📊",
+    title: "數據看不懂",
+    desc: "CTR、CPC、轉換率一堆數字，不知道怎麼優化",
   },
 ];
 
 const serviceFeatures = [
   {
-    icon: "\ud83c\udfea",
-    title: "\u5546\u5bb6\u6a94\u6848\u5168\u9762\u512a\u5316",
-    desc: "\u540d\u7a31\u3001\u985e\u5225\u3001\u8aaa\u660e\u6b04\u4f4d\u3001\u5716\u7247\u3001Q&A\u3001\u8cbc\u6587\u7b56\u7565\uff0c\u4e5d\u5927\u91cd\u9ede\u9010\u4e00\u512a\u5316",
+    icon: "🏪",
+    title: "商家檔案全面優化",
+    desc: "名稱、類別、說明欄位、圖片、Q&A、貼文策略，九大重點逐一優化",
   },
   {
-    icon: "\ud83d\udcca",
-    title: "\u5ee3\u544a\u7b56\u7565\u898f\u5283",
-    desc: "\u5b9a\u4e3b\u984c\u3001\u9396\u5730\u5340\uff083-5\u516c\u91cc\uff09\u3001\u9078\u6642\u6bb5\u3001\u6253\u6d3b\u52d5\uff0c\u56db\u5927\u7b56\u7565\u7cbe\u6e96\u6295\u653e",
+    icon: "📊",
+    title: "廣告策略規劃",
+    desc: "定主題、鎖地區（3-5公里）、選時段、打活動，四大策略精準投放",
   },
   {
-    icon: "\ud83d\uddfa\ufe0f",
-    title: "\u6d88\u8cbb\u8005\u65c5\u7a0b\u8a2d\u8a08",
-    desc: "\u5f15\u6d41\u2192\u8003\u616e\u2192\u6536\u7db2\u4e09\u968e\u6bb5\u5ee3\u544a\u8a2d\u8a08\uff0c\u5f9e\u964c\u751f\u4eba\u5230\u56de\u982d\u5ba2\u7684\u5b8c\u6574\u8def\u5f91",
+    icon: "🗺️",
+    title: "消費者旅程設計",
+    desc: "引流→考慮→收網三階段廣告設計，從陌生人到回頭客的完整路徑",
   },
   {
-    icon: "\u270d\ufe0f",
-    title: "\u5ee3\u544a\u6587\u6848\u64b0\u5beb",
-    desc: "15 \u500b\u6a19\u984c + 4 \u500b\u8aaa\u660e\uff0cGoogle \u81ea\u52d5\u7d44\u5408\u51fa\u6700\u4f73\u7248\u672c",
+    icon: "✍️",
+    title: "廣告文案撰寫",
+    desc: "15 個標題 + 4 個說明，Google 自動組合出最佳版本",
   },
   {
-    icon: "\ud83d\udcc8",
-    title: "\u6578\u64da\u5224\u8b80\u8207\u512a\u5316",
-    desc: "\u6bcf\u9031\u8ffd\u8e64 CTR/CPC/\u8f49\u63db\u7387\uff0c\u6301\u7e8c\u512a\u5316\u5ee3\u544a\u8868\u73fe",
+    icon: "📈",
+    title: "數據判讀與優化",
+    desc: "每週追蹤 CTR/CPC/轉換率，持續優化廣告表現",
   },
 ];
 
 const planFeatures = [
-  "Google \u5546\u5bb6\u6a94\u6848\u5efa\u7acb\u8207\u512a\u5316",
-  "Google Ads \u5ee3\u544a\u5e33\u6236\u5efa\u7acb",
-  "\u6bcf\u6708\u5ee3\u544a\u7b56\u7565\u898f\u5283\u8207\u8abf\u6574",
-  "\u5ee3\u544a\u6587\u6848\u64b0\u5beb\uff08\u6bcf\u6708\u66f4\u65b0\uff09",
-  "\u6bcf\u9031\u5ee3\u544a\u6578\u64da\u8ffd\u8e64\u8207\u512a\u5316",
-  "\u6bcf\u6708\u6210\u6548\u5831\u544a",
-  "\u8a55\u8ad6\u56de\u8986\u7b56\u7565\u6307\u5c0e",
-  "\u5c08\u5c6c LINE \u7fa4\u7d44\u5373\u6642\u6e9d\u901a",
+  "Google 商家檔案建立與優化",
+  "Google Ads 廣告帳戶建立",
+  "每月廣告策略規劃與調整",
+  "廣告文案撰寫（每月更新）",
+  "每週廣告數據追蹤與優化",
+  "每月成效報告",
+  "評論回覆策略指導",
+  "專屬 LINE 群組即時溝通",
 ];
 
 const processSteps = [
   {
     step: "01",
-    title: "\u5546\u5bb6\u5065\u6aa2",
-    desc: "\u5206\u6790\u73fe\u6709 Google \u5546\u5bb6\u6a94\u6848\uff0c\u627e\u51fa\u512a\u5316\u7a7a\u9593",
+    title: "商家健檢",
+    desc: "分析現有 Google 商家檔案，找出優化空間",
   },
   {
     step: "02",
-    title: "\u7b56\u7565\u898f\u5283",
-    desc: "\u6839\u64da\u9910\u5ef3\u7279\u8272\u5236\u5b9a\u5ee3\u544a\u7b56\u7565\u8207\u95dc\u9375\u5b57\u4f48\u5c40",
+    title: "策略規劃",
+    desc: "根據餐廳特色制定廣告策略與關鍵字佈局",
   },
   {
     step: "03",
-    title: "\u6a94\u6848\u512a\u5316",
-    desc: "\u5b8c\u6210\u5546\u5bb6\u4e5d\u5927\u6b04\u4f4d\u512a\u5316\uff0c\u5efa\u7acb\u5ee3\u544a\u5e33\u6236",
+    title: "檔案優化",
+    desc: "完成商家九大欄位優化，建立廣告帳戶",
   },
   {
     step: "04",
-    title: "\u5ee3\u544a\u4e0a\u7dda",
-    desc: "\u555f\u52d5\u4e09\u968e\u6bb5\u5ee3\u544a\u6295\u653e\uff0c\u6301\u7e8c\u76e3\u6e2c\u6210\u6548",
+    title: "廣告上線",
+    desc: "啟動三階段廣告投放，持續監測成效",
   },
   {
     step: "05",
-    title: "\u6578\u64da\u512a\u5316",
-    desc: "\u6bcf\u9031\u8abf\u6574\uff0c\u6bcf\u6708\u5831\u544a\uff0c\u6301\u7e8c\u63d0\u5347 ROI",
+    title: "數據優化",
+    desc: "每週調整，每月報告，持續提升 ROI",
   },
 ];
 
 const faqs = [
   {
-    q: "\u5408\u7d04\u671f\u9593\u662f\u591a\u4e45\uff1f",
-    a: "\u6700\u4f4e\u5408\u4f5c\u671f\u9593\u70ba\u4e09\u500b\u6708\u3002\u4e09\u500b\u6708\u5f8c\u53ef\u9078\u64c7\u7e8c\u7d04\u6216\u8abf\u6574\u3002Google \u5546\u5bb6\u512a\u5316\u9700\u8981\u6301\u7e8c\u7d93\u71df\uff0c\u901a\u5e38 3 \u500b\u6708\u958b\u59cb\u770b\u5230\u660e\u986f\u6210\u6548\u3002",
+    q: "合約期間是多久？",
+    a: "最低合作期間為三個月。三個月後可選擇續約或調整。Google 商家優化需要持續經營，通常 3 個月開始看到明顯成效。",
   },
   {
-    q: "\u5ee3\u544a\u8cbb\u5305\u542b\u5728\u65b9\u6848\u8cbb\u7528\u88e1\u55ce\uff1f",
-    a: "\u4e0d\u5305\u542b\u3002\u65b9\u6848\u8cbb\u7528\u70ba\u7b56\u7565\u898f\u5283\u8207\u57f7\u884c\u7ba1\u7406\u8cbb\uff0cGoogle Ads \u5ee3\u544a\u8cbb\u7531\u4f60\u76f4\u63a5\u652f\u4ed8\u7d66 Google\uff0c\u5efa\u8b70\u6bcf\u6708 NT$9,000-15,000\u3002",
+    q: "廣告費包含在方案費用裡嗎？",
+    a: "不包含。方案費用為策略規劃與執行管理費，Google Ads 廣告費由你直接支付給 Google，建議每月 NT$9,000-15,000。",
   },
   {
-    q: "\u6211\u7684\u5e97\u4e0d\u662f\u9910\u98f2\u696d\u4e5f\u53ef\u4ee5\u55ce\uff1f",
-    a: "\u53ef\u4ee5\uff01\u6211\u5011\u7684\u670d\u52d9\u9069\u7528\u65bc\u6240\u6709\u9700\u8981\u63d0\u5347 Google \u5730\u5716\u6392\u540d\u7684\u5728\u5730\u5e97\u5bb6\uff0c\u5305\u62ec\u7f8e\u5bb9\u7f8e\u9aee\u3001\u8a3a\u6240\u3001\u5065\u8eab\u623f\u3001\u96f6\u552e\u9580\u5e02\u7b49\u3002",
+    q: "我的店不是餐飲業也可以嗎？",
+    a: "可以！我們的服務適用於所有需要提升 Google 地圖排名的在地店家，包括美容美髮、診所、健身房、零售門市等。",
   },
   {
-    q: "\u591a\u4e45\u53ef\u4ee5\u770b\u5230\u6548\u679c\uff1f",
-    a: "\u5546\u5bb6\u6a94\u6848\u512a\u5316\u901a\u5e38 2-4 \u9031\u958b\u59cb\u53cd\u6620\u5728\u641c\u5c0b\u6392\u540d\uff0c\u5ee3\u544a\u6548\u679c 1-2 \u9031\u5373\u53ef\u770b\u5230\u521d\u6b65\u6578\u64da\uff0c3 \u500b\u6708\u5f8c\u6574\u9ad4\u6548\u679c\u6700\u70ba\u986f\u8457\u3002",
+    q: "多久可以看到效果？",
+    a: "商家檔案優化通常 2-4 週開始反映在搜尋排名，廣告效果 1-2 週即可看到初步數據，3 個月後整體效果最為顯著。",
   },
   {
-    q: "\u53ef\u4ee5\u53ea\u505a\u5546\u5bb6\u512a\u5316\u4e0d\u6295\u5ee3\u544a\u55ce\uff1f",
-    a: "\u53ef\u4ee5\u8a0e\u8ad6\u5ba2\u88fd\u5316\u65b9\u6848\uff0c\u4f46\u6211\u5011\u5f37\u70c8\u5efa\u8b70\u642d\u914d\u5ee3\u544a\u6295\u653e\uff0c\u6548\u679c\u6703\u66f4\u986f\u8457\u3002\u55ae\u7d14\u5546\u5bb6\u512a\u5316\u7684\u5831\u50f9\u6b61\u8fce\u806f\u7e6b\u6d3d\u8a62\u3002",
+    q: "可以只做商家優化不投廣告嗎？",
+    a: "可以討論客製化方案，但我們強烈建議搭配廣告投放，效果會更顯著。單純商家優化的報價歡迎聯繫洽詢。",
   },
   {
-    q: "\u514d\u8cbb\u5546\u5bb6\u5065\u6aa2\u6709\u4ec0\u9ebc\u9650\u5236\u55ce\uff1f",
-    a: "\u5b8c\u5168\u514d\u8cbb\uff0c\u6c92\u6709\u4efb\u4f55\u9650\u5236\u3002AI \u6703\u6839\u64da\u4f60\u586b\u5beb\u7684\u8cc7\u8a0a\u5373\u6642\u5206\u6790\uff0c\u7522\u51fa\u5305\u542b\u5546\u5bb6\u512a\u5316\u3001\u5ee3\u544a\u7b56\u7565\u3001\u6587\u6848\u5efa\u8b70\u7684\u5b8c\u6574\u5831\u544a\u3002",
+    q: "免費商家健檢有什麼限制嗎？",
+    a: "完全免費，沒有任何限制。AI 會根據你填寫的資訊即時分析，產出包含商家優化、廣告策略、文案建議的完整報告。",
   },
 ];
 
@@ -240,8 +240,8 @@ export default function GoogleBusinessPlanPage() {
   return (
     <div className="min-h-screen">
       <PixelViewContent
-        contentName="Google\u5546\u5bb6\u5c0e\u6d41\u65b9\u6848"
-        contentCategory="\u670d\u52d9\u65b9\u6848"
+        contentName="Google商家導流方案"
+        contentCategory="服務方案"
         contentType="product"
         contentIds={["google-business"]}
       />
@@ -253,30 +253,30 @@ export default function GoogleBusinessPlanPage() {
         <div className="relative max-w-5xl mx-auto px-6 py-28 text-center">
           <motion.div {...fadeUp}>
             <span className="inline-block px-4 py-1.5 bg-brand-500/10 border border-brand-500/20 text-brand-400 rounded-full text-sm font-medium mb-6">
-              Google \u5546\u5bb6\u5c0e\u6d41\u65b9\u6848
+              Google 商家導流方案
             </span>
             <h1 className="text-4xl md:text-5xl font-black leading-tight mb-6">
-              \u8b93\u9644\u8fd1\u7684\u5ba2\u4eba
+              讓附近的客人
               <br />
-              <span className="text-gradient">\u90fd\u80fd\u627e\u5230\u4f60</span>
+              <span className="text-gradient">都能找到你</span>
             </h1>
             <p className="text-dark-400 text-lg max-w-2xl mx-auto mb-8">
-              Google \u6211\u7684\u5546\u5bb6\u512a\u5316 + Google Ads \u7cbe\u6e96\u6295\u653e\uff0c\u8b93\u4f60\u7684\u5e97\u5bb6\u5728\u5730\u5716\u641c\u5c0b\u4e2d\u812b\u7a4e\u800c\u51fa\uff0c
+              Google 我的商家優化 + Google Ads 精準投放，讓你的店家在地圖搜尋中脫穎而出，
               <br className="hidden sm:block" />
-              3 \u500b\u6708\u898b\u8b49\u6210\u6548\u3002
+              3 個月見證成效。
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/contact"
                 className="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-brand-500 to-brand-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-brand-500/25 transition-all duration-300 hover:-translate-y-0.5"
               >
-                \u7acb\u5373\u8aee\u8a62\u65b9\u6848 \u2192
+                立即諮詢方案 →
               </Link>
               <a
                 href="#diagnostic"
                 className="inline-flex items-center justify-center px-8 py-4 border-2 border-dark-600 text-dark-300 font-semibold rounded-xl hover:border-dark-400 hover:text-white transition-all duration-300"
               >
-                \u514d\u8cbb\u5546\u5bb6\u5065\u6aa2 \u2193
+                免費商家健檢 ↓
               </a>
             </div>
           </motion.div>
@@ -290,9 +290,9 @@ export default function GoogleBusinessPlanPage() {
             transition={{ duration: 0.6, delay: 0.3 }}
           >
             {[
-              { name: "Google Maps", icon: "\ud83d\uddfa\ufe0f", color: "from-green-500 to-green-600" },
-              { name: "Google Ads", icon: "\ud83d\udcb0", color: "from-blue-500 to-blue-600" },
-              { name: "Google Search", icon: "\ud83d\udd0d", color: "from-yellow-500 to-orange-500" },
+              { name: "Google Maps", icon: "🗺️", color: "from-green-500 to-green-600" },
+              { name: "Google Ads", icon: "💰", color: "from-blue-500 to-blue-600" },
+              { name: "Google Search", icon: "🔍", color: "from-yellow-500 to-orange-500" },
             ].map((p) => (
               <div key={p.name} className="flex flex-col items-center gap-2">
                 <div
@@ -312,7 +312,7 @@ export default function GoogleBusinessPlanPage() {
         <div className="max-w-5xl mx-auto px-6">
           <motion.div {...fadeUp} className="text-center mb-16">
             <h2 className="text-3xl font-bold mb-4">
-              \u4f60\u7684\u5e97\u5bb6\u662f\u4e0d\u662f\u4e5f\u9047\u5230\u9019\u4e9b\u554f\u984c\uff1f
+              你的店家是不是也遇到這些問題？
             </h2>
           </motion.div>
           <div className="grid md:grid-cols-2 gap-8">
@@ -340,9 +340,9 @@ export default function GoogleBusinessPlanPage() {
       <section className="py-24 bg-gray-50">
         <div className="max-w-5xl mx-auto px-6">
           <motion.div {...fadeUp} className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">\u6211\u5011\u5e6b\u4f60\u505a\u4ec0\u9ebc</h2>
+            <h2 className="text-3xl font-bold mb-4">我們幫你做什麼</h2>
             <p className="text-dark-500 max-w-xl mx-auto">
-              \u5f9e\u5546\u5bb6\u6a94\u6848\u5230\u5ee3\u544a\u6295\u653e\uff0c\u4e00\u689d\u9f8d\u670d\u52d9
+              從商家檔案到廣告投放，一條龍服務
             </p>
           </motion.div>
           <div className="grid md:grid-cols-2 gap-8">
@@ -370,9 +370,9 @@ export default function GoogleBusinessPlanPage() {
       <section id="plans" className="py-24 bg-white">
         <div className="max-w-4xl mx-auto px-6">
           <motion.div {...fadeUp} className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">\u65b9\u6848\u8cbb\u7528</h2>
+            <h2 className="text-3xl font-bold mb-4">方案費用</h2>
             <p className="text-dark-500 max-w-xl mx-auto">
-              \u5305\u542b Google \u5546\u5bb6\u512a\u5316 + \u5ee3\u544a\u7b56\u7565\u57f7\u884c\uff0c\u4e09\u500b\u6708\u4e00\u671f
+              包含 Google 商家優化 + 廣告策略執行，三個月一期
             </p>
           </motion.div>
 
@@ -382,27 +382,27 @@ export default function GoogleBusinessPlanPage() {
             className="relative rounded-2xl p-8 bg-gradient-to-b from-dark-900 to-dark-800 text-white shadow-2xl shadow-dark-900/20 ring-2 ring-brand-500 max-w-lg mx-auto"
           >
             <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-brand-500 text-white text-xs font-bold rounded-full">
-              3\u500b\u6708\u4e00\u671f
+              3個月一期
             </span>
 
             <div className="mb-6 text-center">
-              <h3 className="text-xl font-bold mb-1">Google \u5546\u5bb6\u5c0e\u6d41\u65b9\u6848</h3>
+              <h3 className="text-xl font-bold mb-1">Google 商家導流方案</h3>
               <p className="text-sm text-dark-400">
-                \u5546\u5bb6\u512a\u5316 + \u5ee3\u544a\u6295\u653e\u5168\u5305\u670d\u52d9
+                商家優化 + 廣告投放全包服務
               </p>
             </div>
 
             <div className="mb-8 text-center">
               <span className="text-sm text-dark-400">NT$</span>
               <span className="text-5xl font-black mx-1">18,800</span>
-              <span className="text-sm text-dark-400">/ \u6708</span>
+              <span className="text-sm text-dark-400">/ 月</span>
             </div>
 
             <ul className="space-y-3 mb-8">
               {planFeatures.map((f) => (
                 <li key={f} className="flex items-start gap-3 text-sm">
                   <span className="flex-shrink-0 w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center text-xs mt-0.5">
-                    \u2713
+                    ✓
                   </span>
                   <span>{f}</span>
                 </li>
@@ -413,12 +413,12 @@ export default function GoogleBusinessPlanPage() {
               href="/contact"
               className="block text-center py-3 rounded-xl font-semibold bg-gradient-to-r from-brand-500 to-brand-600 text-white hover:shadow-lg hover:shadow-brand-500/25 transition-all duration-300"
             >
-              \u7acb\u5373\u8aee\u8a62
+              立即諮詢
             </Link>
           </motion.div>
 
           <p className="text-center text-sm text-dark-400 mt-8">
-            * \u5ee3\u544a\u8cbb\u53e6\u8a08\uff0c\u5efa\u8b70\u6bcf\u6708 NT$9,000-15,000
+            * 廣告費另計，建議每月 NT$9,000-15,000
           </p>
         </div>
       </section>
@@ -427,9 +427,9 @@ export default function GoogleBusinessPlanPage() {
       <section className="py-24 bg-gray-50">
         <div className="max-w-5xl mx-auto px-6">
           <motion.div {...fadeUp} className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">\u5408\u4f5c\u6d41\u7a0b</h2>
+            <h2 className="text-3xl font-bold mb-4">合作流程</h2>
             <p className="text-dark-500 max-w-xl mx-auto">
-              \u5f9e\u5065\u6aa2\u5230\u512a\u5316\uff0c\u6bcf\u4e00\u6b65\u90fd\u900f\u660e\u6e05\u6670
+              從健檢到優化，每一步都透明清晰
             </p>
           </motion.div>
 
@@ -456,9 +456,9 @@ export default function GoogleBusinessPlanPage() {
       <section id="diagnostic" className="py-24 bg-white">
         <div className="max-w-3xl mx-auto px-6">
           <motion.div {...fadeUp} className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">\u514d\u8cbb AI \u5546\u5bb6\u5065\u6aa2</h2>
+            <h2 className="text-3xl font-bold mb-4">免費 AI 商家健檢</h2>
             <p className="text-dark-500 max-w-xl mx-auto">
-              \u586b\u5beb\u4f60\u7684\u5e97\u5bb6\u8cc7\u8a0a\uff0cAI \u7acb\u5373\u5206\u6790\u4e26\u63d0\u4f9b\u512a\u5316\u5efa\u8b70
+              填寫你的店家資訊，AI 立即分析並提供優化建議
             </p>
           </motion.div>
 
@@ -499,11 +499,11 @@ export default function GoogleBusinessPlanPage() {
               {step === 1 && (
                 <div className="space-y-5">
                   <h3 className="text-white text-lg font-bold mb-4">
-                    \u6b65\u9a5f 1\uff1a\u5e97\u5bb6\u8cc7\u8a0a
+                    步驟 1：店家資訊
                   </h3>
                   <div>
                     <label className="block text-sm text-dark-400 mb-1.5">
-                      \u5e97\u5bb6\u540d\u7a31 *
+                      店家名稱 *
                     </label>
                     <input
                       type="text"
@@ -511,13 +511,13 @@ export default function GoogleBusinessPlanPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, businessName: e.target.value })
                       }
-                      placeholder="\u4f8b\uff1a\u5c0f\u738b\u725b\u8089\u9eb5"
+                      placeholder="例：小王牛肉麵"
                       className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-colors"
                     />
                   </div>
                   <div>
                     <label className="block text-sm text-dark-400 mb-1.5">
-                      \u696d\u7a2e\u985e\u578b *
+                      業種類型 *
                     </label>
                     <input
                       type="text"
@@ -525,13 +525,13 @@ export default function GoogleBusinessPlanPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, businessType: e.target.value })
                       }
-                      placeholder="\u4f8b\uff1a\u9910\u5ef3\u3001\u5496\u5561\u5ef3\u3001\u7f8e\u5bb9\u9662\u3001\u8a3a\u6240"
+                      placeholder="例：餐廳、咖啡廳、美容院、診所"
                       className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-colors"
                     />
                   </div>
                   <div>
                     <label className="block text-sm text-dark-400 mb-1.5">
-                      \u5e97\u5bb6\u5730\u5740 / \u6240\u5728\u5730\u5340 *
+                      店家地址 / 所在地區 *
                     </label>
                     <input
                       type="text"
@@ -539,7 +539,7 @@ export default function GoogleBusinessPlanPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, location: e.target.value })
                       }
-                      placeholder="\u4f8b\uff1a\u9ad8\u96c4\u5e02\u524d\u93ae\u5340\u4e2d\u83ef\u8def 123 \u865f"
+                      placeholder="例：高雄市前鎮區中華路 123 號"
                       className="w-full px-4 py-3 bg-dark-700 border border-dark-600 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-colors"
                     />
                   </div>
@@ -548,7 +548,7 @@ export default function GoogleBusinessPlanPage() {
                     disabled={!canProceedStep1}
                     className="w-full py-3 rounded-xl font-semibold bg-gradient-to-r from-brand-500 to-brand-600 text-white hover:shadow-lg hover:shadow-brand-500/25 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
                   >
-                    \u4e0b\u4e00\u6b65 \u2192
+                    下一步 →
                   </button>
                 </div>
               )}
@@ -715,7 +715,7 @@ export default function GoogleBusinessPlanPage() {
                     </div>
                   ) : (
                     <p className="text-dark-400 text-center py-8">
-                      \u6b63\u5728\u8f09\u5165\u5206\u6790\u7d50\u679c...
+                      正在載入分析結果...
                     </p>
                   )}
                   <div className="flex flex-col sm:flex-row gap-3 mt-6">
@@ -736,13 +736,13 @@ export default function GoogleBusinessPlanPage() {
                       }}
                       className="flex-1 py-3 rounded-xl font-semibold border-2 border-dark-600 text-dark-300 hover:border-dark-400 hover:text-white transition-all duration-300"
                     >
-                      \u91cd\u65b0\u5065\u6aa2
+                      重新健檢
                     </button>
                     <Link
                       href="/contact"
                       className="flex-1 py-3 rounded-xl font-semibold bg-gradient-to-r from-brand-500 to-brand-600 text-white hover:shadow-lg hover:shadow-brand-500/25 transition-all duration-300 text-center"
                     >
-                      \u8aee\u8a62\u5b8c\u6574\u65b9\u6848 \u2192
+                      諮詢完整方案 →
                     </Link>
                   </div>
                 </div>
@@ -756,7 +756,7 @@ export default function GoogleBusinessPlanPage() {
       <section className="py-24 bg-gray-50">
         <div className="max-w-3xl mx-auto px-6">
           <motion.div {...fadeUp} className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">\u5e38\u898b\u554f\u984c</h2>
+            <h2 className="text-3xl font-bold mb-4">常見問題</h2>
           </motion.div>
 
           <div className="space-y-4">
@@ -787,23 +787,23 @@ export default function GoogleBusinessPlanPage() {
         <div className="max-w-3xl mx-auto px-6 text-center">
           <motion.div {...fadeUp}>
             <h2 className="text-3xl font-bold mb-4">
-              \u6e96\u5099\u597d\u8b93\u66f4\u591a\u5ba2\u4eba\u627e\u5230\u4f60\u4e86\u55ce\uff1f
+              準備好讓更多客人找到你了嗎？
             </h2>
             <p className="text-dark-400 mb-8 max-w-xl mx-auto">
-              \u9810\u7d04\u514d\u8cbb\u8aee\u8a62\uff0c\u6211\u5011\u6703\u6839\u64da\u4f60\u7684\u5e97\u5bb6\u9700\u6c42\uff0c\u63d0\u4f9b\u6700\u9069\u5408\u7684 Google \u5c0e\u6d41\u65b9\u6848
+              預約免費諮詢，我們會根據你的店家需求，提供最適合的 Google 導流方案
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/contact"
                 className="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-brand-500 to-brand-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-brand-500/25 transition-all duration-300 hover:-translate-y-0.5"
               >
-                \u7acb\u5373\u8aee\u8a62\u65b9\u6848 \u2192
+                立即諮詢方案 →
               </Link>
               <a
                 href="tel:07-2810889"
                 className="inline-flex items-center justify-center px-8 py-4 border-2 border-dark-600 text-dark-300 font-semibold rounded-xl hover:border-dark-400 hover:text-white transition-all duration-300"
               >
-                \u64a5\u6253\u96fb\u8a71 07-2810889
+                撥打電話 07-2810889
               </a>
             </div>
           </motion.div>
