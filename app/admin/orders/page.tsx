@@ -33,6 +33,7 @@ const paymentStatusMap: Record<string, { label: string; color: string }> = {
   pending: { label: "待付款", color: "bg-yellow-100 text-yellow-700" },
   paid: { label: "已付款", color: "bg-green-100 text-green-700" },
   failed: { label: "付款失敗", color: "bg-red-100 text-red-700" },
+  cancelled: { label: "已取消", color: "bg-gray-100 text-gray-500" },
 };
 
 const invoiceStatusMap: Record<string, { label: string; color: string }> = {
@@ -64,6 +65,15 @@ export default function AdminOrdersPage() {
   const [invoiceFilter, setInvoiceFilter] = useState("");
   const [productFilter, setProductFilter] = useState("");
   const [exporting, setExporting] = useState(false);
+  const [editOrder, setEditOrder] = useState<Order | null>(null);
+  const [editForm, setEditForm] = useState({
+    customerName: "",
+    customerEmail: "",
+    customerPhone: "",
+    amount: 0,
+    note: "",
+  });
+  const [saving, setSaving] = useState(false);
 
   const fetchData = useCallback(async (page = 1) => {
     setLoading(true);
@@ -89,6 +99,59 @@ export default function AdminOrdersPage() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  const openEdit = (order: Order) => {
+    setEditOrder(order);
+    setEditForm({
+      customerName: order.customerName || "",
+      customerEmail: order.customerEmail,
+      customerPhone: order.customerPhone || "",
+      amount: order.amount,
+      note: "",
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editOrder) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/admin/orders/${editOrder.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editForm),
+      });
+      if (res.ok) {
+        setEditOrder(null);
+        fetchData(pagination.page);
+      } else {
+        const data = await res.json();
+        alert(data.error || "更新失敗");
+      }
+    } catch {
+      alert("操作失敗");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancelOrder = async (order: Order) => {
+    if (!confirm(`確定要取消訂單 ${order.orderNo} 嗎？此操作無法復原。`)) return;
+    try {
+      const res = await fetch(`/api/admin/orders/${order.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paymentStatus: "cancelled" }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        fetchData(pagination.page);
+      } else {
+        alert(data.error || "取消失敗");
+      }
+    } catch {
+      alert("操作失敗");
+    }
+  };
 
   const handleRetryInvoice = async (orderId: string) => {
     if (!confirm("確定要重新開立發票嗎？")) return;
@@ -308,14 +371,30 @@ export default function AdminOrdersPage() {
                         {formatDate(o.createdAt)}
                       </td>
                       <td className="px-4 py-3">
-                        {o.paymentStatus === "paid" && (o.invoiceStatus === "failed" || o.invoiceStatus === "none") && (
+                        <div className="flex items-center gap-2">
                           <button
-                            onClick={() => handleRetryInvoice(o.id)}
+                            onClick={() => openEdit(o)}
                             className="text-blue-600 hover:text-blue-800 text-sm font-medium whitespace-nowrap"
                           >
-                            開立發票
+                            編輯
                           </button>
-                        )}
+                          {o.paymentStatus === "pending" && (
+                            <button
+                              onClick={() => handleCancelOrder(o)}
+                              className="text-red-500 hover:text-red-700 text-sm font-medium whitespace-nowrap"
+                            >
+                              取消
+                            </button>
+                          )}
+                          {o.paymentStatus === "paid" && (o.invoiceStatus === "failed" || o.invoiceStatus === "none") && (
+                            <button
+                              onClick={() => handleRetryInvoice(o.id)}
+                              className="text-green-600 hover:text-green-800 text-sm font-medium whitespace-nowrap"
+                            >
+                              開立發票
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -350,6 +429,82 @@ export default function AdminOrdersPage() {
           </div>
         )}
       </div>
+      {/* Edit Modal */}
+      {editOrder && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
+            <div className="px-6 py-4 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-gray-900">
+                編輯訂單
+              </h3>
+              <p className="text-xs text-gray-400 mt-0.5">{editOrder.orderNo}</p>
+            </div>
+            <div className="px-6 py-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">客戶姓名</label>
+                <input
+                  type="text"
+                  value={editForm.customerName}
+                  onChange={(e) => setEditForm({ ...editForm, customerName: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={editForm.customerEmail}
+                  onChange={(e) => setEditForm({ ...editForm, customerEmail: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">電話</label>
+                <input
+                  type="tel"
+                  value={editForm.customerPhone}
+                  onChange={(e) => setEditForm({ ...editForm, customerPhone: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">金額 (NT$)</label>
+                <input
+                  type="number"
+                  value={editForm.amount}
+                  onChange={(e) => setEditForm({ ...editForm, amount: parseInt(e.target.value) || 0 })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">備註</label>
+                <textarea
+                  value={editForm.note}
+                  onChange={(e) => setEditForm({ ...editForm, note: e.target.value })}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  placeholder="管理員備註..."
+                />
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+              <button
+                onClick={() => setEditOrder(null)}
+                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleSaveEdit}
+                disabled={saving}
+                className="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+              >
+                {saving ? "儲存中..." : "儲存"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

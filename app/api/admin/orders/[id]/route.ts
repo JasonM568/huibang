@@ -42,9 +42,27 @@ export async function PATCH(
 
     // 白名單欄位
     const allowed: Record<string, unknown> = {};
-    const fields = ["customerName", "customerEmail", "customerPhone", "carrierNum", "note"] as const;
+    const fields = ["customerName", "customerEmail", "customerPhone", "carrierNum", "note", "amount", "planId"] as const;
     for (const f of fields) {
       if (f in body) allowed[f] = body[f] ?? null;
+    }
+
+    // 取消訂單（只允許 pending → cancelled）
+    if (body.paymentStatus === "cancelled") {
+      const [order] = await db
+        .select()
+        .from(orders)
+        .where(eq(orders.id, params.id));
+      if (!order) {
+        return NextResponse.json({ error: "Not found" }, { status: 404 });
+      }
+      if (order.paymentStatus !== "pending") {
+        return NextResponse.json(
+          { error: "只有待付款的訂單可以取消" },
+          { status: 400 }
+        );
+      }
+      allowed.paymentStatus = "cancelled";
     }
 
     if (Object.keys(allowed).length === 0) {
