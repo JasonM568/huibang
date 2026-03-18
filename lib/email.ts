@@ -512,6 +512,82 @@ export async function notifyTrialLead(params: NotifyTrialLeadParams) {
   return data;
 }
 
+// ===== 試用名單：寄送社群文案機器人連結給用戶 =====
+interface SendTrialAgentEmailParams {
+  email: string;
+  name: string;
+}
+
+export async function sendTrialAgentEmail(params: SendTrialAgentEmailParams) {
+  const { email, name } = params;
+  const agentUrl = process.env.TRIAL_AGENT_URL || "https://chatgpt.com";
+  const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://huibang.com.tw";
+
+  const { data, error } = await resend.emails.send({
+    from: "惠邦行銷 <hello@huibang.com.tw>",
+    replyTo: process.env.NOTIFY_EMAIL || "service@huibang.com.tw",
+    to: email,
+    subject: "🎁 你的免費社群文案機器人已開通！",
+    html: `
+      <div style="font-family: -apple-system, 'Noto Sans TC', sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc;">
+        <div style="background: linear-gradient(135deg, #059669, #06b6d4); padding: 32px 24px; text-align: center;">
+          <h1 style="color: #fff; font-size: 22px; margin: 0 0 8px 0;">🎁 免費試用已開通</h1>
+          <p style="color: #a7f3d0; font-size: 14px; margin: 0;">社群文案機器人 — AI 幫你寫貼文</p>
+        </div>
+        <div style="background: #fff; padding: 32px 24px;">
+          <p style="color: #334155; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+            ${name} 你好，<br><br>
+            感謝你申請惠邦行銷的社群文案機器人免費試用！點擊下方按鈕即可開始使用：
+          </p>
+
+          <div style="text-align: center; padding: 24px; background: #f0fdf4; border: 2px solid #86efac; border-radius: 12px; margin: 0 0 24px 0;">
+            <p style="color: #166534; font-size: 14px; font-weight: 600; margin: 0 0 16px 0;">
+              🤖 你的專屬社群文案機器人
+            </p>
+            <a href="${agentUrl}" style="display: inline-block; background: linear-gradient(135deg, #059669, #06b6d4); color: #fff; padding: 16px 40px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 16px;">
+              立即開始使用 →
+            </a>
+          </div>
+
+          <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 16px; margin: 0 0 24px 0;">
+            <p style="color: #92400e; font-size: 13px; line-height: 1.5; margin: 0;">
+              ⚡ <strong>使用說明：</strong><br>
+              • 需要 ChatGPT 帳號（免費版即可使用）<br>
+              • 告訴它你的品牌和產業，它會幫你產出貼文<br>
+              • 支援 Facebook、Instagram、LINE 等平台文案<br>
+              • 不限使用次數，永久有效
+            </p>
+          </div>
+
+          <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px; margin: 0 0 24px 0;">
+            <p style="color: #1e40af; font-size: 13px; line-height: 1.5; margin: 0;">
+              💡 <strong>想要更多 AI 行銷工具？</strong><br>
+              我們有完整的 AI 個體包，包含 9 位專業 AI Agent，涵蓋社群經營、廣告投放、數據分析等。現在限時優惠只要 <strong>NT$999</strong>！
+            </p>
+            <div style="text-align: center; margin-top: 12px;">
+              <a href="${siteUrl}/ai/restaurant-pack" style="display: inline-block; background: #2563eb; color: #fff; padding: 10px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">
+                了解 AI 個體包 →
+              </a>
+            </div>
+          </div>
+
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;">
+          <p style="color: #64748b; font-size: 13px; margin: 0;">
+            惠邦行銷｜讓每個品牌都找到對的人<br>
+            如有問題，歡迎回覆此信件聯繫我們
+          </p>
+        </div>
+      </div>
+    `,
+  });
+
+  if (error) {
+    console.error("Send trial agent email error:", error);
+    throw error;
+  }
+  return data;
+}
+
 // ===== 深度社群健診：客戶報告通知信 =====
 interface NotifyDiagnosticCustomerParams {
   email: string;
