@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "客戶案例",
+  title: "成功案例 | 旅遊、電商、餐飲、教育產業行銷成果",
   description:
-    "查看惠邦行銷的真實客戶案例與成效，了解我們如何協助餐飲、零售、服務業等不同產業的品牌提升數位行銷成效。",
+    "查看惠邦行銷的真實客戶案例：ROAS 5.2 倍、來客數 +60%、報名成長 180%，了解我們如何協助旅遊、電商、餐飲、教育產業提升數位行銷成效。",
   openGraph: {
-    title: "客戶案例 | 惠邦行銷",
-    description: "真實客戶案例與成效，了解惠邦行銷如何協助不同產業品牌提升數位行銷成效。",
+    title: "成功案例 | 惠邦行銷・旅遊、電商、餐飲、教育產業行銷成果",
+    description:
+      "真實客戶案例：ROAS 5.2 倍、來客數 +60%、報名成長 180%，跨產業行銷成效實證。",
     url: "https://huibang.com.tw/cases",
   },
 };

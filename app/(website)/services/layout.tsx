@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "服務項目",
+  title: "服務項目 | 高雄品牌定位・廣告代操・社群經營・內容行銷",
   description:
-    "惠邦行銷提供品牌健檢、廣告投放、社群經營、內容行銷、AI 行銷等完整數位行銷服務。了解如何協助你的品牌在數位時代成長。",
+    "惠邦行銷提供品牌定位策略、Facebook/Google 廣告代操、社群經營管理、內容行銷與 AI 行銷工具，高雄在地服務，協助中小企業數位轉型。",
   openGraph: {
-    title: "服務項目 | 惠邦行銷",
-    description: "品牌健檢、廣告投放、社群經營、內容行銷、AI 行銷，一站式數位行銷解決方案。",
+    title: "服務項目 | 高雄品牌定位・廣告代操・社群經營 | 惠邦行銷",
+    description:
+      "品牌定位、廣告代操、社群經營、內容行銷，高雄在地一站式數位行銷解決方案。",
     url: "https://huibang.com.tw/services",
   },
 };

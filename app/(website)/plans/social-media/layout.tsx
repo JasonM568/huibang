@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "社群媒體經營方案",
+  title: "社群媒體代操方案 | FB・IG・Threads 三平台・高雄",
   description:
-    "惠邦行銷提供 Instagram、Facebook、Line 三平台社群經營服務，包含內容策略、貼文製作、廣告投放、數據分析，讓品牌每天都在線。",
+    "惠邦行銷提供 FB、IG、Threads 三平台社群代操服務，NT$18,000 起，每月 12–36 篇專業貼文，含文案設計與數據月報，高雄在地服務，免費諮詢。",
   openGraph: {
-    title: "社群媒體經營方案 | 惠邦行銷",
-    description: "IG、FB、LINE 三平台社群經營，內容策略、貼文製作、廣告投放一次搞定。",
+    title: "社群媒體代操方案 | FB・IG・Threads | 惠邦行銷",
+    description:
+      "三平台社群代操 NT$18,000 起，每月 12–36 篇專業貼文，含數據月報，高雄在地服務。",
     url: "https://huibang.com.tw/plans/social-media",
   },
 };

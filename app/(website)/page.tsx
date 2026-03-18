@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "惠邦行銷 | 數位行銷專家 — 品牌定位 • 廣告投放 • 社群經營",
+  title: "惠邦行銷 | 高雄數位行銷・品牌定位・廣告代操・社群經營",
   description:
-    "惠邦行銷以數據驅動的品牌策略，協助中小企業在數位時代精準觸及目標客群。提供免費品牌健檢、廣告投放、社群經營、AI 行銷等完整解決方案。",
+    "惠邦行銷是高雄在地數位行銷公司，提供品牌定位、Facebook/Google 廣告投放、社群經營一站式服務，2020 年成立，服務 50+ 品牌，免費品牌健檢立即領取。",
   openGraph: {
-    title: "惠邦行銷 | 數位行銷專家 — 品牌定位 • 廣告投放 • 社群經營",
-    description: "以數據驅動的品牌策略，協助中小企業在數位時代精準觸及目標客群。",
+    title: "惠邦行銷 | 高雄數位行銷・品牌定位・廣告代操・社群經營",
+    description: "高雄在地數位行銷公司，品牌定位、廣告投放、社群經營一站式服務，免費品牌健檢立即領取。",
     url: "https://huibang.com.tw",
     images: [{ url: "/og-default.png", width: 1200, height: 630 }],
   },
@@ -23,12 +23,19 @@ const jsonLd = {
   description: "惠邦行銷提供品牌定位、廣告投放、社群經營、內容行銷等數位行銷服務，協助企業打造強勢品牌。",
   address: {
     "@type": "PostalAddress",
+    streetAddress: "九如一路 61 號 5F-2",
+    addressLocality: "三民區",
+    addressRegion: "高雄市",
+    postalCode: "807",
     addressCountry: "TW",
   },
   contactPoint: {
     "@type": "ContactPoint",
     contactType: "customer service",
+    telephone: "+886-7-2810889",
     email: "service@huibang.com.tw",
+    areaServed: "TW",
+    availableLanguage: "zh-TW",
   },
   sameAs: [
     "https://www.facebook.com/huibangmarketing",
