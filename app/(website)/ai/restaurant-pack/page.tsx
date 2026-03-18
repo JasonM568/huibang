@@ -376,19 +376,8 @@ export default function RestaurantAIPackPage() {
                   <p className="text-emerald-800 text-sm font-medium">
                     ✉️ 使用連結已寄送至 <strong>{trialForm.email}</strong>，請查收信箱
                   </p>
-                  <p className="text-emerald-600 text-xs mt-1">沒收到？請檢查垃圾郵件資料夾</p>
+                  <p className="text-emerald-600 text-xs mt-1">沒收到？請檢查垃圾郵件資料夾，或確認 Email 是否正確</p>
                 </div>
-
-                {trialAgentUrl && (
-                  <a
-                    href={trialAgentUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center w-full px-6 py-4 bg-gradient-to-r from-emerald-500 to-cyan-600 text-white font-bold rounded-xl hover:shadow-lg transition-all mb-4"
-                  >
-                    📱 或直接點此使用社群文案機器人 →
-                  </a>
-                )}
 
                 <div className="mt-6 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl">
                   <p className="text-amber-800 font-semibold text-sm mb-1">覺得好用嗎？🔥</p>

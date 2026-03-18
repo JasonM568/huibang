@@ -27,9 +27,7 @@ export async function POST(request: NextRequest) {
     notifyTrialLead({ name: name.trim(), email: email.trim(), phone: phone?.trim() }).catch(() => {});
     sendTrialAgentEmail({ email: email.trim(), name: name.trim() }).catch(() => {});
 
-    const agentUrl = process.env.TRIAL_AGENT_URL || null;
-
-    return NextResponse.json({ success: true, agentUrl });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("[trial-lead] error:", error);
     return NextResponse.json({ error: "系統錯誤，請稍後再試" }, { status: 500 });
