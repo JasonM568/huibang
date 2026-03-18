@@ -18,7 +18,7 @@ export default function AiPackCheckoutPage() {
   const plan = PLANS[planId] || PLANS["3"];
   const gptList = PLAN_GPTS[planId] || PLAN_GPTS["3"];
 
-  const [form, setForm] = useState({ email: "", contactName: "", phone: "", carrierNum: "", discountCode: "", agreed: false });
+  const [form, setForm] = useState({ email: "", contactName: "", phone: "", carrierNum: "", discountCode: "", invoiceType: "personal" as "personal" | "company", taxId: "", companyName: "", agreed: false });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [showTerms, setShowTerms] = useState(false);
@@ -59,9 +59,19 @@ export default function AiPackCheckoutPage() {
       setError("手機號碼格式不正確（應為 09 開頭的 10 碼）");
       return;
     }
-    if (form.carrierNum && !/^\/[A-Z0-9.+-]{7}$/.test(form.carrierNum)) {
+    if (form.invoiceType === "personal" && form.carrierNum && !/^\/[A-Z0-9.+-]{7}$/.test(form.carrierNum)) {
       setError("手機條碼格式不正確（應為 / 開頭的 8 碼）");
       return;
+    }
+    if (form.invoiceType === "company") {
+      if (!form.taxId || !/^\d{8}$/.test(form.taxId)) {
+        setError("統一編號應為 8 碼數字");
+        return;
+      }
+      if (!form.companyName.trim()) {
+        setError("請填寫公司抬頭");
+        return;
+      }
     }
     if (!form.agreed) {
       setError("請先閱讀並同意購買條款");
@@ -104,7 +114,10 @@ export default function AiPackCheckoutPage() {
           email: form.email,
           contactName: form.contactName,
           phone: form.phone,
-          carrierNum: form.carrierNum,
+          carrierNum: form.invoiceType === "personal" ? form.carrierNum : undefined,
+          invoiceType: form.invoiceType,
+          taxId: form.invoiceType === "company" ? form.taxId : undefined,
+          companyName: form.invoiceType === "company" ? form.companyName : undefined,
           discountCode: discountApplied ? form.discountCode.trim() : undefined,
           product: "ai-pack",
           planId: effectivePlanId,
@@ -237,21 +250,73 @@ export default function AiPackCheckoutPage() {
                 />
               </div>
 
+              {/* 發票類型 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  手機條碼載具（選填）
+                  發票類型
                 </label>
-                <input
-                  type="text"
-                  value={form.carrierNum}
-                  onChange={(e) => setForm({ ...form, carrierNum: e.target.value.toUpperCase() })}
-                  placeholder="/ 開頭 8 碼，例如 /ABC1234"
-                  maxLength={8}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-400 transition-colors"
-                />
-                <p className="mt-1 text-xs text-gray-400">
-                  如需存入手機條碼載具請填入，未填則以 Email 寄送電子發票
-                </p>
+                <div className="flex gap-3 mb-3">
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, invoiceType: "personal" })}
+                    className={`flex-1 py-2.5 rounded-xl text-sm font-medium border-2 transition-colors ${
+                      form.invoiceType === "personal"
+                        ? "border-emerald-400 bg-emerald-50 text-emerald-700"
+                        : "border-gray-200 text-gray-500 hover:border-gray-300"
+                    }`}
+                  >
+                    二聯式（個人）
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, invoiceType: "company" })}
+                    className={`flex-1 py-2.5 rounded-xl text-sm font-medium border-2 transition-colors ${
+                      form.invoiceType === "company"
+                        ? "border-emerald-400 bg-emerald-50 text-emerald-700"
+                        : "border-gray-200 text-gray-500 hover:border-gray-300"
+                    }`}
+                  >
+                    三聯式（公司）
+                  </button>
+                </div>
+
+                {form.invoiceType === "personal" ? (
+                  <div>
+                    <input
+                      type="text"
+                      value={form.carrierNum}
+                      onChange={(e) => setForm({ ...form, carrierNum: e.target.value.toUpperCase() })}
+                      placeholder="手機條碼載具（選填），例如 /ABC1234"
+                      maxLength={8}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-400 transition-colors"
+                    />
+                    <p className="mt-1 text-xs text-gray-400">
+                      未填則以 Email 寄送電子發票
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div>
+                      <input
+                        type="text"
+                        value={form.taxId}
+                        onChange={(e) => setForm({ ...form, taxId: e.target.value.replace(/\D/g, "") })}
+                        placeholder="統一編號（8 碼）"
+                        maxLength={8}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-400 transition-colors"
+                      />
+                    </div>
+                    <div>
+                      <input
+                        type="text"
+                        value={form.companyName}
+                        onChange={(e) => setForm({ ...form, companyName: e.target.value })}
+                        placeholder="公司抬頭"
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-400 transition-colors"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* 折扣碼 */}

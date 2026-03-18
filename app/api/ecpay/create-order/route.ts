@@ -11,7 +11,7 @@ const AI_PACK_PLANS: Record<string, { name: string; price: number }> = {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, contactName, phone, product, planId, carrierNum, discountCode } = body;
+    const { email, contactName, phone, product, planId, carrierNum, discountCode, invoiceType, taxId, companyName } = body;
 
     // 折扣碼驗證
     const VALID_DISCOUNT_CODE = process.env.DISCOUNT_CODE || "TRIAL300";
@@ -82,8 +82,9 @@ export async function POST(request: NextRequest) {
         customerEmail: email,
         customerName: contactName || null,
         customerPhone: phone || null,
-        carrierType: carrierNum ? "barcode" : null,
-        carrierNum: carrierNum || null,
+        carrierType: invoiceType === "company" ? "company" : (carrierNum ? "barcode" : null),
+        carrierNum: invoiceType === "company" ? taxId : (carrierNum || null),
+        note: invoiceType === "company" ? `三聯式｜統編: ${taxId}｜抬頭: ${companyName}` : null,
         paymentStatus: "pending",
         invoiceStatus: "none",
       });
