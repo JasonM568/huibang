@@ -381,21 +381,32 @@ export default function GoogleBusinessPlanPage() {
             transition={{ duration: 0.5 }}
             className="relative rounded-2xl p-8 bg-gradient-to-b from-dark-900 to-dark-800 text-white shadow-2xl shadow-dark-900/20 ring-2 ring-brand-500 max-w-lg mx-auto"
           >
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-brand-500 text-white text-xs font-bold rounded-full">
-              3個月一期
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-red-500 text-white text-xs font-bold rounded-full">
+              本月限時特價
             </span>
 
             <div className="mb-6 text-center">
               <h3 className="text-xl font-bold mb-1">Google 商家導流方案</h3>
               <p className="text-sm text-dark-400">
-                商家優化 + 廣告投放全包服務
+                商家優化 + 廣告投放全包服務｜3 個月一期
               </p>
             </div>
 
-            <div className="mb-8 text-center">
+            <div className="mb-2 text-center">
+              <span className="text-dark-500 line-through text-lg">NT$ 26,800</span>
+            </div>
+            <div className="mb-2 text-center">
+              <span className="text-sm text-brand-400">限時特價</span>
+            </div>
+            <div className="mb-4 text-center">
               <span className="text-sm text-dark-400">NT$</span>
               <span className="text-5xl font-black mx-1">18,800</span>
               <span className="text-sm text-dark-400">/ 月</span>
+            </div>
+            <div className="mb-8 text-center">
+              <span className="inline-block px-3 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded-full">
+                含 NT$6,000 廣告費
+              </span>
             </div>
 
             <ul className="space-y-3 mb-8">
@@ -418,7 +429,7 @@ export default function GoogleBusinessPlanPage() {
           </motion.div>
 
           <p className="text-center text-sm text-dark-400 mt-8">
-            * 廣告費另計，建議每月 NT$9,000-15,000
+            * 方案已含每月 NT$6,000 廣告費，如需加碼投放可另行討論
           </p>
         </div>
       </section>

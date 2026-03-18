@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Google 我的商家導流方案 | 在地搜尋排名優化・高雄",
   description:
-    "惠邦行銷提供 Google 我的商家優化 + Google Ads 精準投放服務，月費 NT$18,800，3 個月一期，協助餐飲與在地店家提升 Google 地圖排名、增加來客數。免費 AI 商家健檢。",
+    "惠邦行銷提供 Google 我的商家優化 + Google Ads 精準投放服務，原價 NT$26,800，本月限時特價 NT$18,800（含 $6,000 廣告費），3 個月一期，協助餐飲與在地店家提升 Google 地圖排名。免費 AI 商家健檢。",
   keywords:
     "Google我的商家,Google商家優化,Google Ads,在地搜尋,地圖排名,餐飲行銷,高雄,惠邦行銷",
   openGraph: {
