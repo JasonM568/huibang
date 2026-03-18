@@ -77,6 +77,17 @@ export default function AiPackCheckoutPage() {
       setError("請先閱讀並同意購買條款");
       return;
     }
+    // 提交時自動套用折扣碼（如果有輸入但尚未套用）
+    let isDiscounted = discountApplied;
+    const codeToSend = form.discountCode.trim().toUpperCase();
+    if (codeToSend && !discountApplied) {
+      if (codeToSend === "TRIAL300") {
+        isDiscounted = true;
+        setDiscountApplied(true);
+      }
+    }
+    const submitPrice = isDiscounted ? plan.price - DISCOUNT_AMOUNT : plan.price;
+
     setSubmitting(true);
     setError("");
 
@@ -86,7 +97,7 @@ export default function AiPackCheckoutPage() {
         content_ids: [`ai-pack-plan-${effectivePlanId}`],
         content_name: plan.name,
         content_type: "product",
-        value: finalPrice,
+        value: submitPrice,
         currency: "TWD",
         num_items: plan.agents,
       });
@@ -96,11 +107,11 @@ export default function AiPackCheckoutPage() {
     if (typeof window !== "undefined" && window.gtag) {
       window.gtag("event", "begin_checkout", {
         currency: "TWD",
-        value: finalPrice,
+        value: submitPrice,
         items: [{
           item_id: `ai-pack-plan-${effectivePlanId}`,
           item_name: plan.name,
-          price: finalPrice,
+          price: submitPrice,
           quantity: 1,
         }],
       });
@@ -118,7 +129,7 @@ export default function AiPackCheckoutPage() {
           invoiceType: form.invoiceType,
           taxId: form.invoiceType === "company" ? form.taxId : undefined,
           companyName: form.invoiceType === "company" ? form.companyName : undefined,
-          discountCode: discountApplied ? form.discountCode.trim() : undefined,
+          discountCode: isDiscounted ? codeToSend : undefined,
           product: "ai-pack",
           planId: effectivePlanId,
         }),
@@ -332,6 +343,8 @@ export default function AiPackCheckoutPage() {
                       setForm({ ...form, discountCode: e.target.value });
                       if (discountApplied) setDiscountApplied(false);
                     }}
+                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleApplyDiscount())}
+                    onBlur={handleApplyDiscount}
                     placeholder="輸入折扣碼"
                     maxLength={20}
                     className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-400 transition-colors uppercase"

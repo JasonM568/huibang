@@ -41,11 +41,13 @@ export async function POST(request: NextRequest) {
       amount = plan.price;
 
       // 套用折扣碼
-      if (discountCode && discountCode.toUpperCase() === VALID_DISCOUNT_CODE) {
+      if (discountCode && discountCode.toUpperCase() === VALID_DISCOUNT_CODE.toUpperCase()) {
         amount = Math.max(amount - DISCOUNT_AMOUNT, 1);
         itemName = `${plan.name}（折扣碼 -$${DISCOUNT_AMOUNT}）x1`;
+        console.log(`[ECPay] Discount applied: ${discountCode}, amount: ${amount}`);
       } else {
         itemName = `${plan.name} x1`;
+        if (discountCode) console.log(`[ECPay] Invalid discount code: ${discountCode}`);
       }
 
       orderOptions = {
