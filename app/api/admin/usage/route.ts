@@ -4,6 +4,8 @@ import { apiUsageLogs } from "@/lib/db/schema";
 import { sql, gte, desc } from "drizzle-orm";
 import { requireAuth } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     await requireAuth();
@@ -104,9 +106,10 @@ export async function GET() {
     if (error instanceof Error && error.message === "Unauthorized") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    console.error("Usage API error:", error);
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error("Usage API error:", errMsg, error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Internal server error", detail: errMsg },
       { status: 500 }
     );
   }

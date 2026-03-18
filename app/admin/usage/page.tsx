@@ -54,6 +54,7 @@ const PIE_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6"];
 export default function UsagePage() {
   const [data, setData] = useState<UsageData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
     fetch("/api/admin/usage")
@@ -63,12 +64,12 @@ export default function UsagePage() {
       })
       .then((json) => {
         if (json.error) {
-          console.error("Usage API error:", json.error);
+          setErrorMsg(json.detail || json.error);
           return;
         }
         setData(json);
       })
-      .catch((err) => console.error("Usage fetch failed:", err))
+      .catch((err) => setErrorMsg(err.message || "網路錯誤"))
       .finally(() => setLoading(false));
   }, []);
 
@@ -81,7 +82,12 @@ export default function UsagePage() {
   }
 
   if (!data) {
-    return <div className="text-center py-20 text-gray-400">載入失敗</div>;
+    return (
+      <div className="text-center py-20">
+        <p className="text-gray-400 mb-2">載入失敗</p>
+        {errorMsg && <p className="text-xs text-red-400">{errorMsg}</p>}
+      </div>
+    );
   }
 
   const avgCost =
