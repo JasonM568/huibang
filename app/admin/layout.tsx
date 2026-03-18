@@ -104,7 +104,7 @@ export default function AdminLayout({
           <p className="text-xs text-gray-400 mt-0.5">管理後台</p>
         </div>
 
-        <nav className="p-3 space-y-1">
+        <nav className="p-3 space-y-1 overflow-y-auto" style={{ maxHeight: "calc(100vh - 130px)" }}>
           {navItems.map((item) => (
             <Link
               key={item.href}

@@ -57,12 +57,18 @@ export default function UsagePage() {
 
   useEffect(() => {
     fetch("/api/admin/usage")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
       .then((json) => {
-        if (json.error) return;
+        if (json.error) {
+          console.error("Usage API error:", json.error);
+          return;
+        }
         setData(json);
       })
-      .catch(console.error)
+      .catch((err) => console.error("Usage fetch failed:", err))
       .finally(() => setLoading(false));
   }, []);
 
