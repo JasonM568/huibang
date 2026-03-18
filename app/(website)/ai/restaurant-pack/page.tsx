@@ -360,7 +360,7 @@ export default function RestaurantAIPackPage() {
                   </button>
 
                   <p className="text-center text-xs text-gray-400">
-                    填寫後立即取得連結，不會收到垃圾郵件
+                    填寫後連結會寄到你的 Email 信箱
                   </p>
                 </form>
               </div>
@@ -372,21 +372,22 @@ export default function RestaurantAIPackPage() {
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">已成功領取！</h3>
                 <p className="text-gray-500 mb-6">感謝你，{trialForm.name}！你的社群文案機器人已準備好了</p>
 
-                {trialAgentUrl ? (
+                <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl mb-4">
+                  <p className="text-emerald-800 text-sm font-medium">
+                    ✉️ 使用連結已寄送至 <strong>{trialForm.email}</strong>，請查收信箱
+                  </p>
+                  <p className="text-emerald-600 text-xs mt-1">沒收到？請檢查垃圾郵件資料夾</p>
+                </div>
+
+                {trialAgentUrl && (
                   <a
                     href={trialAgentUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center justify-center w-full px-6 py-4 bg-gradient-to-r from-emerald-500 to-cyan-600 text-white font-bold rounded-xl hover:shadow-lg transition-all mb-4"
                   >
-                    📱 點我立即使用社群文案機器人 →
+                    📱 或直接點此使用社群文案機器人 →
                   </a>
-                ) : (
-                  <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl mb-4">
-                    <p className="text-emerald-800 text-sm font-medium">
-                      ✅ 我們會在 24 小時內將使用連結寄送至你的 Email：{trialForm.email}
-                    </p>
-                  </div>
                 )}
 
                 <div className="mt-6 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl">
