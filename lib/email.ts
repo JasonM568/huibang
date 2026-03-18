@@ -700,3 +700,84 @@ export async function notifyTeamDiagnostic(params: NotifyTeamDiagnosticParams) {
   }
   return data;
 }
+
+// ===== GMB 商家健檢：分析報告寄送 =====
+interface SendGmbDiagnosticEmailParams {
+  email: string;
+  name: string;
+  businessName: string;
+  result: string;
+}
+
+export async function sendGmbDiagnosticEmail(params: SendGmbDiagnosticEmailParams) {
+  const { email, name, businessName, result } = params;
+  const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://huibang.com.tw";
+
+  // Parse sections from result text
+  const sections = result.split(/===\s*(.+?)\s*===/).filter((s: string) => s.trim());
+  let sectionsHtml = "";
+  for (let i = 0; i < sections.length - 1; i += 2) {
+    const title = sections[i].trim();
+    const content = sections[i + 1].trim()
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\n/g, "<br>");
+    sectionsHtml += `
+      <div style="margin: 0 0 20px 0; padding: 20px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #3b82f6;">
+        <h3 style="color: #1e40af; font-size: 16px; margin: 0 0 12px 0;">${title}</h3>
+        <div style="color: #334155; font-size: 14px; line-height: 1.8;">${content}</div>
+      </div>
+    `;
+  }
+  if (!sectionsHtml && result.trim()) {
+    sectionsHtml = `<div style="color: #334155; font-size: 14px; line-height: 1.8; white-space: pre-wrap;">${result.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>")}</div>`;
+  }
+
+  const { data, error } = await resend.emails.send({
+    from: "惠邦行銷 <hello@huibang.com.tw>",
+    replyTo: process.env.NOTIFY_EMAIL || "service@huibang.com.tw",
+    to: email,
+    subject: `📍 ${businessName} — Google 商家健檢分析報告`,
+    html: `
+      <div style="font-family: -apple-system, 'Noto Sans TC', sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc;">
+        <div style="background: linear-gradient(135deg, #1e40af, #3b82f6); padding: 32px 24px; text-align: center;">
+          <h1 style="color: #fff; font-size: 22px; margin: 0 0 8px 0;">📍 Google 商家健檢報告</h1>
+          <p style="color: #93c5fd; font-size: 14px; margin: 0;">${businessName}</p>
+        </div>
+        <div style="background: #fff; padding: 32px 24px;">
+          <p style="color: #334155; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+            ${name} 你好，<br><br>
+            感謝你使用惠邦行銷的免費 AI 商家健檢！以下是針對「${businessName}」的分析報告：
+          </p>
+
+          ${sectionsHtml}
+
+          <div style="background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 2px solid #3b82f6; border-radius: 12px; padding: 20px; margin: 24px 0; text-align: center;">
+            <p style="color: #1e40af; font-size: 15px; font-weight: 700; margin: 0 0 8px 0;">
+              想讓專業團隊幫你執行這些優化？
+            </p>
+            <p style="color: #334155; font-size: 13px; margin: 0 0 16px 0;">
+              Google 商家導流方案｜原價 $26,800 → 限時特價 $18,800/月（含 $6,000 廣告費）
+            </p>
+            <a href="${siteUrl}/plans/google-business" style="display: inline-block; background: linear-gradient(135deg, #1e40af, #3b82f6); color: #fff; padding: 14px 36px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 15px;">
+              了解完整方案 →
+            </a>
+          </div>
+
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;">
+          <p style="color: #64748b; font-size: 13px; margin: 0;">
+            惠邦行銷｜讓每個品牌都找到對的人<br>
+            📞 07-2810889｜如有問題歡迎回覆此信件
+          </p>
+        </div>
+      </div>
+    `,
+  });
+
+  if (error) {
+    console.error("Send GMB diagnostic email error:", error);
+    throw error;
+  }
+  return data;
+}

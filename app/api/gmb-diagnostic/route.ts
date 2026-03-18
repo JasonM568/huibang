@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { db } from "@/lib/db";
 import { trialLeads } from "@/lib/db/schema";
 import { logApiUsage } from "@/lib/api-usage";
+import { sendGmbDiagnosticEmail } from "@/lib/email";
 import { eq, and, gte } from "drizzle-orm";
 
 const AGENT_MAP: Record<string, string> = {
@@ -38,8 +39,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Auto-select all agents (users don't choose)
-    const agents = ["profile", "strategy", "journey", "copy", "data"];
+    // Only 3 public-facing modules (strategy + data are internal only)
+    const agents = ["profile", "journey", "copy"];
 
     // --- Rate limiting: 同一 email 24 小時內只能用一次 ---
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
@@ -84,20 +85,17 @@ ${problem}
 ${adsData ? `## 現有廣告數據\n${adsData}` : ""}
 ${upcoming ? `## 近期目標或活動\n${upcoming}` : ""}
 
-## 請依序提供以下五個面向的分析建議：
+## 請依序提供以下三個面向的分析建議：
 
 輸出格式要求：
-1. 每個面向用「=== [面向標題] ===」開頭，標題使用以下名稱：
+1. 每個面向用「=== 面向標題 ===」開頭，標題使用以下名稱：
    - === 商家檔案優化建議 ===
-   - === 廣告策略規劃 ===
-   - === 消費者旅程設計 ===
+   - === 消費者旅程建議 ===
    - === 廣告文案建議 ===
-   - === 數據指標與優化方向 ===
 2. 內容要具體、可操作，針對這家店的實際情況
-3. 有數字就給數字（預算/CPC/CTR 標準值）
-4. 文案建議要給可直接使用的範例
-5. 繁體中文，台灣在地用語
-6. 每個面向約 200-300 字，簡潔有力
+3. 文案建議要給可直接使用的 Google Ads 標題與說明範例
+4. 繁體中文，台灣在地用語
+5. 每個面向約 200-300 字，簡潔有力
 
 請開始：`;
 
@@ -123,8 +121,21 @@ ${upcoming ? `## 近期目標或活動\n${upcoming}` : ""}
       email,
       phone: phone || null,
       source: "gmb-diagnostic",
-      note: `類型:${type} 地區:${location} 預算:${budget} 模組:${agents.join(",")}`,
+      note: `類型:${type} 地區:${location} 預算:${budget}`,
     });
+
+    // --- Send email with results ---
+    try {
+      await sendGmbDiagnosticEmail({
+        email,
+        name,
+        businessName: name,
+        result,
+      });
+    } catch (emailErr) {
+      console.error("Failed to send GMB diagnostic email:", emailErr);
+      // Don't fail the request if email fails
+    }
 
     return NextResponse.json({ result });
   } catch (error: unknown) {
