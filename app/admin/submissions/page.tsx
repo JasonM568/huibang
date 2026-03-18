@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+type TabType = "brand" | "gmb";
+
 interface Submission {
   id: string;
   createdAt: string;
@@ -16,6 +18,17 @@ interface Submission {
   status: string;
   assignedTo: string | null;
   analysis: { overall_score?: number } | null;
+}
+
+interface GmbLead {
+  id: string;
+  createdAt: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  source: string;
+  agentDelivered: boolean;
+  note: string | null;
 }
 
 interface Pagination {
@@ -34,7 +47,11 @@ const statusMap: Record<string, { label: string; color: string }> = {
 
 export default function AdminSubmissionsPage() {
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState<TabType>("brand");
   const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [gmbLeads, setGmbLeads] = useState<GmbLead[]>([]);
+  const [gmbTotal, setGmbTotal] = useState(0);
+  const [gmbLoading, setGmbLoading] = useState(false);
   const [pagination, setPagination] = useState<Pagination>({
     page: 1, limit: 20, total: 0, totalPages: 0,
   });
@@ -64,9 +81,28 @@ export default function AdminSubmissionsPage() {
     }
   }, [search, statusFilter, industryFilter]);
 
+  const fetchGmbLeads = useCallback(async () => {
+    setGmbLoading(true);
+    try {
+      const res = await fetch("/api/admin/trial-leads?source=gmb-diagnostic");
+      if (res.status === 401) return;
+      const data = await res.json();
+      setGmbLeads(data.leads || []);
+      setGmbTotal(data.total || 0);
+    } catch (err) {
+      console.error("Fetch GMB leads error:", err);
+    } finally {
+      setGmbLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (activeTab === "brand") {
+      fetchData();
+    } else {
+      fetchGmbLeads();
+    }
+  }, [fetchData, fetchGmbLeads, activeTab]);
 
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`確定要刪除「${name}」的問卷資料嗎？此操作無法復原。`)) return;
@@ -152,19 +188,46 @@ export default function AdminSubmissionsPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">問卷提交列表</h1>
           <p className="text-sm text-gray-500 mt-1">
-            共 {pagination.total} 筆提交
+            共 {activeTab === "brand" ? pagination.total : gmbTotal} 筆提交
           </p>
         </div>
+        {activeTab === "brand" && (
+          <button
+            onClick={handleExport}
+            disabled={exporting}
+            className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+          >
+            {exporting ? "匯出中..." : "📥 匯出 CSV"}
+          </button>
+        )}
+      </div>
+
+      {/* Category Tabs */}
+      <div className="flex gap-1 bg-gray-100 rounded-lg p-1 mb-6">
         <button
-          onClick={handleExport}
-          disabled={exporting}
-          className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+          onClick={() => setActiveTab("brand")}
+          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            activeTab === "brand"
+              ? "bg-white text-blue-600 shadow-sm"
+              : "text-gray-500 hover:text-gray-700"
+          }`}
         >
-          {exporting ? "匯出中..." : "📥 匯出 CSV"}
+          🏢 品牌健檢（{pagination.total}）
+        </button>
+        <button
+          onClick={() => setActiveTab("gmb")}
+          className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            activeTab === "gmb"
+              ? "bg-white text-blue-600 shadow-sm"
+              : "text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          📍 商家檢測（{gmbTotal}）
         </button>
       </div>
 
-      {/* Filters */}
+      {/* Filters - only show for brand tab */}
+      {activeTab === "brand" && (
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
         <div className="flex flex-col sm:flex-row gap-3">
           <input
@@ -208,8 +271,53 @@ export default function AdminSubmissionsPage() {
           </button>
         </div>
       </div>
+      )}
 
-      {/* Table */}
+      {/* GMB Table */}
+      {activeTab === "gmb" && (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          {gmbLoading ? (
+            <div className="flex justify-center py-20">
+              <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+            </div>
+          ) : gmbLeads.length === 0 ? (
+            <div className="text-center py-20 text-gray-400">
+              <div className="text-4xl mb-3">📭</div>
+              <p>還沒有商家檢測紀錄</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <th className="text-left px-4 py-3 font-medium text-gray-500">時間</th>
+                    <th className="text-left px-4 py-3 font-medium text-gray-500">商家名稱</th>
+                    <th className="text-left px-4 py-3 font-medium text-gray-500">Email</th>
+                    <th className="text-left px-4 py-3 font-medium text-gray-500">電話</th>
+                    <th className="text-left px-4 py-3 font-medium text-gray-500">備註</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {gmbLeads.map((lead) => (
+                    <tr key={lead.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
+                        {formatDate(lead.createdAt)}
+                      </td>
+                      <td className="px-4 py-3 font-medium text-gray-900">{lead.name}</td>
+                      <td className="px-4 py-3 text-gray-600">{lead.email}</td>
+                      <td className="px-4 py-3 text-gray-600">{lead.phone || "—"}</td>
+                      <td className="px-4 py-3 text-gray-500 text-xs max-w-xs truncate">{lead.note || "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Brand Table */}
+      {activeTab === "brand" && (
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         {loading ? (
           <div className="flex justify-center py-20">
@@ -329,6 +437,7 @@ export default function AdminSubmissionsPage() {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }
