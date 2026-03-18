@@ -5,13 +5,17 @@ import { orders } from "@/lib/db/schema";
 
 // AI 個體包方案定義
 const AI_PACK_PLANS: Record<string, { name: string; price: number }> = {
-  "3": { name: "AI 個體包 — 全配方案（9 位 AI Agent）限時優惠", price: 999 },
+  "3": { name: "AI 個體包 — 全配方案（9 位 AI Agent）", price: 1299 },
 };
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, contactName, phone, product, planId, carrierNum } = body;
+    const { email, contactName, phone, product, planId, carrierNum, discountCode } = body;
+
+    // 折扣碼驗證
+    const VALID_DISCOUNT_CODE = process.env.DISCOUNT_CODE || "TRIAL300";
+    const DISCOUNT_AMOUNT = 300;
 
     if (!email) {
       return NextResponse.json({ error: "Email 為必填" }, { status: 400 });
@@ -35,10 +39,18 @@ export async function POST(request: NextRequest) {
     if (product === "ai-pack" && planId && AI_PACK_PLANS[planId]) {
       const plan = AI_PACK_PLANS[planId];
       amount = plan.price;
-      itemName = `${plan.name} x1`;
+
+      // 套用折扣碼
+      if (discountCode && discountCode.toUpperCase() === VALID_DISCOUNT_CODE) {
+        amount = Math.max(amount - DISCOUNT_AMOUNT, 1);
+        itemName = `${plan.name}（折扣碼 -$${DISCOUNT_AMOUNT}）x1`;
+      } else {
+        itemName = `${plan.name} x1`;
+      }
+
       orderOptions = {
         ...orderOptions,
-        amount: plan.price,
+        amount,
         itemName,
         tradeDesc: "AI個體包餐飲業客製化GPTs",
         productType: "ai-pack",

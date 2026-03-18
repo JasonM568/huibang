@@ -559,14 +559,20 @@ export async function sendTrialAgentEmail(params: SendTrialAgentEmailParams) {
             </p>
           </div>
 
-          <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px; margin: 0 0 24px 0;">
-            <p style="color: #1e40af; font-size: 13px; line-height: 1.5; margin: 0;">
-              💡 <strong>想要更多 AI 行銷工具？</strong><br>
-              我們有完整的 AI 個體包，包含 9 位專業 AI Agent，涵蓋社群經營、廣告投放、數據分析等。現在限時優惠只要 <strong>NT$999</strong>！
+          <div style="background: linear-gradient(135deg, #eff6ff, #f0fdf4); border: 2px solid #86efac; border-radius: 12px; padding: 20px; margin: 0 0 24px 0;">
+            <p style="color: #166534; font-size: 15px; font-weight: 700; margin: 0 0 8px 0; text-align: center;">
+              🎁 專屬折扣碼
+            </p>
+            <div style="text-align: center; padding: 12px; background: #fff; border: 2px dashed #059669; border-radius: 8px; margin: 0 0 12px 0;">
+              <span style="font-size: 24px; font-weight: 800; color: #059669; letter-spacing: 3px;">TRIAL300</span>
+            </div>
+            <p style="color: #1e40af; font-size: 13px; line-height: 1.5; margin: 0 0 4px 0; text-align: center;">
+              結帳時輸入折扣碼，<strong>立折 NT$300</strong><br>
+              9 位 AI 專家原價 $1,299 → 折後只要 <strong style="color: #059669;">$999</strong>！
             </p>
             <div style="text-align: center; margin-top: 12px;">
-              <a href="${siteUrl}/ai/restaurant-pack" style="display: inline-block; background: #2563eb; color: #fff; padding: 10px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">
-                了解 AI 個體包 →
+              <a href="${siteUrl}/ai/restaurant-pack#pricing" style="display: inline-block; background: linear-gradient(135deg, #059669, #06b6d4); color: #fff; padding: 12px 32px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 15px;">
+                立即升級全配包 →
               </a>
             </div>
           </div>

@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 const PLANS: Record<string, { name: string; agents: number; price: number; originalPrice: number }> = {
-  "3": { name: "全配方案（限時優惠）", agents: 9, price: 999, originalPrice: 9880 },
+  "3": { name: "全配方案", agents: 9, price: 1299, originalPrice: 9880 },
 };
 
 const PLAN_GPTS: Record<string, string[]> = {
@@ -18,10 +18,25 @@ export default function AiPackCheckoutPage() {
   const plan = PLANS[planId] || PLANS["3"];
   const gptList = PLAN_GPTS[planId] || PLAN_GPTS["3"];
 
-  const [form, setForm] = useState({ email: "", contactName: "", phone: "", carrierNum: "", agreed: false });
+  const [form, setForm] = useState({ email: "", contactName: "", phone: "", carrierNum: "", discountCode: "", agreed: false });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [showTerms, setShowTerms] = useState(false);
+  const [discountApplied, setDiscountApplied] = useState(false);
+
+  const DISCOUNT_AMOUNT = 300;
+  const finalPrice = discountApplied ? plan.price - DISCOUNT_AMOUNT : plan.price;
+
+  const handleApplyDiscount = () => {
+    const code = form.discountCode.trim().toUpperCase();
+    if (code === "TRIAL300") {
+      setDiscountApplied(true);
+      setError("");
+    } else if (code) {
+      setDiscountApplied(false);
+      setError("折扣碼無效，請確認後重試");
+    }
+  };
 
   // 如果 planId 無效，fallback 到全配
   const effectivePlanId = PLANS[planId] ? planId : "3";
@@ -61,7 +76,7 @@ export default function AiPackCheckoutPage() {
         content_ids: [`ai-pack-plan-${effectivePlanId}`],
         content_name: plan.name,
         content_type: "product",
-        value: plan.price,
+        value: finalPrice,
         currency: "TWD",
         num_items: plan.agents,
       });
@@ -71,11 +86,11 @@ export default function AiPackCheckoutPage() {
     if (typeof window !== "undefined" && window.gtag) {
       window.gtag("event", "begin_checkout", {
         currency: "TWD",
-        value: plan.price,
+        value: finalPrice,
         items: [{
           item_id: `ai-pack-plan-${effectivePlanId}`,
           item_name: plan.name,
-          price: plan.price,
+          price: finalPrice,
           quantity: 1,
         }],
       });
@@ -90,6 +105,7 @@ export default function AiPackCheckoutPage() {
           contactName: form.contactName,
           phone: form.phone,
           carrierNum: form.carrierNum,
+          discountCode: discountApplied ? form.discountCode.trim() : undefined,
           product: "ai-pack",
           planId: effectivePlanId,
         }),
@@ -142,10 +158,17 @@ export default function AiPackCheckoutPage() {
                   NT$ {plan.originalPrice.toLocaleString()}
                 </span>
                 <span className="text-3xl font-extrabold text-emerald-600">
-                  NT$ {plan.price.toLocaleString()}
+                  NT$ {finalPrice.toLocaleString()}
                 </span>
               </div>
             </div>
+
+            {discountApplied && (
+              <div className="mb-3 p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between">
+                <span className="text-emerald-700 text-sm font-medium">🎉 折扣碼已套用</span>
+                <span className="text-emerald-700 text-sm font-bold">-NT$ {DISCOUNT_AMOUNT}</span>
+              </div>
+            )}
 
             <div className="space-y-2.5 text-sm text-gray-600">
               {gptList.map((name) => (
@@ -158,7 +181,8 @@ export default function AiPackCheckoutPage() {
 
             <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
               <p className="text-amber-800 text-xs font-medium">
-                ⚡ 限時優惠價，省 NT$ {(plan.originalPrice - plan.price).toLocaleString()}｜付款後立即開通，永久使用
+                ⚡ 省 NT$ {(plan.originalPrice - finalPrice).toLocaleString()}｜付款後立即開通，永久使用
+                {!discountApplied && "｜有折扣碼？在下方輸入可再折 $300"}
               </p>
             </div>
           </div>
@@ -230,6 +254,39 @@ export default function AiPackCheckoutPage() {
                 </p>
               </div>
 
+              {/* 折扣碼 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  折扣碼（選填）
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={form.discountCode}
+                    onChange={(e) => {
+                      setForm({ ...form, discountCode: e.target.value });
+                      if (discountApplied) setDiscountApplied(false);
+                    }}
+                    placeholder="輸入折扣碼"
+                    maxLength={20}
+                    className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-400 transition-colors uppercase"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleApplyDiscount}
+                    className="px-4 py-3 bg-gray-100 text-gray-700 font-medium rounded-xl text-sm hover:bg-gray-200 transition-colors shrink-0"
+                  >
+                    套用
+                  </button>
+                </div>
+                {discountApplied && (
+                  <p className="mt-1 text-xs text-emerald-600 font-medium">✅ 已折抵 NT${DISCOUNT_AMOUNT}，實付 NT${finalPrice.toLocaleString()}</p>
+                )}
+                <p className="mt-1 text-xs text-gray-400">
+                  試用社群文案機器人可取得專屬折扣碼
+                </p>
+              </div>
+
               {/* 購買條款同意書 */}
               <div className="border-2 border-gray-200 rounded-xl p-4 bg-white">
                 <label className="flex items-start gap-3 cursor-pointer">
@@ -285,7 +342,7 @@ export default function AiPackCheckoutPage() {
               >
                 {submitting
                   ? "前往付款中..."
-                  : `前往付款 NT$ ${plan.price.toLocaleString()}`}
+                  : `前往付款 NT$ ${finalPrice.toLocaleString()}`}
               </button>
 
               <p className="text-center text-xs text-gray-400">

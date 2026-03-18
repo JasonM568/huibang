@@ -156,8 +156,8 @@ const faqs = [
     a: "社群文案機器人專門負責每日社群貼文，免費提供體驗。付費的全配方案另外包含 9 位 AI 專家，涵蓋活動企劃、評論回覆、成本計算、廣告投放、人資招募等餐飲經營的各個面向。",
   },
   {
-    q: "$999 限時優惠是什麼時候截止？",
-    a: "這是期間限定的早鳥優惠，名額有限，恕不事先公告截止日期。建議有意願的老闆盡早鎖定優惠價格。",
+    q: "有折扣嗎？",
+    a: "有！先免費試用社群文案機器人，Email 會收到 $300 折扣碼，結帳時輸入即可折抵，原價 $1,299 折後只要 $999！",
   },
   {
     q: "跟直接用 ChatGPT 有什麼不同？",
@@ -202,7 +202,7 @@ export default function RestaurantAIPackPage() {
         contentCategory="AI 產品"
         contentType="product"
         contentIds={["ai-pack"]}
-        value={999}
+        value={1299}
         currency="TWD"
       />
       {/* Hero */}
@@ -381,7 +381,7 @@ export default function RestaurantAIPackPage() {
 
                 <div className="mt-6 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl">
                   <p className="text-amber-800 font-semibold text-sm mb-1">覺得好用嗎？🔥</p>
-                  <p className="text-amber-700 text-sm mb-3">升級全配包，一次解鎖 9 位 AI 專家，限時優惠 NT$999</p>
+                  <p className="text-amber-700 text-sm mb-3">升級全配包，一次解鎖 9 位 AI 專家，用折扣碼只要 NT$999</p>
                   <a
                     href="#pricing"
                     className="inline-flex items-center justify-center px-5 py-2.5 bg-amber-500 text-white font-bold rounded-xl hover:bg-amber-600 transition-colors text-sm"
@@ -540,9 +540,9 @@ export default function RestaurantAIPackPage() {
               <span className="text-dark-500 line-through text-sm">NT$ 9,880</span>
               <div className="flex items-baseline gap-2 mt-1">
                 <span className="text-5xl font-extrabold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-                  NT$ 999
+                  NT$ 1,299
                 </span>
-                <span className="text-emerald-400 font-semibold text-sm">省 NT$ 8,881</span>
+                <span className="text-emerald-400 font-semibold text-sm">省 NT$ 8,581</span>
               </div>
               <p className="text-amber-400 text-xs font-medium mt-2">⚡ 限時優惠，隨時調整，把握機會</p>
             </div>
@@ -570,7 +570,7 @@ export default function RestaurantAIPackPage() {
               href="/checkout/ai-pack?plan=3"
               className="block w-full py-4 rounded-xl font-bold text-center bg-gradient-to-r from-emerald-500 to-cyan-600 text-white hover:shadow-lg hover:shadow-emerald-500/25 transition-all duration-300 hover:-translate-y-0.5"
             >
-              立即搶購 NT$999 →
+              立即搶購 NT$1,299 →
             </Link>
 
             <p className="text-center text-xs text-dark-500 mt-4">
@@ -591,7 +591,7 @@ export default function RestaurantAIPackPage() {
             {[
               { step: "01", emoji: "🎁", title: "免費領取試用", desc: "填寫資料，立即領取「社群文案機器人」，零門檻體驗 AI 幫你寫貼文" },
               { step: "02", emoji: "😍", title: "體驗滿意再升級", desc: "用過覺得好用？一次解鎖 9 位 AI 專家，涵蓋餐飲經營所有場景" },
-              { step: "03", emoji: "🚀", title: "立即開工全面升級", desc: "NT$999 限時鎖定，付款後永久使用，今天就讓 AI 幫你分擔" },
+              { step: "03", emoji: "🚀", title: "立即開工全面升級", desc: "用折扣碼 NT$999 搞定，付款後永久使用，今天就讓 AI 幫你分擔" },
             ].map((s, i) => (
               <motion.div
                 key={s.step}
@@ -655,7 +655,7 @@ export default function RestaurantAIPackPage() {
                 href="#pricing"
                 className="inline-flex items-center justify-center px-8 py-4 border-2 border-dark-600 text-dark-300 font-semibold rounded-xl hover:border-dark-400 hover:text-white transition-all duration-300"
               >
-                查看 $999 限時方案
+                查看 $1,299 方案（折扣碼再折 $300）
               </a>
             </div>
           </motion.div>
