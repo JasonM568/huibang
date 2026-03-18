@@ -28,7 +28,6 @@ export async function POST(request: Request) {
       problem,
       adsData,
       upcoming,
-      agents,
     } = body;
 
     // --- Validation ---
