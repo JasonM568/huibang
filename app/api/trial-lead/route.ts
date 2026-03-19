@@ -24,19 +24,18 @@ export async function POST(request: NextRequest) {
       agentDelivered: false,
     }).returning({ id: trialLeads.id });
 
-    // 非同步發送 Email 通知團隊
+    // 寄試用連結給用戶（await 確保 Vercel 不會提前終止）
+    try {
+      await sendTrialAgentEmail({ email: email.trim(), name: name.trim() });
+      await db.update(trialLeads).set({ agentDelivered: true, deliveredAt: new Date() }).where(eq(trialLeads.id, lead.id));
+    } catch (err) {
+      console.error("[trial-lead] sendTrialAgentEmail failed:", email, err);
+    }
+
+    // 通知團隊（非關鍵，不阻擋回應）
     notifyTrialLead({ name: name.trim(), email: email.trim(), phone: phone?.trim() }).catch((err) => {
       console.error("[trial-lead] notifyTrialLead failed:", err);
     });
-
-    // 寄試用連結給用戶，成功後更新 agentDelivered
-    sendTrialAgentEmail({ email: email.trim(), name: name.trim() })
-      .then(async () => {
-        await db.update(trialLeads).set({ agentDelivered: true, deliveredAt: new Date() }).where(eq(trialLeads.id, lead.id));
-      })
-      .catch((err) => {
-        console.error("[trial-lead] sendTrialAgentEmail failed:", email, err);
-      });
 
     return NextResponse.json({ success: true });
   } catch (error) {
