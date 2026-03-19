@@ -781,3 +781,57 @@ export async function sendGmbDiagnosticEmail(params: SendGmbDiagnosticEmailParam
   }
   return data;
 }
+
+// ===== EDM 電子報 =====
+interface SendEdmParams {
+  to: string;
+  name: string;
+  subject: string;
+  bodyHtml: string;
+  ctaText?: string;
+  ctaUrl?: string;
+}
+
+export async function sendEdm(params: SendEdmParams) {
+  const { to, name, subject, bodyHtml, ctaText, ctaUrl } = params;
+  const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://huibang.com.tw";
+
+  const ctaBlock = ctaText && ctaUrl ? `
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${ctaUrl}" style="display: inline-block; background: linear-gradient(135deg, #f97316, #ea580c); color: #fff; padding: 16px 40px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 16px;">
+        ${ctaText}
+      </a>
+    </div>` : "";
+
+  const { data, error } = await resend.emails.send({
+    from: "惠邦行銷 <hello@huibang.com.tw>",
+    replyTo: process.env.NOTIFY_EMAIL || "service@huibang.com.tw",
+    to,
+    subject,
+    html: `
+      <div style="font-family: -apple-system, 'Noto Sans TC', sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc;">
+        <div style="background: linear-gradient(135deg, #1e293b, #334155); padding: 32px 24px; text-align: center;">
+          <p style="color: #fff; font-size: 20px; font-weight: 900; margin: 0;">惠邦<span style="color: #f97316;">行銷</span></p>
+          <p style="color: #94a3b8; font-size: 13px; margin: 8px 0 0 0;">讓每個品牌都找到對的人</p>
+        </div>
+        <div style="background: #fff; padding: 32px 24px;">
+          <p style="color: #334155; font-size: 15px; margin: 0 0 8px 0;">${name} 你好，</p>
+          <div style="color: #475569; font-size: 15px; line-height: 1.8; margin: 16px 0;">
+            ${bodyHtml}
+          </div>
+          ${ctaBlock}
+        </div>
+        <div style="background: #f1f5f9; padding: 20px 24px; text-align: center;">
+          <p style="color: #94a3b8; font-size: 12px; margin: 0;">
+            惠邦行銷 ｜ <a href="${siteUrl}" style="color: #f97316; text-decoration: none;">${siteUrl.replace("https://", "")}</a>
+          </p>
+        </div>
+      </div>`,
+  });
+
+  if (error) {
+    console.error("[sendEdm] error:", to, error);
+    throw error;
+  }
+  return data;
+}

@@ -251,6 +251,18 @@ export const trialLeads = pgTable("trial_leads", {
   note: text("note"),
 });
 
+// ===== EDM 發送記錄 =====
+export const edmLogs = pgTable("edm_logs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  subject: varchar("subject", { length: 200 }).notNull(),
+  recipientCount: integer("recipient_count").notNull(),
+  recipients: jsonb("recipients").notNull(),
+  sentBy: varchar("sent_by", { length: 100 }),
+  status: varchar("status", { length: 20 }).default("sent").notNull(),
+});
+export type EdmLog = typeof edmLogs.$inferSelect;
+
 // ===== Types =====
 export type DiagnosticToken = typeof diagnosticTokens.$inferSelect;
 export type NewDiagnosticToken = typeof diagnosticTokens.$inferInsert;
