@@ -153,6 +153,21 @@ export default function AdminOrdersPage() {
     }
   };
 
+  const handleDeleteOrder = async (order: Order) => {
+    if (!confirm(`確定要刪除訂單 ${order.orderNo} 嗎？\n\n此操作無法復原，訂單資料將永久移除。`)) return;
+    try {
+      const res = await fetch(`/api/admin/orders/${order.id}`, { method: "DELETE" });
+      if (res.ok) {
+        fetchData(pagination.page);
+      } else {
+        const data = await res.json();
+        alert(data.error || "刪除失敗");
+      }
+    } catch {
+      alert("操作失敗");
+    }
+  };
+
   const handleRetryInvoice = async (orderId: string) => {
     if (!confirm("確定要重新開立發票嗎？")) return;
     try {
@@ -394,6 +409,12 @@ export default function AdminOrdersPage() {
                               開立發票
                             </button>
                           )}
+                          <button
+                            onClick={() => handleDeleteOrder(o)}
+                            className="text-gray-400 hover:text-red-600 text-sm font-medium whitespace-nowrap transition-colors"
+                          >
+                            刪除
+                          </button>
                         </div>
                       </td>
                     </tr>

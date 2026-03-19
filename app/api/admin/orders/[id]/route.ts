@@ -91,6 +91,30 @@ export async function PATCH(
   }
 }
 
+// DELETE: 刪除訂單（僅限管理員）
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const auth = await requireAuth();
+    if (auth instanceof NextResponse) return auth;
+
+    const [order] = await db.select().from(orders).where(eq(orders.id, params.id));
+    if (!order) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    await db.delete(orders).where(eq(orders.id, params.id));
+    return NextResponse.json({ success: true });
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message === "Unauthorized") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
 // POST: 重新開立發票
 export async function POST(
   request: NextRequest,
