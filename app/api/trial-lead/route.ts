@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     // 寄試用連結給用戶，成功後更新 agentDelivered
     sendTrialAgentEmail({ email: email.trim(), name: name.trim() })
       .then(async () => {
-        await db.update(trialLeads).set({ agentDelivered: true }).where(eq(trialLeads.id, lead.id));
+        await db.update(trialLeads).set({ agentDelivered: true, deliveredAt: new Date() }).where(eq(trialLeads.id, lead.id));
       })
       .catch((err) => {
         console.error("[trial-lead] sendTrialAgentEmail failed:", email, err);

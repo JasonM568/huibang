@@ -10,6 +10,7 @@ interface Lead {
   phone: string | null;
   source: string;
   agentDelivered: boolean;
+  deliveredAt: string | null;
   note: string | null;
 }
 
@@ -17,8 +18,9 @@ export default function TrialLeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [resending, setResending] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadLeads = () => {
     fetch("/api/admin/trial-leads")
       .then((r) => r.json())
       .then((data) => {
@@ -28,22 +30,54 @@ export default function TrialLeadsPage() {
         }
       })
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { loadLeads(); }, []);
 
   const formatDate = (iso: string) => {
     const d = new Date(iso);
     return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
   };
 
+  const handleResend = async (id: string) => {
+    setResending(id);
+    try {
+      const res = await fetch("/api/admin/trial-leads/resend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      if (res.ok) {
+        loadLeads();
+      } else {
+        alert("寄送失敗，請稍後再試");
+      }
+    } finally {
+      setResending(null);
+    }
+  };
+
+  const notDelivered = leads.filter((l) => !l.agentDelivered).length;
+
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">試用名單</h1>
-        <p className="text-sm text-gray-500 mt-1">社群文案機器人免費試用申請紀錄</p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">試用名單</h1>
+          <p className="text-sm text-gray-500 mt-1">社群文案機器人免費試用申請紀錄</p>
+        </div>
+        <a
+          href="https://resend.com/emails"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 text-xs px-3 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
+        >
+          <span>📨</span> Resend 後台
+        </a>
       </div>
 
       {/* KPI */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
           <p className="text-xs text-gray-400 mb-1">總申請數</p>
           <p className="text-3xl font-bold text-gray-900">{total}</p>
@@ -64,6 +98,10 @@ export default function TrialLeadsPage() {
             {total > 0 ? Math.round((leads.filter((l) => l.phone).length / total) * 100) : 0}%
           </p>
         </div>
+        <div className={`bg-white rounded-xl p-5 border shadow-sm ${notDelivered > 0 ? "border-red-200 bg-red-50" : "border-gray-100"}`}>
+          <p className="text-xs text-gray-400 mb-1">未寄出</p>
+          <p className={`text-3xl font-bold ${notDelivered > 0 ? "text-red-600" : "text-gray-300"}`}>{notDelivered}</p>
+        </div>
       </div>
 
       {/* Table */}
@@ -72,7 +110,7 @@ export default function TrialLeadsPage() {
           <h2 className="font-semibold text-gray-900">申請名單</h2>
           <button
             onClick={() => {
-              const csv = ["姓名,Email,手機,申請時間", ...leads.map((l) => `${l.name},${l.email},${l.phone || ""},${formatDate(l.createdAt)}`)].join("\n");
+              const csv = ["姓名,Email,手機,申請時間,信件寄出時間", ...leads.map((l) => `${l.name},${l.email},${l.phone || ""},${formatDate(l.createdAt)},${l.deliveredAt ? formatDate(l.deliveredAt) : "未寄出"}`)].join("\n");
               const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
               const url = URL.createObjectURL(blob);
               const a = document.createElement("a");
@@ -99,6 +137,8 @@ export default function TrialLeadsPage() {
                   <th className="text-left px-6 py-3 font-medium text-gray-500">姓名</th>
                   <th className="text-left px-6 py-3 font-medium text-gray-500">Email</th>
                   <th className="text-left px-6 py-3 font-medium text-gray-500">手機</th>
+                  <th className="text-left px-6 py-3 font-medium text-gray-500">信件狀態</th>
+                  <th className="text-left px-6 py-3 font-medium text-gray-500">操作</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -121,6 +161,31 @@ export default function TrialLeadsPage() {
                       ) : (
                         <span className="text-gray-300">—</span>
                       )}
+                    </td>
+                    <td className="px-6 py-4">
+                      {lead.agentDelivered ? (
+                        <div>
+                          <span className="inline-flex items-center gap-1 text-xs text-emerald-600 font-medium">
+                            ✅ 已寄出
+                          </span>
+                          {lead.deliveredAt && (
+                            <p className="text-xs text-gray-400 mt-0.5">{formatDate(lead.deliveredAt)}</p>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-xs text-red-500 font-medium">
+                          ❌ 未寄出
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() => handleResend(lead.id)}
+                        disabled={resending === lead.id}
+                        className="text-xs px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium disabled:opacity-50"
+                      >
+                        {resending === lead.id ? "寄送中..." : "重新寄送"}
+                      </button>
                     </td>
                   </tr>
                 ))}

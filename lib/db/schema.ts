@@ -247,6 +247,7 @@ export const trialLeads = pgTable("trial_leads", {
   phone: varchar("phone", { length: 30 }),
   source: varchar("source", { length: 50 }).default("restaurant-pack").notNull(),
   agentDelivered: boolean("agent_delivered").default(false).notNull(),
+  deliveredAt: timestamp("delivered_at"),
   note: text("note"),
 });
 
