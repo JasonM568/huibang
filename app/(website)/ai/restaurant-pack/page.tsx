@@ -217,8 +217,8 @@ const faqs = [
     a: "直接用 ChatGPT 你需要自己想 prompt、給背景資料、調整語氣。我們的客製化 GPTs 已經內建餐飲業的專業知識、台灣在地用語和最佳實踐，打開就能直接用，省去大量摸索時間。",
   },
   {
-    q: "不滿意可以退費嗎？",
-    a: "可以！我們提供 7 天內全額退費保證。如果你覺得不適合，聯繫我們即可全額退款，零風險。",
+    q: "購買後有什麼售後服務？",
+    a: "購買後我們提供使用教學和操作指引，確保你能順利上手。如果遇到任何問題，隨時可以聯繫我們的客服團隊協助。",
   },
 ];
 
@@ -786,12 +786,12 @@ export default function RestaurantAIPackPage() {
               </p>
             </div>
 
-            {/* Risk Reversal Badge */}
+            {/* Support Badge */}
             <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl mb-6 text-center">
               <p className="text-amber-400 text-sm font-bold">
-                🛡️ 不滿意 7 天內全額退費
+                💬 專屬客服支援，使用問題隨時問
               </p>
-              <p className="text-amber-400/70 text-xs mt-0.5">零風險，用了不滿意隨時退</p>
+              <p className="text-amber-400/70 text-xs mt-0.5">購買後提供完整教學 + 一對一操作指導</p>
             </div>
 
             <Link
