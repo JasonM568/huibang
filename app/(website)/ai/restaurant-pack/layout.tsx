@@ -3,13 +3,13 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "AI 個體包 — 餐飲老闆的 AI 行銷軍團",
   description:
-    "惠邦 AI 個體包，10 位專為餐飲老闆設計的 AI 助理，社群文案免費試用，全配方案 NT$1,299，折扣碼再折 $300，ChatGPT 操作零門檻，餐廳行銷全面升級。",
+    "惠邦 AI 個體包，專為餐飲老闆設計的 AI 助理，社群文案免費試用，小當家組 NT$1,299 / 總舖師組 NT$2,999，折扣碼再折 $300，ChatGPT 操作零門檻。",
   keywords:
     "餐飲行銷,AI助理,ChatGPT,餐廳行銷,社群貼文,AI個體包,惠邦行銷,餐飲AI行銷工具,GPT餐飲",
   openGraph: {
     title: "AI 個體包 — 餐飲老闆的 AI 行銷軍團 | 惠邦行銷",
     description:
-      "10 位 AI 專家全面支援餐飲事業，社群文案免費試用，全配方案 NT$1,299 起。",
+      "專為餐飲老闆設計的 AI 助理，小當家組 $1,299 / 總舖師組 $2,999，社群文案免費試用。",
     url: "https://huibang.com.tw/ai/restaurant-pack",
     images: [{ url: "/og-default.png", width: 1200, height: 630 }],
   },

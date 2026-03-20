@@ -5,11 +5,13 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 const PLANS: Record<string, { name: string; agents: number; price: number; originalPrice: number }> = {
-  "3": { name: "全配方案", agents: 9, price: 1299, originalPrice: 9880 },
+  "2": { name: "小當家組", agents: 5, price: 1299, originalPrice: 3980 },
+  "3": { name: "總舖師組", agents: 10, price: 2999, originalPrice: 7980 },
 };
 
 const PLAN_GPTS: Record<string, string[]> = {
-  "3": ["活動企劃師", "菜單設計顧問", "Google 評論回覆手", "LINE/客服訊息管家", "食材成本計算機", "徵人文案+面試題庫", "廣告投放教練", "每月營運覆盤師", "老闆決策顧問"],
+  "2": ["活動企劃師", "Google 評論回覆手", "LINE/客服訊息管家", "徵人文案+面試題庫", "社群文案機器人"],
+  "3": ["社群文案機器人", "活動企劃師", "菜單設計顧問", "Google 評論回覆手", "LINE/客服訊息管家", "食材成本計算機", "徵人文案+面試題庫", "廣告投放教練", "每月營運覆盤師", "老闆決策顧問"],
 };
 
 export default function AiPackCheckoutPage() {

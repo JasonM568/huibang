@@ -5,7 +5,8 @@ import { orders } from "@/lib/db/schema";
 
 // AI 個體包方案定義
 const AI_PACK_PLANS: Record<string, { name: string; price: number }> = {
-  "3": { name: "AI 個體包 — 全配方案（9 位 AI Agent）", price: 1299 },
+  "2": { name: "AI 個體包 — 小當家組（5 位 AI Agent）", price: 1299 },
+  "3": { name: "AI 個體包 — 總舖師組（10 位 AI Agent）", price: 2999 },
 };
 
 export async function POST(request: NextRequest) {

@@ -10,9 +10,8 @@ const SHEET_URLS: Record<string, string> = {
 };
 
 const PLAN_NAMES: Record<string, string> = {
-  "1": "入門方案（2 位 AI Agent）",
-  "2": "進階方案（6 位 AI Agent）",
-  "3": "全配方案（10 位 AI Agent）",
+  "2": "小當家組（5 位 AI Agent）",
+  "3": "總舖師組（10 位 AI Agent）",
 };
 
 export default function AiPackPaymentSuccessPage() {

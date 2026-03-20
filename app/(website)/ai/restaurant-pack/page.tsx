@@ -213,8 +213,8 @@ const faqs = [
     a: "社群文案機器人專門負責每日社群貼文，免費提供體驗。付費的全配方案另外包含 9 位 AI 專家，涵蓋活動企劃、評論回覆、成本計算、廣告投放、人資招募等餐飲經營的各個面向。",
   },
   {
-    q: "NT$1,299 包含什麼？",
-    a: "NT$1,299 一次買斷，包含 9 位 AI Agent（加上免費的社群文案機器人共 10 位），永久使用不限次數。等於每天不到 $3.6，比一杯超商咖啡還便宜。",
+    q: "兩個方案有什麼差別？",
+    a: "小當家組 NT$1,299 包含 5 位前線營運 AI Agent（社群文案、活動企劃、評論回覆、客服管家、徵人文案）。總舖師組 NT$2,999 包含全部 10 位 AI Agent，額外涵蓋菜單設計、成本計算、廣告投放、營運覆盤、決策顧問。兩個方案皆一次買斷永久使用。",
   },
   {
     q: "跟直接用 ChatGPT 有什麼不同？",
@@ -325,7 +325,7 @@ export default function RestaurantAIPackPage() {
                 href="#pricing"
                 className="inline-flex items-center justify-center px-8 py-4 border-2 border-dark-600 text-dark-300 font-semibold rounded-xl hover:border-dark-400 hover:text-white transition-all duration-300"
               >
-                查看方案 NT$1,299
+                查看方案 NT$1,299 起
               </a>
             </div>
           </motion.div>
@@ -440,7 +440,7 @@ export default function RestaurantAIPackPage() {
                 <span className="text-4xl">🤖</span>
                 <h3 className="text-xl font-bold mt-3">AI 行銷軍團</h3>
                 <div className="mt-4">
-                  <span className="text-3xl font-extrabold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">NT$ 1,299</span>
+                  <span className="text-3xl font-extrabold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">NT$ 1,299 起</span>
                   <span className="text-dark-400 text-sm">/一次買斷</span>
                 </div>
               </div>
@@ -712,7 +712,7 @@ export default function RestaurantAIPackPage() {
 
                 <div className="mt-6 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl">
                   <p className="text-amber-800 font-semibold text-sm mb-1">覺得好用嗎？</p>
-                  <p className="text-amber-700 text-sm mb-3">升級全配包，一次解鎖 9 位 AI 專家，只要 NT$1,299</p>
+                  <p className="text-amber-700 text-sm mb-3">升級小當家組或總舖師組，解鎖更多 AI 專家，NT$1,299 起</p>
                   <a
                     href="#pricing"
                     className="inline-flex items-center justify-center px-5 py-2.5 bg-amber-500 text-white font-bold rounded-xl hover:bg-amber-600 transition-colors text-sm"
@@ -739,87 +739,141 @@ export default function RestaurantAIPackPage() {
             </p>
           </motion.div>
 
-          <motion.div {...fadeUp} className="relative bg-dark-900 text-white rounded-3xl p-10 ring-2 ring-emerald-500 shadow-2xl shadow-emerald-500/10 max-w-xl mx-auto">
-            <span className="absolute -top-4 left-1/2 -translate-x-1/2 px-6 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-black rounded-full tracking-wide uppercase">
-              限時優惠
-            </span>
-
-            {/* Countdown Timer */}
-            <div className="mb-6 p-4 bg-dark-800 rounded-2xl border border-dark-700">
-              <p className="text-dark-400 text-xs font-semibold text-center mb-3">限時優惠倒數</p>
-              <div className="flex items-center justify-center gap-3">
-                {[
-                  { value: countdown.days, label: "天" },
-                  { value: countdown.hours, label: "時" },
-                  { value: countdown.minutes, label: "分" },
-                  { value: countdown.seconds, label: "秒" },
-                ].map((unit, i) => (
-                  <div key={i} className="text-center">
-                    <div className="w-14 h-14 bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 rounded-xl flex items-center justify-center">
-                      <span className="text-2xl font-extrabold text-emerald-400 tabular-nums">
-                        {String(unit.value).padStart(2, "0")}
-                      </span>
-                    </div>
-                    <span className="text-dark-500 text-xs mt-1 block">{unit.label}</span>
+          {/* Countdown Timer */}
+          <motion.div {...fadeUp} className="mb-10 p-4 bg-dark-900 rounded-2xl border border-dark-700 max-w-md mx-auto">
+            <p className="text-dark-400 text-xs font-semibold text-center mb-3">限時優惠倒數</p>
+            <div className="flex items-center justify-center gap-3">
+              {[
+                { value: countdown.days, label: "天" },
+                { value: countdown.hours, label: "時" },
+                { value: countdown.minutes, label: "分" },
+                { value: countdown.seconds, label: "秒" },
+              ].map((unit, i) => (
+                <div key={i} className="text-center">
+                  <div className="w-14 h-14 bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 rounded-xl flex items-center justify-center">
+                    <span className="text-2xl font-extrabold text-emerald-400 tabular-nums">
+                      {String(unit.value).padStart(2, "0")}
+                    </span>
                   </div>
-                ))}
-              </div>
+                  <span className="text-dark-500 text-xs mt-1 block">{unit.label}</span>
+                </div>
+              ))}
             </div>
-
-            <div className="mb-6">
-              <h3 className="text-2xl font-bold mb-1">AI 個體包 全配方案</h3>
-              <p className="text-dark-400 text-sm">9 位 AI Agent，餐飲經營全面覆蓋</p>
-            </div>
-
-            <div className="mb-6">
-              <span className="text-dark-500 line-through text-sm">NT$ 9,880</span>
-              <div className="flex items-baseline gap-2 mt-1">
-                <span className="text-5xl font-extrabold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-                  NT$ 1,299
-                </span>
-                <span className="text-emerald-400 font-semibold text-sm">省 NT$ 8,581</span>
-              </div>
-              <p className="text-dark-400 text-sm mt-2">= 每天不到 $3.6，比一杯超商咖啡還便宜</p>
-            </div>
-
-            <div className="mb-6">
-              <p className="text-xs font-semibold text-dark-400 mb-3">包含的 9 位 AI Agent：</p>
-              <ul className="space-y-2.5">
-                {gpts.filter(g => FULL_PACK_IDS.includes(g.id)).map((gpt) => (
-                  <li key={gpt.id} className="flex items-center gap-2.5 text-sm">
-                    <span className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs flex-shrink-0">✓</span>
-                    <span className="text-white">{gpt.emoji} {gpt.name}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl mb-4">
-              <p className="text-emerald-300 text-xs font-medium">
-                另附贈「社群文案機器人」（可先免費試用）<br />
-                合計共 10 位 AI 專家，一次擁有完整行銷軍團
-              </p>
-            </div>
-
-            {/* Support Badge */}
-            <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl mb-6 text-center">
-              <p className="text-amber-400 text-sm font-bold">
-                💬 專屬客服支援，使用問題隨時問
-              </p>
-              <p className="text-amber-400/70 text-xs mt-0.5">購買後提供完整教學 + 一對一操作指導</p>
-            </div>
-
-            <Link
-              href="/checkout/ai-pack?plan=3"
-              className="block w-full py-4 rounded-xl font-bold text-center bg-gradient-to-r from-emerald-500 to-cyan-600 text-white hover:shadow-lg hover:shadow-emerald-500/25 transition-all duration-300 hover:-translate-y-0.5 text-lg"
-            >
-              立即搶購 NT$1,299 →
-            </Link>
-
-            <p className="text-center text-xs text-dark-500 mt-4">
-              付款後立即開通，永久使用不限次數
-            </p>
           </motion.div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* 小當家組 */}
+            <motion.div {...fadeUp} className="relative bg-dark-900 text-white rounded-3xl p-8 ring-1 ring-dark-700">
+              <span className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs font-black rounded-full tracking-wide">
+                人氣首選
+              </span>
+
+              <div className="mb-5">
+                <h3 className="text-2xl font-bold mb-1">🍳 小當家組</h3>
+                <p className="text-dark-400 text-sm">5 位 AI Agent，前線營運必備</p>
+              </div>
+
+              <div className="mb-5">
+                <span className="text-dark-500 line-through text-sm">NT$ 3,980</span>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <span className="text-4xl font-extrabold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                    NT$ 1,299
+                  </span>
+                  <span className="text-cyan-400 font-semibold text-sm">省 $2,681</span>
+                </div>
+                <p className="text-dark-400 text-sm mt-1">= 每天不到 $3.6</p>
+              </div>
+
+              <div className="mb-5">
+                <p className="text-xs font-semibold text-dark-400 mb-3">包含 5 位 AI Agent：</p>
+                <ul className="space-y-2">
+                  {[
+                    { emoji: "📱", name: "社群文案機器人" },
+                    { emoji: "🎉", name: "活動企劃師" },
+                    { emoji: "⭐", name: "Google 評論回覆手" },
+                    { emoji: "💬", name: "LINE/客服訊息管家" },
+                    { emoji: "👥", name: "徵人文案+面試題庫" },
+                  ].map((gpt, i) => (
+                    <li key={i} className="flex items-center gap-2.5 text-sm">
+                      <span className="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs flex-shrink-0">✓</span>
+                      <span className="text-white">{gpt.emoji} {gpt.name}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl mb-5 text-center">
+                <p className="text-blue-400 text-sm font-bold">💬 專屬客服支援</p>
+                <p className="text-blue-400/70 text-xs mt-0.5">完整教學 + 一對一操作指導</p>
+              </div>
+
+              <Link
+                href="/checkout/ai-pack?plan=2"
+                className="block w-full py-4 rounded-xl font-bold text-center bg-gradient-to-r from-blue-500 to-cyan-600 text-white hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 hover:-translate-y-0.5 text-lg"
+              >
+                選擇小當家組 NT$1,299 →
+              </Link>
+
+              <p className="text-center text-xs text-dark-500 mt-3">
+                付款後立即開通，永久使用不限次數
+              </p>
+            </motion.div>
+
+            {/* 總舖師組 */}
+            <motion.div {...fadeUp} className="relative bg-dark-900 text-white rounded-3xl p-8 ring-2 ring-emerald-500 shadow-2xl shadow-emerald-500/10">
+              <span className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-black rounded-full tracking-wide">
+                最高 CP 值
+              </span>
+
+              <div className="mb-5">
+                <h3 className="text-2xl font-bold mb-1">👨‍🍳 總舖師組</h3>
+                <p className="text-dark-400 text-sm">10 位 AI Agent，經營管理全面覆蓋</p>
+              </div>
+
+              <div className="mb-5">
+                <span className="text-dark-500 line-through text-sm">NT$ 7,980</span>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <span className="text-4xl font-extrabold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                    NT$ 2,999
+                  </span>
+                  <span className="text-emerald-400 font-semibold text-sm">省 $4,981</span>
+                </div>
+                <p className="text-dark-400 text-sm mt-1">= 每天不到 $8.2</p>
+              </div>
+
+              <div className="mb-5">
+                <p className="text-xs font-semibold text-dark-400 mb-3">包含全部 10 位 AI Agent：</p>
+                <ul className="space-y-2">
+                  {gpts.map((gpt) => (
+                    <li key={gpt.id} className="flex items-center gap-2.5 text-sm">
+                      <span className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs flex-shrink-0">✓</span>
+                      <span className="text-white">{gpt.emoji} {gpt.name}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl mb-5 text-center">
+                <p className="text-amber-400 text-sm font-bold">💬 專屬客服支援 + VIP 優先回覆</p>
+                <p className="text-amber-400/70 text-xs mt-0.5">完整教學 + 一對一操作指導</p>
+              </div>
+
+              <Link
+                href="/checkout/ai-pack?plan=3"
+                className="block w-full py-4 rounded-xl font-bold text-center bg-gradient-to-r from-emerald-500 to-cyan-600 text-white hover:shadow-lg hover:shadow-emerald-500/25 transition-all duration-300 hover:-translate-y-0.5 text-lg"
+              >
+                選擇總舖師組 NT$2,999 →
+              </Link>
+
+              <p className="text-center text-xs text-dark-500 mt-3">
+                付款後立即開通，永久使用不限次數
+              </p>
+            </motion.div>
+          </div>
+
+          <p className="text-center text-sm text-dark-500 mt-6">
+            🎟️ 試用折扣碼可折抵 $300，兩個方案皆適用
+          </p>
         </div>
       </section>
 
@@ -833,8 +887,8 @@ export default function RestaurantAIPackPage() {
           <div className="grid md:grid-cols-3 gap-8">
             {[
               { step: "01", title: "免費領取試用", desc: "填寫資料，立即領取「社群文案機器人」，零門檻體驗 AI 幫你寫貼文" },
-              { step: "02", title: "體驗滿意再升級", desc: "用過覺得好用？一次解鎖 9 位 AI 專家，涵蓋餐飲經營所有場景" },
-              { step: "03", title: "NT$1,299 立即開工", desc: "一次買斷永久使用，今天就讓 AI 幫你分擔行銷、管理、企劃大小事" },
+              { step: "02", title: "體驗滿意再升級", desc: "用過覺得好用？選擇小當家組或總舖師組，解鎖更多 AI 專家" },
+              { step: "03", title: "NT$1,299 起立即開工", desc: "一次買斷永久使用，今天就讓 AI 幫你分擔行銷、管理、企劃大小事" },
             ].map((s, i) => (
               <motion.div
                 key={s.step}
@@ -900,7 +954,7 @@ export default function RestaurantAIPackPage() {
                 href="#pricing"
                 className="inline-flex items-center justify-center px-8 py-4 border-2 border-dark-600 text-dark-300 font-semibold rounded-xl hover:border-dark-400 hover:text-white transition-all duration-300"
               >
-                查看 NT$1,299 方案
+                查看方案 NT$1,299 起
               </a>
             </div>
           </motion.div>
