@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 interface Props {
   contentName: string;
@@ -12,8 +12,7 @@ interface Props {
 }
 
 /**
- * 頁面掛載後觸發 Meta Pixel ViewContent 事件
- * 可放在任何頁面（server / client component 皆可）
+ * 頁面掛載後觸發 Meta Pixel ViewContent 事件（僅觸發一次）
  */
 export default function PixelViewContent({
   contentName,
@@ -23,8 +22,12 @@ export default function PixelViewContent({
   value,
   currency = "TWD",
 }: Props) {
+  const hasFired = useRef(false);
+
   useEffect(() => {
+    if (hasFired.current) return;
     if (typeof window !== "undefined" && window.fbq) {
+      hasFired.current = true;
       window.fbq("track", "ViewContent", {
         content_name: contentName,
         content_category: contentCategory,
