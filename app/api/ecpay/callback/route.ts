@@ -112,7 +112,9 @@ export async function POST(request: NextRequest) {
           itemName: order.itemName || "惠邦行銷服務",
           itemCount: 1,
           itemUnit: "組",
+          buyerName: order.customerName || "消費者",
           buyerEmail: order.customerEmail,
+          buyerUbn: order.buyerUbn || null,
           carrierType: order.carrierType,
           carrierNum: order.carrierNum,
         });

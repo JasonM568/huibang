@@ -46,7 +46,9 @@ interface IssueInvoiceParams {
   itemName: string;
   itemCount?: number;
   itemUnit?: string;
+  buyerName: string;
   buyerEmail: string;
+  buyerUbn?: string | null;
   carrierType?: string | null;
   carrierNum?: string | null;
 }
@@ -94,8 +96,9 @@ export async function issueInvoice(
       TransNum: "",
       MerchantOrderNo: params.orderNo,
       Status: "1", // 立即開立
-      Category: "B2C",
-      BuyerName: "",
+      Category: params.buyerUbn ? "B2B" : "B2C",
+      BuyerName: params.buyerName,
+      BuyerUBN: params.buyerUbn || "",
       BuyerEmail: params.buyerEmail,
       PrintFlag: "Y",
       TaxType: "1", // 應稅
