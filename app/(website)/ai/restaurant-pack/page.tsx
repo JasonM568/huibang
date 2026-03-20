@@ -26,6 +26,7 @@ const painCards = [
     solution: "社群文案機器人 30 秒搞定，還附圖文建議",
     emoji: "😩",
     solutionEmoji: "📱",
+    image: "/images/ai-pack/Picture_1.jpg",
   },
   {
     scenario: "又收到一星負評，回也不是不回也不是",
@@ -33,6 +34,7 @@ const painCards = [
     solution: "Google 評論回覆手幫你專業回應，語氣拿捏到位",
     emoji: "😰",
     solutionEmoji: "⭐",
+    image: "/images/ai-pack/Picture_2.jpg",
   },
   {
     scenario: "月底了，到底這個月賺還是虧？",
@@ -40,6 +42,7 @@ const painCards = [
     solution: "食材成本計算機即時算給你，毛利一目瞭然",
     emoji: "💸",
     solutionEmoji: "🧮",
+    image: "/images/ai-pack/Picture_3.jpg",
   },
   {
     scenario: "員工又離職了，徵人文寫了 3 小時",
@@ -47,6 +50,7 @@ const painCards = [
     solution: "徵人文案機器人 1 分鐘產出吸睛徵才文",
     emoji: "🏃",
     solutionEmoji: "👥",
+    image: "/images/ai-pack/Picture_4.jpg",
   },
 ];
 
@@ -348,11 +352,22 @@ export default function RestaurantAIPackPage() {
                 transition={{ duration: 0.5, delay: i * 0.1 }}
                 className="relative bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300"
               >
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className="text-3xl">{card.emoji}</span>
-                    <h3 className="text-lg font-bold text-gray-900">{card.scenario}</h3>
+                <div className="relative h-52 overflow-hidden">
+                  <Image
+                    src={card.image}
+                    alt={card.scenario}
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">{card.emoji}</span>
+                      <h3 className="text-lg font-bold text-white drop-shadow-lg">{card.scenario}</h3>
+                    </div>
                   </div>
+                </div>
+                <div className="p-6">
                   <blockquote className="text-dark-500 text-sm italic border-l-2 border-gray-200 pl-4 mb-5">
                     「{card.quote}」
                   </blockquote>
