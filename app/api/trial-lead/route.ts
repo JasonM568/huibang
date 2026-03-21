@@ -12,6 +12,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "姓名和 Email 為必填" }, { status: 400 });
     }
 
+    // 姓名驗證：防止無效資料
+    const trimmedName = name.trim();
+    if (trimmedName.length < 2) {
+      return NextResponse.json({ error: "請填寫完整姓名（至少 2 個字）" }, { status: 400 });
+    }
+    if (/^[a-zA-Z]{1,4}$/.test(trimmedName)) {
+      return NextResponse.json({ error: "請填寫真實姓名" }, { status: 400 });
+    }
+    if (/@/.test(trimmedName)) {
+      return NextResponse.json({ error: "姓名欄位請勿填寫 Email" }, { status: 400 });
+    }
+    if (/^[\d\s\-+()]+$/.test(trimmedName)) {
+      return NextResponse.json({ error: "姓名欄位請勿填寫電話號碼" }, { status: 400 });
+    }
+
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ error: "Email 格式不正確" }, { status: 400 });
     }

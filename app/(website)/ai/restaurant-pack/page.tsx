@@ -256,7 +256,11 @@ export default function RestaurantAIPackPage() {
 
   const handleTrialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!trialForm.name.trim()) { setTrialError("請填寫姓名"); return; }
+    const n = trialForm.name.trim();
+    if (!n) { setTrialError("請填寫姓名"); return; }
+    if (n.length < 2) { setTrialError("請填寫完整姓名（至少 2 個字）"); return; }
+    if (/^[a-zA-Z]{1,4}$/.test(n)) { setTrialError("請填寫真實姓名"); return; }
+    if (/@/.test(n)) { setTrialError("姓名欄位請勿填寫 Email"); return; }
     if (!trialForm.email.trim()) { setTrialError("請填寫 Email"); return; }
     setTrialSubmitting(true);
     setTrialError("");
