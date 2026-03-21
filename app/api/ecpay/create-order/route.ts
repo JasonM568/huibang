@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
 
     // 如果是 AI 個體包，覆寫 OrderResultURL
     if (product === "ai-pack" && planId) {
-      params.OrderResultURL = `${baseUrl}/checkout/ai-pack/success?trade_no=${tradeNo}&plan=${planId}`;
+      params.OrderResultURL = `${baseUrl}/checkout/ai-pack/success?trade_no=${tradeNo}&plan=${planId}&amount=${amount}`;
       // 重新計算 CheckMacValue
       delete params.CheckMacValue;
       const { generateCheckMacValue } = await import("@/lib/ecpay");

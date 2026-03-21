@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useEffect } from "react";
 
 const SHEET_URLS: Record<string, string> = {
   "1": "https://docs.google.com/spreadsheets/d/1uVZDt6c6TZ9pn3lLNY5riWUAti1i88d0Eg164X86-o8/edit?usp=sharing",
@@ -14,11 +15,51 @@ const PLAN_NAMES: Record<string, string> = {
   "3": "總舖師組（10 位 AI Agent）",
 };
 
+const PLAN_PRICES: Record<string, number> = {
+  "2": 1299,
+  "3": 2999,
+};
+
 export default function AiPackPaymentSuccessPage() {
   const searchParams = useSearchParams();
   const planId = searchParams.get("plan") || "3";
   const planName = PLAN_NAMES[planId] || PLAN_NAMES["3"];
   const sheetUrl = SHEET_URLS[planId] || SHEET_URLS["3"];
+  const amount = Number(searchParams.get("amount")) || PLAN_PRICES[planId] || 2999;
+  const tradeNo = searchParams.get("trade_no") || "";
+
+  // Meta Pixel: Purchase + GA4: purchase（用 tradeNo 防止重複觸發）
+  useEffect(() => {
+    const key = `__purchase_fired_${tradeNo}`;
+    if ((window as Record<string, unknown>)[key]) return;
+    (window as Record<string, unknown>)[key] = true;
+
+    // Meta Pixel Purchase
+    if (window.fbq) {
+      window.fbq("track", "Purchase", {
+        content_ids: [`ai-pack-plan-${planId}`],
+        content_name: planName,
+        content_type: "product",
+        value: amount,
+        currency: "TWD",
+      });
+    }
+
+    // GA4 purchase
+    if (window.gtag) {
+      window.gtag("event", "purchase", {
+        transaction_id: tradeNo,
+        value: amount,
+        currency: "TWD",
+        items: [{
+          item_id: `ai-pack-plan-${planId}`,
+          item_name: planName,
+          price: amount,
+          quantity: 1,
+        }],
+      });
+    }
+  }, [planId, planName, amount, tradeNo]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white flex items-center justify-center px-4 py-16">
