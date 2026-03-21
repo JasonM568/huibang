@@ -1,4 +1,7 @@
+"use client";
+
 import Script from "next/script";
+import { useEffect } from "react";
 
 interface TrackingScriptsProps {
   gtm: string;
@@ -15,6 +18,29 @@ export default function TrackingScripts({
   metaPixel,
   lineTag,
 }: TrackingScriptsProps) {
+  // Meta Pixel — 用 useEffect 確保只執行一次
+  useEffect(() => {
+    if (!metaPixel) return;
+    if ((window as Record<string, unknown>).__fb_pixel_inited) return;
+    (window as Record<string, unknown>).__fb_pixel_inited = true;
+
+    /* eslint-disable */
+    (function (f: any, b: any, e: any, v: any) {
+      if (f.fbq) return;
+      const n: any = (f.fbq = function () {
+        n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+      });
+      if (!f._fbq) f._fbq = n;
+      n.push = n; n.loaded = !0; n.version = "2.0"; n.queue = [];
+      const t = b.createElement(e); t.async = !0; t.src = v;
+      const s = b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t, s);
+    })(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
+    window.fbq("init", metaPixel);
+    window.fbq("track", "PageView");
+    /* eslint-enable */
+  }, [metaPixel]);
+
   return (
     <>
       {/* Google Tag Manager */}
@@ -79,36 +105,17 @@ export default function TrackingScripts({
         </>
       )}
 
-      {/* Meta Pixel (Facebook) */}
+      {/* Meta Pixel noscript fallback */}
       {metaPixel && (
-        <>
-          <Script id="meta-pixel-init" strategy="afterInteractive">
-            {`
-              if(!window.__fb_pixel_loaded){
-                window.__fb_pixel_loaded=true;
-                !function(f,b,e,v,n,t,s)
-                {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-                n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-                n.queue=[];t=b.createElement(e);t.async=!0;
-                t.src=v;s=b.getElementsByTagName(e)[0];
-                s.parentNode.insertBefore(t,s)}(window, document,'script',
-                'https://connect.facebook.net/en_US/fbevents.js');
-                fbq('init', '${metaPixel}');
-                fbq('track', 'PageView');
-              }
-            `}
-          </Script>
-          <noscript>
-            <img
-              height="1"
-              width="1"
-              style={{ display: "none" }}
-              src={`https://www.facebook.com/tr?id=${metaPixel}&ev=PageView&noscript=1`}
-              alt=""
-            />
-          </noscript>
-        </>
+        <noscript>
+          <img
+            height="1"
+            width="1"
+            style={{ display: "none" }}
+            src={`https://www.facebook.com/tr?id=${metaPixel}&ev=PageView&noscript=1`}
+            alt=""
+          />
+        </noscript>
       )}
 
       {/* LINE Tag */}
