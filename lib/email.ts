@@ -577,9 +577,14 @@ export async function sendTrialAgentEmail(params: SendTrialAgentEmailParams) {
           </div>
 
           <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;">
-          <p style="color: #64748b; font-size: 13px; margin: 0;">
+          <div style="text-align: center; margin: 0 0 16px 0;">
+            <a href="https://lin.ee/6Cibkgs" style="display: inline-block; background: #06C755; color: #fff; padding: 12px 28px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 14px;">
+              💬 加入 LINE 官方帳號，有問題直接問！
+            </a>
+          </div>
+          <p style="color: #64748b; font-size: 13px; margin: 0; text-align: center;">
             惠邦行銷｜讓每個品牌都找到對的人<br>
-            如有問題，歡迎回覆此信件聯繫我們
+            如有問題，歡迎加 LINE 或回覆此信件聯繫我們
           </p>
         </div>
       </div>
