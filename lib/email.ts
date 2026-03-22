@@ -578,7 +578,7 @@ export async function sendTrialAgentEmail(params: SendTrialAgentEmailParams) {
 
           <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;">
           <div style="text-align: center; margin: 0 0 16px 0;">
-            <a href="https://lin.ee/6Cibkgs" style="display: inline-block; background: #06C755; color: #fff; padding: 12px 28px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 14px;">
+            <a href="https://lin.ee/ty6evC5" style="display: inline-block; background: #06C755; color: #fff; padding: 12px 28px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 14px;">
               💬 加入 LINE 官方帳號，有問題直接問！
             </a>
           </div>
