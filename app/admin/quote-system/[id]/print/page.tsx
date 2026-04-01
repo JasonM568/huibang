@@ -244,7 +244,7 @@ export default function QuotePrintPage() {
                   <img src="/company/signature.png" alt="簽名" style={{ height: "125px" }} className="object-contain" />
                 )}
                 {showStamp && company?.stampUrl && (
-                  <img src={company.stampUrl} alt="發票章" style={{ width: "180px", height: "180px" }} className="object-contain" />
+                  <img src={company.stampUrl} alt="發票章" style={{ width: "225px", height: "225px" }} className="object-contain" />
                 )}
               </div>
               {!showSeals && !showSignature && !showStamp && <div className="h-24"></div>}
