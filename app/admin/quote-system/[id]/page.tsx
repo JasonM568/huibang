@@ -97,7 +97,26 @@ export default function QuoteDetailPage() {
             onClick={() => window.open(`/admin/quote-system/${id}/print`, "_blank")}
             className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
           >
-            下載 PDF
+            查看 PDF
+          </button>
+          <button
+            onClick={async () => {
+              if (!confirm("確定要將此報價單轉為請款單？")) return;
+              const res = await fetch("/api/admin/invoices", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ quoteId: id }),
+              });
+              if (res.ok) {
+                const inv = await res.json();
+                router.push(`/admin/quote-system/invoice/${inv.id}`);
+              } else {
+                alert("轉換失敗");
+              }
+            }}
+            className="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600"
+          >
+            轉請款單
           </button>
           <select
             value={quote.status}

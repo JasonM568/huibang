@@ -337,6 +337,31 @@ export const companyInfo = pgTable("company_info", {
   stampUrl: text("stamp_url").default("").notNull(),
 });
 
+// 請款單
+export const invoices = pgTable("invoices", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  invoiceNumber: varchar("invoice_number", { length: 30 }).unique().notNull(),
+  quoteId: uuid("quote_id").references(() => quotes.id).notNull(),
+  customerId: uuid("customer_id").references(() => customers.id).notNull(),
+  userId: uuid("user_id").references(() => adminUsers.id).notNull(),
+  // 金額（從報價單帶入）
+  subtotal: numeric("subtotal", { precision: 12, scale: 2 }).default("0").notNull(),
+  taxAmount: numeric("tax_amount", { precision: 12, scale: 2 }).default("0").notNull(),
+  totalAmount: numeric("total_amount", { precision: 12, scale: 2 }).default("0").notNull(),
+  // 發票狀態
+  invoiceStatus: varchar("invoice_status", { length: 20 }).default("unissued").notNull(),
+  // unissued（未開）/ issued（已開）
+  issuedDate: timestamp("issued_date"),    // 開立日期
+  sentDate: timestamp("sent_date"),        // 寄出日期
+  // 付款狀態
+  paymentStatus: varchar("payment_status", { length: 20 }).default("unpaid").notNull(),
+  // unpaid（未付）/ paid（已付）
+  paidDate: timestamp("paid_date"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // ===== Types =====
 export type DiagnosticToken = typeof diagnosticTokens.$inferSelect;
 export type NewDiagnosticToken = typeof diagnosticTokens.$inferInsert;
@@ -362,3 +387,4 @@ export type Service = typeof services.$inferSelect;
 export type Quote = typeof quotes.$inferSelect;
 export type QuoteItem = typeof quoteItems.$inferSelect;
 export type CompanyInfo = typeof companyInfo.$inferSelect;
+export type Invoice = typeof invoices.$inferSelect;
