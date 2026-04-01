@@ -50,6 +50,7 @@ export const adminUsers = pgTable("admin_users", {
   name: varchar("name", { length: 50 }),
   role: varchar("role", { length: 20 }).default("editor").notNull(),
   canQuote: boolean("can_quote").default(false).notNull(),
+  canSalary: boolean("can_salary").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -365,6 +366,63 @@ export const invoices = pgTable("invoices", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// ===== 薪資系統 =====
+
+// 員工
+export const employees = pgTable("employees", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 50 }).notNull(),
+  department: varchar("department", { length: 50 }),    // 單位（行銷部等）
+  jobTitle: varchar("job_title", { length: 50 }),       // 職位
+  jobGrade: varchar("job_grade", { length: 20 }),       // 職等
+  baseSalary: numeric("base_salary", { precision: 10, scale: 0 }).default("0").notNull(),  // 基本薪資
+  startDate: timestamp("start_date"),                   // 到職日
+  isActive: boolean("is_active").default(true).notNull(),
+  note: text("note"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// 薪資紀錄（每月一筆）
+export const salaryRecords = pgTable("salary_records", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  employeeId: uuid("employee_id").references(() => employees.id, { onDelete: "cascade" }).notNull(),
+  year: integer("year").notNull(),                      // 年（民國年）
+  month: integer("month").notNull(),                    // 月
+  workPeriodStart: varchar("work_period_start", { length: 20 }),  // 工作期間起
+  workPeriodEnd: varchar("work_period_end", { length: 20 }),      // 工作期間迄
+  payDays: integer("pay_days"),                         // 計薪日數
+  // 應領
+  baseSalary: numeric("base_salary", { precision: 10, scale: 0 }).default("0").notNull(),
+  leaveDays: text("leave_days"),                        // 請假日數說明
+  leaveDeduction: numeric("leave_deduction", { precision: 10, scale: 0 }).default("0").notNull(),  // 請假扣款
+  overtimePay: numeric("overtime_pay", { precision: 10, scale: 0 }).default("0").notNull(),       // 加班費
+  fullAttendanceBonus: numeric("full_attendance_bonus", { precision: 10, scale: 0 }).default("0").notNull(), // 全勤獎金
+  supervisorAllowance: numeric("supervisor_allowance", { precision: 10, scale: 0 }).default("0").notNull(), // 主管加給
+  // 應扣
+  laborInsurance: numeric("labor_insurance", { precision: 10, scale: 0 }).default("0").notNull(),   // 勞保費
+  healthInsurance: numeric("health_insurance", { precision: 10, scale: 0 }).default("0").notNull(), // 健保費
+  employmentInsurance: numeric("employment_insurance", { precision: 10, scale: 0 }).default("0").notNull(), // 就保費
+  annualDues: numeric("annual_dues", { precision: 10, scale: 0 }).default("0").notNull(),           // 常年會費
+  otherDeduction: numeric("other_deduction", { precision: 10, scale: 0 }).default("0").notNull(),   // 其他扣款
+  otherDeductionNote: text("other_deduction_note"),
+  // 合計
+  totalEarnings: numeric("total_earnings", { precision: 10, scale: 0 }).default("0").notNull(),     // 應領合計
+  totalDeductions: numeric("total_deductions", { precision: 10, scale: 0 }).default("0").notNull(), // 應扣合計
+  netPay: numeric("net_pay", { precision: 10, scale: 0 }).default("0").notNull(),                   // 實領金額
+  note: text("note"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// 薪資獎金項目（多筆，如專案獎金）
+export const salaryBonuses = pgTable("salary_bonuses", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  salaryRecordId: uuid("salary_record_id").references(() => salaryRecords.id, { onDelete: "cascade" }).notNull(),
+  name: varchar("name", { length: 100 }).notNull(),    // 獎金名稱（如：專案獎金-中宇）
+  amount: numeric("amount", { precision: 10, scale: 0 }).default("0").notNull(),
+});
+
 // ===== Types =====
 export type DiagnosticToken = typeof diagnosticTokens.$inferSelect;
 export type NewDiagnosticToken = typeof diagnosticTokens.$inferInsert;
@@ -391,3 +449,6 @@ export type Quote = typeof quotes.$inferSelect;
 export type QuoteItem = typeof quoteItems.$inferSelect;
 export type CompanyInfo = typeof companyInfo.$inferSelect;
 export type Invoice = typeof invoices.$inferSelect;
+export type Employee = typeof employees.$inferSelect;
+export type SalaryRecord = typeof salaryRecords.$inferSelect;
+export type SalaryBonus = typeof salaryBonuses.$inferSelect;

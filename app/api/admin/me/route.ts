@@ -9,6 +9,7 @@ export async function GET() {
       email: session.email,
       role: session.role,
       canQuote: session.canQuote || false,
+      canSalary: session.canSalary || false,
     });
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -8,6 +8,7 @@ interface User {
   name: string | null;
   role: string;
   canQuote: boolean;
+  canSalary: boolean;
   createdAt: string;
 }
 
@@ -223,6 +224,7 @@ export default function UsersPage() {
                   <th className="text-left px-4 py-3 font-medium text-gray-500">Email</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">角色</th>
                   <th className="text-center px-4 py-3 font-medium text-gray-500">報價系統</th>
+                  <th className="text-center px-4 py-3 font-medium text-gray-500">薪資管理</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">建立時間</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">操作</th>
                 </tr>
@@ -283,6 +285,30 @@ export default function UsersPage() {
                           <span
                             className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
                               user.canQuote ? "translate-x-5" : "translate-x-0.5"
+                            }`}
+                          />
+                        </button>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <button
+                          onClick={async () => {
+                            const res = await fetch("/api/admin/users", {
+                              method: "PATCH",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ id: user.id, canSalary: !user.canSalary }),
+                            });
+                            if (res.ok) {
+                              const data = await res.json();
+                              setUsers(users.map((u) => (u.id === user.id ? { ...u, canSalary: data.canSalary } : u)));
+                            }
+                          }}
+                          className={`inline-block w-10 h-5 rounded-full transition-colors relative ${
+                            user.canSalary ? "bg-blue-600" : "bg-gray-300"
+                          }`}
+                        >
+                          <span
+                            className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                              user.canSalary ? "translate-x-5" : "translate-x-0.5"
                             }`}
                           />
                         </button>
@@ -354,6 +380,7 @@ export default function UsersPage() {
           <p><span className="font-medium text-purple-600">管理員</span> — 可檢視所有資料、更新狀態、管理人員帳號、報價系統</p>
           <p><span className="font-medium text-blue-600">編輯</span> — 可檢視所有資料、更新狀態，不能管理人員</p>
           <p><span className="font-medium text-green-600">報價系統</span> — 開啟後該人員可使用報價系統功能</p>
+          <p><span className="font-medium text-green-600">薪資管理</span> — 開啟後該人員可使用薪資管理功能</p>
         </div>
       </div>
     </div>

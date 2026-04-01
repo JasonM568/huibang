@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET || "fallback-secret-change-me");
 
-export async function signToken(payload: { userId: string; email: string; role: string; canQuote?: boolean }) {
+export async function signToken(payload: { userId: string; email: string; role: string; canQuote?: boolean; canSalary?: boolean }) {
   return new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setExpirationTime("7d")
@@ -14,7 +14,7 @@ export async function signToken(payload: { userId: string; email: string; role: 
 export async function verifyToken(token: string) {
   try {
     const { payload } = await jwtVerify(token, secret);
-    return payload as { userId: string; email: string; role: string; canQuote?: boolean };
+    return payload as { userId: string; email: string; role: string; canQuote?: boolean; canSalary?: boolean };
   } catch {
     return null;
   }

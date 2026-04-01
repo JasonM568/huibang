@@ -26,6 +26,7 @@ export async function GET() {
         name: adminUsers.name,
         role: adminUsers.role,
         canQuote: adminUsers.canQuote,
+        canSalary: adminUsers.canSalary,
         createdAt: adminUsers.createdAt,
       })
       .from(adminUsers)
@@ -122,6 +123,7 @@ export async function PATCH(request: Request) {
     if (name !== undefined) updates.name = name;
     if (role) updates.role = role;
     if (canQuote !== undefined) updates.canQuote = canQuote;
+    if (body.canSalary !== undefined) updates.canSalary = body.canSalary;
     if (password) updates.passwordHash = await bcrypt.hash(password, 10);
 
     const [updated] = await db

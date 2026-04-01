@@ -42,6 +42,7 @@ export async function POST(request: Request) {
       email: user.email,
       role: user.role,
       canQuote: user.canQuote,
+      canSalary: user.canSalary,
     });
 
     const response = NextResponse.json({ success: true, name: user.name });
