@@ -267,16 +267,14 @@ export default function UsersPage() {
                       </td>
                       <td className="px-4 py-3 text-center">
                         <button
-                          onClick={async () => {
+                          onClick={() => {
                             const newVal = !user.canQuote;
-                            const res = await fetch("/api/admin/users", {
+                            setUsers(users.map((u) => (u.id === user.id ? { ...u, canQuote: newVal } : u)));
+                            fetch("/api/admin/users", {
                               method: "PATCH",
                               headers: { "Content-Type": "application/json" },
                               body: JSON.stringify({ id: user.id, canQuote: newVal }),
                             });
-                            if (res.ok) {
-                              setUsers(users.map((u) => (u.id === user.id ? { ...u, canQuote: newVal } : u)));
-                            }
                           }}
                           className={`inline-block w-10 h-5 rounded-full transition-colors relative ${
                             user.canQuote ? "bg-blue-600" : "bg-gray-300"
@@ -291,16 +289,14 @@ export default function UsersPage() {
                       </td>
                       <td className="px-4 py-3 text-center">
                         <button
-                          onClick={async () => {
+                          onClick={() => {
                             const newVal = !user.canSalary;
-                            const res = await fetch("/api/admin/users", {
+                            setUsers(users.map((u) => (u.id === user.id ? { ...u, canSalary: newVal } : u)));
+                            fetch("/api/admin/users", {
                               method: "PATCH",
                               headers: { "Content-Type": "application/json" },
                               body: JSON.stringify({ id: user.id, canSalary: newVal }),
                             });
-                            if (res.ok) {
-                              setUsers(users.map((u) => (u.id === user.id ? { ...u, canSalary: newVal } : u)));
-                            }
                           }}
                           className={`inline-block w-10 h-5 rounded-full transition-colors relative ${
                             user.canSalary ? "bg-blue-600" : "bg-gray-300"
