@@ -31,8 +31,8 @@ export default function AiPackPaymentSuccessPage() {
   // Meta Pixel: Purchase + GA4: purchase（用 tradeNo 防止重複觸發）
   useEffect(() => {
     const key = `__purchase_fired_${tradeNo}`;
-    if ((window as Record<string, unknown>)[key]) return;
-    (window as Record<string, unknown>)[key] = true;
+    if ((window as unknown as Record<string, unknown>)[key]) return;
+    (window as unknown as Record<string, unknown>)[key] = true;
 
     // Meta Pixel Purchase
     if (window.fbq) {
