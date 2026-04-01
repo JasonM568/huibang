@@ -31,7 +31,7 @@ export default function PixelViewContent({
     if ((window as unknown as Record<string, unknown>)[key]) return;
     (window as unknown as Record<string, unknown>)[key] = true;
 
-    window.fbq("track", "ViewContent", {
+    window.fbq?.("track", "ViewContent", {
       content_name: contentName,
       content_category: contentCategory,
       content_type: contentType,

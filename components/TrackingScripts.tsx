@@ -36,8 +36,8 @@ export default function TrackingScripts({
       const s = b.getElementsByTagName(e)[0];
       s.parentNode.insertBefore(t, s);
     })(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
-    window.fbq("init", metaPixel);
-    window.fbq("track", "PageView");
+    window.fbq?.("init", metaPixel);
+    window.fbq?.("track", "PageView");
     /* eslint-enable */
   }, [metaPixel]);
 
