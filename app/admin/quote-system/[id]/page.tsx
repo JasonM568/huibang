@@ -93,6 +93,12 @@ export default function QuoteDetailPage() {
           <h1 className="text-2xl font-bold text-gray-900 mt-1">{quote.quoteNumber}</h1>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => window.open(`/admin/quote-system/${id}/print`, "_blank")}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+          >
+            下載 PDF
+          </button>
           <select
             value={quote.status}
             onChange={(e) => updateStatus(e.target.value)}
