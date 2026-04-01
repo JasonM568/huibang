@@ -240,10 +240,13 @@ export default function QuotePrintPage() {
                 </div>
               )}
               {showSignature && (
-                <img src="/company/signature.png" alt="簽名" className="h-12 object-contain mb-1" />
+                <img src="/company/signature.png" alt="簽名" style={{ height: "53.76px" }} className="object-contain mb-1" />
               )}
-              {!showSeals && !showSignature && <div className="h-24"></div>}
-              <div className="border-b border-gray-400 w-48"></div>
+              {showStamp && company?.stampUrl && (
+                <img src={company.stampUrl} alt="發票章" style={{ width: "101.76px", height: "101.76px" }} className="object-contain mt-1" />
+              )}
+              {!showSeals && !showSignature && !showStamp && <div className="h-24"></div>}
+              <div className="border-b border-gray-400 w-48 mt-2"></div>
               <p className="text-xs text-gray-500 mt-1">{company?.name}</p>
             </div>
             <div>
@@ -253,11 +256,6 @@ export default function QuotePrintPage() {
               <p className="text-xs text-gray-500 mt-1">{quote.customerName}</p>
             </div>
           </div>
-          {showStamp && company?.stampUrl && (
-            <div className="mt-4">
-              <img src={company.stampUrl} alt="發票章" className="w-24 h-24 object-contain" />
-            </div>
-          )}
         </div>
 
         {/* Prepared by */}
