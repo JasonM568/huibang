@@ -40,6 +40,7 @@ const statusOptions = [
   { value: "accepted", label: "已接受" },
   { value: "rejected", label: "已拒絕" },
   { value: "expired", label: "已過期" },
+  { value: "invoiced", label: "已轉請款" },
 ];
 
 export default function QuoteDetailPage() {
@@ -83,6 +84,8 @@ export default function QuoteDetailPage() {
     return <div className="text-center py-12 text-gray-400">找不到此報價單</div>;
   }
 
+  const isLocked = quote.status === "invoiced";
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -91,6 +94,9 @@ export default function QuoteDetailPage() {
             ← 返回報價系統
           </Link>
           <h1 className="text-2xl font-bold text-gray-900 mt-1">{quote.quoteNumber}</h1>
+          {isLocked && (
+            <p className="text-xs text-orange-600 mt-1">此報價單已轉為請款單，無法修改</p>
+          )}
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -99,40 +105,56 @@ export default function QuoteDetailPage() {
           >
             查看 PDF
           </button>
-          <button
-            onClick={async () => {
-              if (!confirm("確定要將此報價單轉為請款單？")) return;
-              const res = await fetch("/api/admin/invoices", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ quoteId: id }),
-              });
-              if (res.ok) {
-                const inv = await res.json();
-                router.push(`/admin/quote-system/invoice/${inv.id}`);
-              } else {
-                alert("轉換失敗");
-              }
-            }}
-            className="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600"
-          >
-            轉請款單
-          </button>
-          <select
-            value={quote.status}
-            onChange={(e) => updateStatus(e.target.value)}
-            className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {statusOptions.map((s) => (
-              <option key={s.value} value={s.value}>{s.label}</option>
-            ))}
-          </select>
-          <button
-            onClick={handleDelete}
-            className="px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100"
-          >
-            刪除
-          </button>
+          {!isLocked && (
+            <>
+              <Link
+                href={`/admin/quote-system/${id}/edit`}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+              >
+                編輯
+              </Link>
+              <button
+                onClick={async () => {
+                  if (!confirm("確定要將此報價單轉為請款單？轉換後報價單將無法修改。")) return;
+                  const res = await fetch("/api/admin/invoices", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ quoteId: id }),
+                  });
+                  if (res.ok) {
+                    // 更新報價單狀態為已轉請款
+                    await fetch(`/api/admin/quotes/${id}`, {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ status: "invoiced" }),
+                    });
+                    const inv = await res.json();
+                    router.push(`/admin/quote-system/invoice/${inv.id}`);
+                  } else {
+                    alert("轉換失敗");
+                  }
+                }}
+                className="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600"
+              >
+                轉請款單
+              </button>
+              <select
+                value={quote.status}
+                onChange={(e) => updateStatus(e.target.value)}
+                className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {statusOptions.filter(s => s.value !== "invoiced").map((s) => (
+                  <option key={s.value} value={s.value}>{s.label}</option>
+                ))}
+              </select>
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100"
+              >
+                刪除
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -228,6 +250,10 @@ export default function QuoteDetailPage() {
               <div>
                 <dt className="text-gray-500">報價單號</dt>
                 <dd className="font-mono text-gray-900">{quote.quoteNumber}</dd>
+              </div>
+              <div>
+                <dt className="text-gray-500">狀態</dt>
+                <dd className="text-gray-900">{statusOptions.find(s => s.value === quote.status)?.label || quote.status}</dd>
               </div>
               <div>
                 <dt className="text-gray-500">製表人</dt>
