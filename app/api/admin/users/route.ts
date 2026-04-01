@@ -87,6 +87,8 @@ export async function POST(request: Request) {
         email: adminUsers.email,
         name: adminUsers.name,
         role: adminUsers.role,
+        canQuote: adminUsers.canQuote,
+        canSalary: adminUsers.canSalary,
         createdAt: adminUsers.createdAt,
       });
 
@@ -135,6 +137,8 @@ export async function PATCH(request: Request) {
         email: adminUsers.email,
         name: adminUsers.name,
         role: adminUsers.role,
+        canQuote: adminUsers.canQuote,
+        canSalary: adminUsers.canSalary,
         createdAt: adminUsers.createdAt,
       });
 
