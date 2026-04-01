@@ -239,12 +239,14 @@ export default function QuotePrintPage() {
                   <img src="/company/seal-small.png" alt="公司小章" className="w-16 h-16 object-contain" />
                 </div>
               )}
-              {showSignature && (
-                <img src="/company/signature.png" alt="簽名" style={{ height: "53.76px" }} className="object-contain mb-1" />
-              )}
-              {showStamp && company?.stampUrl && (
-                <img src={company.stampUrl} alt="發票章" style={{ width: "101.76px", height: "101.76px" }} className="object-contain mt-1" />
-              )}
+              <div className="flex items-end gap-3">
+                {showSignature && (
+                  <img src="/company/signature.png" alt="簽名" style={{ height: "125px" }} className="object-contain" />
+                )}
+                {showStamp && company?.stampUrl && (
+                  <img src={company.stampUrl} alt="發票章" style={{ width: "125px", height: "125px" }} className="object-contain" />
+                )}
+              </div>
               {!showSeals && !showSignature && !showStamp && <div className="h-24"></div>}
               <div className="border-b border-gray-400 w-48 mt-2"></div>
               <p className="text-xs text-gray-500 mt-1">{company?.name}</p>
