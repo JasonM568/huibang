@@ -8,6 +8,7 @@ import {
   integer,
   date,
   uniqueIndex,
+  numeric,
   boolean,
 } from "drizzle-orm/pg-core";
 
@@ -76,6 +77,7 @@ export const contactSubmissions = pgTable("contact_submissions", {
   internalNote: text("internal_note"),
 });
 
+<<<<<<< HEAD
 // ===== 網站設定（Key-Value） =====
 export const siteSettings = pgTable("site_settings", {
   key: varchar("key", { length: 100 }).primaryKey(),
@@ -266,6 +268,75 @@ export const edmLogs = pgTable("edm_logs", {
 });
 export type EdmLog = typeof edmLogs.$inferSelect;
 
+// ===== 報價單系統 =====
+
+// 客戶
+export const customers = pgTable("customers", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  companyName: varchar("company_name", { length: 200 }).notNull(),
+  taxId: varchar("tax_id", { length: 20 }),
+  contactPerson: varchar("contact_person", { length: 100 }).notNull(),
+  address: text("address"),
+  email: varchar("email", { length: 100 }).notNull(),
+  phone: varchar("phone", { length: 30 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// 服務項目
+export const services = pgTable("services", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 200 }).notNull(),
+  specification: text("specification"),
+  unitPrice: numeric("unit_price", { precision: 10, scale: 2 }).notNull(),
+  description: text("description"),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// 報價單
+export const quotes = pgTable("quotes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  quoteNumber: varchar("quote_number", { length: 30 }).unique().notNull(),
+  customerId: uuid("customer_id").references(() => customers.id).notNull(),
+  userId: uuid("user_id").references(() => adminUsers.id).notNull(),
+  discount: numeric("discount", { precision: 5, scale: 2 }).default("0").notNull(),
+  taxRate: numeric("tax_rate", { precision: 5, scale: 2 }).default("5").notNull(),
+  validUntil: timestamp("valid_until").notNull(),
+  status: varchar("status", { length: 20 }).default("draft").notNull(),
+  notes: text("notes"),
+  subtotal: numeric("subtotal", { precision: 12, scale: 2 }).default("0").notNull(),
+  taxAmount: numeric("tax_amount", { precision: 12, scale: 2 }).default("0").notNull(),
+  totalAmount: numeric("total_amount", { precision: 12, scale: 2 }).default("0").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// 報價單項目
+export const quoteItems = pgTable("quote_items", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  quoteId: uuid("quote_id").references(() => quotes.id, { onDelete: "cascade" }).notNull(),
+  serviceId: uuid("service_id").references(() => services.id),
+  name: varchar("name", { length: 200 }).notNull(),
+  specification: text("specification"),
+  unitPrice: numeric("unit_price", { precision: 10, scale: 2 }).notNull(),
+  quantity: integer("quantity").default(1).notNull(),
+  amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
+});
+
+// 公司資訊（報價單用）
+export const companyInfo = pgTable("company_info", {
+  id: varchar("id", { length: 20 }).primaryKey().default("default"),
+  name: varchar("name", { length: 200 }).default("公司名稱").notNull(),
+  address: text("address").default("").notNull(),
+  phone: varchar("phone", { length: 30 }).default("").notNull(),
+  email: varchar("email", { length: 100 }).default("").notNull(),
+  taxId: varchar("tax_id", { length: 20 }).default("").notNull(),
+  logoUrl: text("logo_url").default("").notNull(),
+  stampUrl: text("stamp_url").default("").notNull(),
+});
+
 // ===== Types =====
 export type DiagnosticToken = typeof diagnosticTokens.$inferSelect;
 export type NewDiagnosticToken = typeof diagnosticTokens.$inferInsert;
@@ -286,3 +357,8 @@ export type NewOrder = typeof orders.$inferInsert;
 export type ApiUsageLog = typeof apiUsageLogs.$inferSelect;
 export type TrialLead = typeof trialLeads.$inferSelect;
 export type NewTrialLead = typeof trialLeads.$inferInsert;
+export type Customer = typeof customers.$inferSelect;
+export type Service = typeof services.$inferSelect;
+export type Quote = typeof quotes.$inferSelect;
+export type QuoteItem = typeof quoteItems.$inferSelect;
+export type CompanyInfo = typeof companyInfo.$inferSelect;
