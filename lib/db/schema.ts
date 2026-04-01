@@ -77,7 +77,6 @@ export const contactSubmissions = pgTable("contact_submissions", {
   internalNote: text("internal_note"),
 });
 
-<<<<<<< HEAD
 // ===== 網站設定（Key-Value） =====
 export const siteSettings = pgTable("site_settings", {
   key: varchar("key", { length: 100 }).primaryKey(),
