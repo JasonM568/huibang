@@ -21,8 +21,8 @@ export default function TrackingScripts({
   // Meta Pixel — 用 useEffect 確保只執行一次
   useEffect(() => {
     if (!metaPixel) return;
-    if ((window as Record<string, unknown>).__fb_pixel_inited) return;
-    (window as Record<string, unknown>).__fb_pixel_inited = true;
+    if ((window as unknown as Record<string, unknown>).__fb_pixel_inited) return;
+    (window as unknown as Record<string, unknown>).__fb_pixel_inited = true;
 
     /* eslint-disable */
     (function (f: any, b: any, e: any, v: any) {

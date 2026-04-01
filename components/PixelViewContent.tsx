@@ -28,8 +28,8 @@ export default function PixelViewContent({
 
     // 用 contentName 作為唯一 key，防止同頁重複觸發
     const key = `__pixel_vc_fired_${contentName.replace(/\s/g, "_")}`;
-    if ((window as Record<string, unknown>)[key]) return;
-    (window as Record<string, unknown>)[key] = true;
+    if ((window as unknown as Record<string, unknown>)[key]) return;
+    (window as unknown as Record<string, unknown>)[key] = true;
 
     window.fbq("track", "ViewContent", {
       content_name: contentName,
