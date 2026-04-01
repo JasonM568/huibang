@@ -4,13 +4,13 @@ import { quotes, quoteItems, customers, adminUsers } from "@/lib/db/schema";
 import { desc, eq, sql, ilike } from "drizzle-orm";
 import { requireAuth } from "@/lib/auth";
 
-function generateQuoteNumber() {
+function generateQuoteNumber(customerName: string) {
   const now = new Date();
-  const y = now.getFullYear().toString().slice(2);
+  const y = now.getFullYear();
   const m = (now.getMonth() + 1).toString().padStart(2, "0");
   const d = now.getDate().toString().padStart(2, "0");
-  const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
-  return `Q${y}${m}${d}-${rand}`;
+  const rand = Math.random().toString(36).substring(2, 5).toUpperCase();
+  return `Q-${customerName}-${y}${m}${d}-${rand}`;
 }
 
 export async function GET(request: Request) {
@@ -85,6 +85,13 @@ export async function POST(request: Request) {
 
     const items = body.items || [];
 
+    // Fetch customer name for quote number
+    const [customer] = await db
+      .select({ companyName: customers.companyName })
+      .from(customers)
+      .where(eq(customers.id, body.customerId));
+    const customerName = customer?.companyName || "未知客戶";
+
     // Calculate totals
     const subtotal = items.reduce(
       (sum: number, item: { unitPrice: string; quantity: number }) =>
@@ -99,7 +106,7 @@ export async function POST(request: Request) {
     const [quote] = await db
       .insert(quotes)
       .values({
-        quoteNumber: generateQuoteNumber(),
+        quoteNumber: generateQuoteNumber(customerName),
         customerId: body.customerId,
         userId: session.userId,
         discount: body.discount || "0",

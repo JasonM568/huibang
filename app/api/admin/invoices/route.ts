@@ -4,13 +4,13 @@ import { invoices, quotes, customers, adminUsers } from "@/lib/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
 import { requireAuth } from "@/lib/auth";
 
-function generateInvoiceNumber() {
+function generateInvoiceNumber(customerName: string) {
   const now = new Date();
-  const y = now.getFullYear().toString().slice(2);
+  const y = now.getFullYear();
   const m = (now.getMonth() + 1).toString().padStart(2, "0");
   const d = now.getDate().toString().padStart(2, "0");
-  const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
-  return `INV${y}${m}${d}-${rand}`;
+  const rand = Math.random().toString(36).substring(2, 5).toUpperCase();
+  return `INV-${customerName}-${y}${m}${d}-${rand}`;
 }
 
 export async function GET(request: Request) {
@@ -100,10 +100,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Quote not found" }, { status: 404 });
     }
 
+    // Fetch customer name for invoice number
+    const [customer] = await db
+      .select({ companyName: customers.companyName })
+      .from(customers)
+      .where(eq(customers.id, quote.customerId));
+    const customerName = customer?.companyName || "未知客戶";
+
     const [invoice] = await db
       .insert(invoices)
       .values({
-        invoiceNumber: generateInvoiceNumber(),
+        invoiceNumber: generateInvoiceNumber(customerName),
         quoteId: quote.id,
         customerId: quote.customerId,
         userId: session.userId,

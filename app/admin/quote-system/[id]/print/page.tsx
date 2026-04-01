@@ -64,6 +64,12 @@ export default function QuotePrintPage() {
     });
   }, [id]);
 
+  useEffect(() => {
+    if (quote) {
+      document.title = `報價單_${quote.quoteNumber}`;
+    }
+  }, [quote]);
+
   if (loading || !quote) {
     return <div className="p-8 text-center text-gray-400">載入中...</div>;
   }
@@ -75,6 +81,10 @@ export default function QuotePrintPage() {
           body { margin: 0; padding: 0; }
           .no-print { display: none !important; }
           @page { margin: 15mm; size: A4; }
+          title { display: none; }
+        }
+        @page {
+          margin: 15mm;
         }
         @media screen {
           body { background: #f3f4f6; }
@@ -260,9 +270,9 @@ export default function QuotePrintPage() {
           </div>
         </div>
 
-        {/* Prepared by */}
+        {/* Validity note */}
         <p className="text-xs text-gray-400 mt-8 text-center">
-          製表人：{quote.userName} ｜ 本報價單有效期限至 {new Date(quote.validUntil).toLocaleDateString("zh-TW")}
+          本報價單有效期限至 {new Date(quote.validUntil).toLocaleDateString("zh-TW")}
         </p>
       </div>
     </>
