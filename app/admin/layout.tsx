@@ -8,6 +8,7 @@ interface Session {
   userId: string;
   email: string;
   role: string;
+  canQuote: boolean;
 }
 
 export default function AdminLayout({
@@ -59,7 +60,7 @@ export default function AdminLayout({
     { href: "/admin/contacts", label: "聯絡表單", icon: "💬", show: true },
     { href: "/admin/clients", label: "客戶管理", icon: "🏢", show: true },
     { href: "/admin/content-studio", label: "貼文產生器", icon: "✨", show: true },
-    { href: "/admin/quote-system", label: "報價系統", icon: "📄", show: true },
+    { href: "/admin/quote-system", label: "報價系統", icon: "📄", show: session?.canQuote || isAdmin },
     { href: "/admin/users", label: "人員管理", icon: "👥", show: isAdmin },
     { href: "/admin/tracking", label: "追蹤碼管理", icon: "📈", show: true },
     { href: "/admin/diagnostic", label: "深度健診", icon: "🔬", show: true },

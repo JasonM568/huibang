@@ -49,6 +49,7 @@ export const adminUsers = pgTable("admin_users", {
   passwordHash: varchar("password_hash", { length: 200 }).notNull(),
   name: varchar("name", { length: 50 }),
   role: varchar("role", { length: 20 }).default("editor").notNull(),
+  canQuote: boolean("can_quote").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

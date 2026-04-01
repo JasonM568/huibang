@@ -41,6 +41,7 @@ export async function POST(request: Request) {
       userId: user.id,
       email: user.email,
       role: user.role,
+      canQuote: user.canQuote,
     });
 
     const response = NextResponse.json({ success: true, name: user.name });

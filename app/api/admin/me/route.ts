@@ -8,6 +8,7 @@ export async function GET() {
       userId: session.userId,
       email: session.email,
       role: session.role,
+      canQuote: session.canQuote || false,
     });
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

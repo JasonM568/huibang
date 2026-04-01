@@ -25,6 +25,7 @@ export async function GET() {
         email: adminUsers.email,
         name: adminUsers.name,
         role: adminUsers.role,
+        canQuote: adminUsers.canQuote,
         createdAt: adminUsers.createdAt,
       })
       .from(adminUsers)
@@ -107,7 +108,7 @@ export async function PATCH(request: Request) {
     await requireAdmin();
 
     const body = await request.json();
-    const { id, name, role, password } = body;
+    const { id, name, role, password, canQuote } = body;
 
     if (!id) {
       return NextResponse.json({ error: "Missing id" }, { status: 400 });
@@ -120,6 +121,7 @@ export async function PATCH(request: Request) {
     const updates: Record<string, any> = {};
     if (name !== undefined) updates.name = name;
     if (role) updates.role = role;
+    if (canQuote !== undefined) updates.canQuote = canQuote;
     if (password) updates.passwordHash = await bcrypt.hash(password, 10);
 
     const [updated] = await db

@@ -7,6 +7,7 @@ interface User {
   email: string;
   name: string | null;
   role: string;
+  canQuote: boolean;
   createdAt: string;
 }
 
@@ -221,6 +222,7 @@ export default function UsersPage() {
                   <th className="text-left px-4 py-3 font-medium text-gray-500">名稱</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">Email</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">角色</th>
+                  <th className="text-center px-4 py-3 font-medium text-gray-500">報價系統</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">建立時間</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">操作</th>
                 </tr>
@@ -260,6 +262,30 @@ export default function UsersPage() {
                             {role.label}
                           </span>
                         )}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <button
+                          onClick={async () => {
+                            const res = await fetch("/api/admin/users", {
+                              method: "PATCH",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ id: user.id, canQuote: !user.canQuote }),
+                            });
+                            if (res.ok) {
+                              const data = await res.json();
+                              setUsers(users.map((u) => (u.id === user.id ? { ...u, canQuote: data.canQuote } : u)));
+                            }
+                          }}
+                          className={`inline-block w-10 h-5 rounded-full transition-colors relative ${
+                            user.canQuote ? "bg-blue-600" : "bg-gray-300"
+                          }`}
+                        >
+                          <span
+                            className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                              user.canQuote ? "translate-x-5" : "translate-x-0.5"
+                            }`}
+                          />
+                        </button>
                       </td>
                       <td className="px-4 py-3 text-gray-500">
                         {new Date(user.createdAt).toLocaleDateString("zh-TW")}
@@ -325,8 +351,9 @@ export default function UsersPage() {
       <div className="mt-6 bg-gray-50 rounded-xl p-5 text-sm text-gray-500">
         <h3 className="font-medium text-gray-700 mb-2">權限說明</h3>
         <div className="space-y-1">
-          <p><span className="font-medium text-purple-600">管理員</span> — 可檢視所有資料、更新狀態、管理人員帳號</p>
+          <p><span className="font-medium text-purple-600">管理員</span> — 可檢視所有資料、更新狀態、管理人員帳號、報價系統</p>
           <p><span className="font-medium text-blue-600">編輯</span> — 可檢視所有資料、更新狀態，不能管理人員</p>
+          <p><span className="font-medium text-green-600">報價系統</span> — 開啟後該人員可使用報價系統功能</p>
         </div>
       </div>
     </div>
