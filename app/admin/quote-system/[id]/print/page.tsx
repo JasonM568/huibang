@@ -48,6 +48,11 @@ export default function QuotePrintPage() {
   const [company, setCompany] = useState<CompanyInfo | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // 蓋章選項
+  const [showSeals, setShowSeals] = useState(false);
+  const [showSignature, setShowSignature] = useState(false);
+  const [showStamp, setShowStamp] = useState(false);
+
   useEffect(() => {
     Promise.all([
       fetch(`/api/admin/quotes/${id}`).then((r) => r.json()),
@@ -58,13 +63,6 @@ export default function QuotePrintPage() {
       setLoading(false);
     });
   }, [id]);
-
-  useEffect(() => {
-    if (!loading && quote) {
-      // Auto print after render
-      setTimeout(() => window.print(), 500);
-    }
-  }, [loading, quote]);
 
   if (loading || !quote) {
     return <div className="p-8 text-center text-gray-400">載入中...</div>;
@@ -83,20 +81,52 @@ export default function QuotePrintPage() {
         }
       `}</style>
 
-      {/* Print button - hidden in print */}
-      <div className="no-print fixed top-4 right-4 z-50 flex gap-2">
-        <button
-          onClick={() => window.print()}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-lg"
-        >
-          列印 / 下載 PDF
-        </button>
-        <button
-          onClick={() => window.close()}
-          className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 shadow-lg"
-        >
-          關閉
-        </button>
+      {/* Control panel - hidden in print */}
+      <div className="no-print fixed top-4 right-4 z-50 bg-white rounded-xl shadow-lg border border-gray-200 p-4 w-64">
+        <h3 className="text-sm font-bold text-gray-900 mb-3">列印選項</h3>
+        <div className="space-y-2 mb-4">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showSeals}
+              onChange={(e) => setShowSeals(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-700">公司大小章</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showSignature}
+              onChange={(e) => setShowSignature(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-700">簽名檔</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showStamp}
+              onChange={(e) => setShowStamp(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-700">發票章</span>
+          </label>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => window.print()}
+            className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+          >
+            列印 / 下載 PDF
+          </button>
+          <button
+            onClick={() => window.close()}
+            className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200"
+          >
+            關閉
+          </button>
+        </div>
       </div>
 
       <div className="max-w-[210mm] mx-auto bg-white p-8 sm:my-8 sm:shadow-lg" style={{ fontFamily: "'Noto Sans TC', 'Microsoft JhengHei', sans-serif" }}>
@@ -203,12 +233,18 @@ export default function QuotePrintPage() {
           <div className="grid grid-cols-2 gap-8">
             <div>
               <p className="text-sm font-medium text-gray-700 mb-3">報價方簽章</p>
-              <div className="flex items-end gap-3 mb-2">
-                <img src="/company/seal-large.png" alt="公司大章" className="w-20 h-20 object-contain" />
-                <img src="/company/seal-small.png" alt="公司小章" className="w-16 h-16 object-contain" />
-              </div>
-              <img src="/company/signature.png" alt="簽名" className="h-12 object-contain mb-1" />
-              <p className="text-xs text-gray-500">{company?.name}</p>
+              {showSeals && (
+                <div className="flex items-end gap-3 mb-2">
+                  <img src="/company/seal-large.png" alt="公司大章" className="w-20 h-20 object-contain" />
+                  <img src="/company/seal-small.png" alt="公司小章" className="w-16 h-16 object-contain" />
+                </div>
+              )}
+              {showSignature && (
+                <img src="/company/signature.png" alt="簽名" className="h-12 object-contain mb-1" />
+              )}
+              {!showSeals && !showSignature && <div className="h-24"></div>}
+              <div className="border-b border-gray-400 w-48"></div>
+              <p className="text-xs text-gray-500 mt-1">{company?.name}</p>
             </div>
             <div>
               <p className="text-sm font-medium text-gray-700 mb-3">客戶確認簽章</p>
@@ -217,7 +253,7 @@ export default function QuotePrintPage() {
               <p className="text-xs text-gray-500 mt-1">{quote.customerName}</p>
             </div>
           </div>
-          {company?.stampUrl && (
+          {showStamp && company?.stampUrl && (
             <div className="mt-4">
               <img src={company.stampUrl} alt="發票章" className="w-24 h-24 object-contain" />
             </div>
