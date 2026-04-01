@@ -402,8 +402,6 @@ export const salaryRecords = pgTable("salary_records", {
   // 應扣
   laborInsurance: numeric("labor_insurance", { precision: 10, scale: 0 }).default("0").notNull(),   // 勞保費
   healthInsurance: numeric("health_insurance", { precision: 10, scale: 0 }).default("0").notNull(), // 健保費
-  employmentInsurance: numeric("employment_insurance", { precision: 10, scale: 0 }).default("0").notNull(), // 就保費
-  annualDues: numeric("annual_dues", { precision: 10, scale: 0 }).default("0").notNull(),           // 常年會費
   otherDeduction: numeric("other_deduction", { precision: 10, scale: 0 }).default("0").notNull(),   // 其他扣款
   otherDeductionNote: text("other_deduction_note"),
   // 合計

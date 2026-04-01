@@ -64,8 +64,6 @@ export async function POST(request: Request) {
 
     const totalDeductions = (parseInt(body.laborInsurance) || 0)
       + (parseInt(body.healthInsurance) || 0)
-      + (parseInt(body.employmentInsurance) || 0)
-      + (parseInt(body.annualDues) || 0)
       + (parseInt(body.otherDeduction) || 0);
 
     const netPay = totalEarnings - totalDeductions;
@@ -85,8 +83,6 @@ export async function POST(request: Request) {
       supervisorAllowance: body.supervisorAllowance || "0",
       laborInsurance: body.laborInsurance || "0",
       healthInsurance: body.healthInsurance || "0",
-      employmentInsurance: body.employmentInsurance || "0",
-      annualDues: body.annualDues || "0",
       otherDeduction: body.otherDeduction || "0",
       otherDeductionNote: body.otherDeductionNote || null,
       totalEarnings: totalEarnings.toString(),

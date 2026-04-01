@@ -18,8 +18,8 @@ export default function NewSalaryPage() {
     workPeriodStart: "", workPeriodEnd: "", payDays: "30",
     baseSalary: "0", leaveDays: "", leaveDeduction: "0",
     overtimePay: "0", fullAttendanceBonus: "0", supervisorAllowance: "0",
-    laborInsurance: "0", healthInsurance: "0", employmentInsurance: "0",
-    annualDues: "0", otherDeduction: "0", otherDeductionNote: "", note: "",
+    laborInsurance: "0", healthInsurance: "0",
+    otherDeduction: "0", otherDeductionNote: "", note: "",
   });
   const [bonuses, setBonuses] = useState<BonusForm[]>([]);
 
@@ -34,7 +34,7 @@ export default function NewSalaryPage() {
 
   const bonusTotal = bonuses.reduce((s, b) => s + (parseInt(b.amount) || 0), 0);
   const totalEarnings = (parseInt(form.baseSalary) || 0) - (parseInt(form.leaveDeduction) || 0) + (parseInt(form.overtimePay) || 0) + (parseInt(form.fullAttendanceBonus) || 0) + (parseInt(form.supervisorAllowance) || 0) + bonusTotal;
-  const totalDeductions = (parseInt(form.laborInsurance) || 0) + (parseInt(form.healthInsurance) || 0) + (parseInt(form.employmentInsurance) || 0) + (parseInt(form.annualDues) || 0) + (parseInt(form.otherDeduction) || 0);
+  const totalDeductions = (parseInt(form.laborInsurance) || 0) + (parseInt(form.healthInsurance) || 0) + (parseInt(form.otherDeduction) || 0);
   const netPay = totalEarnings - totalDeductions;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -133,10 +133,8 @@ export default function NewSalaryPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <h2 className="text-base font-bold text-gray-900 mb-3">應扣金額</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <F label="就保費" field="employmentInsurance" />
             <F label="勞保費" field="laborInsurance" />
             <F label="健保費" field="healthInsurance" />
-            <F label="常年會費" field="annualDues" />
             <F label="其他扣款" field="otherDeduction" />
             <div>
               <label className="block text-xs text-gray-500 mb-1">其他扣款說明</label>

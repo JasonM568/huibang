@@ -9,7 +9,7 @@ interface Record {
   year: number; month: number; workPeriodStart: string | null; workPeriodEnd: string | null; payDays: number | null;
   baseSalary: string; leaveDays: string | null; leaveDeduction: string;
   overtimePay: string; fullAttendanceBonus: string; supervisorAllowance: string;
-  laborInsurance: string; healthInsurance: string; employmentInsurance: string; annualDues: string;
+  laborInsurance: string; healthInsurance: string;
   otherDeduction: string; totalEarnings: string; totalDeductions: string; netPay: string;
 }
 
@@ -50,12 +50,10 @@ function SalarySlip({ r, companyName }: { r: FullRecord; companyName: string }) 
           {Number(r.supervisorAllowance) > 0 && <tr><td className="border border-gray-300 px-1 py-0.5">主管加給</td><td className="border border-gray-300 px-1 py-0.5 text-right">$</td><td className="border border-gray-300 px-1 py-0.5 text-right">{Number(r.supervisorAllowance).toLocaleString()}</td></tr>}
 
           <tr>
-            <td className="border border-gray-300 px-1 py-0.5 bg-gray-50 text-center" rowSpan={5}>應<br/>扣<br/>金<br/>額</td>
-            <td className="border border-gray-300 px-1 py-0.5">就保費</td><td className="border border-gray-300 px-1 py-0.5 text-right">$</td><td className="border border-gray-300 px-1 py-0.5 text-right">{n(r.employmentInsurance)}</td>
+            <td className="border border-gray-300 px-1 py-0.5 bg-gray-50 text-center" rowSpan={3}>應<br/>扣<br/>金<br/>額</td>
+            <td className="border border-gray-300 px-1 py-0.5">勞保費</td><td className="border border-gray-300 px-1 py-0.5 text-right" colSpan={2}>{n(r.laborInsurance)}</td>
           </tr>
-          <tr><td className="border border-gray-300 px-1 py-0.5">勞保費</td><td className="border border-gray-300 px-1 py-0.5 text-right" colSpan={2}>{n(r.laborInsurance)}</td></tr>
           <tr><td className="border border-gray-300 px-1 py-0.5">健保費</td><td className="border border-gray-300 px-1 py-0.5 text-right" colSpan={2}>{n(r.healthInsurance)}</td></tr>
-          <tr><td className="border border-gray-300 px-1 py-0.5">常年會費</td><td className="border border-gray-300 px-1 py-0.5 text-right" colSpan={2}>{n(r.annualDues)}</td></tr>
           <tr><td className="border border-gray-300 px-1 py-0.5">合計</td><td className="border border-gray-300 px-1 py-0.5" colSpan={2}></td></tr>
 
           <tr className="bg-gray-50"><td className="border border-gray-300 px-1 py-0.5" colSpan={2}>實領金額</td><td className="border border-gray-300 px-1 py-0.5 text-right font-bold bg-yellow-100" colSpan={2}>$ {Number(r.netPay).toLocaleString()}</td></tr>

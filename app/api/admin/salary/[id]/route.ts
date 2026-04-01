@@ -33,8 +33,6 @@ export async function GET(
         supervisorAllowance: salaryRecords.supervisorAllowance,
         laborInsurance: salaryRecords.laborInsurance,
         healthInsurance: salaryRecords.healthInsurance,
-        employmentInsurance: salaryRecords.employmentInsurance,
-        annualDues: salaryRecords.annualDues,
         otherDeduction: salaryRecords.otherDeduction,
         otherDeductionNote: salaryRecords.otherDeductionNote,
         totalEarnings: salaryRecords.totalEarnings,
@@ -78,8 +76,6 @@ export async function PATCH(
         + bonusTotal;
       const totalDeductions = (parseInt(body.laborInsurance) || 0)
         + (parseInt(body.healthInsurance) || 0)
-        + (parseInt(body.employmentInsurance) || 0)
-        + (parseInt(body.annualDues) || 0)
         + (parseInt(body.otherDeduction) || 0);
       const netPay = totalEarnings - totalDeductions;
 

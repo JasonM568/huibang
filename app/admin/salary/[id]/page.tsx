@@ -10,7 +10,7 @@ interface SalaryDetail {
   year: number; month: number; workPeriodStart: string | null; workPeriodEnd: string | null; payDays: number | null;
   baseSalary: string; leaveDays: string | null; leaveDeduction: string;
   overtimePay: string; fullAttendanceBonus: string; supervisorAllowance: string;
-  laborInsurance: string; healthInsurance: string; employmentInsurance: string; annualDues: string;
+  laborInsurance: string; healthInsurance: string;
   otherDeduction: string; otherDeductionNote: string | null;
   totalEarnings: string; totalDeductions: string; netPay: string;
   note: string | null; bonuses: Bonus[];
@@ -67,10 +67,8 @@ export default function SalaryDetailPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <h2 className="text-base font-bold text-gray-900 mb-3">應扣金額</h2>
           <dl className="space-y-2 text-sm">
-            {Number(record.employmentInsurance) > 0 && <div className="flex justify-between"><dt className="text-gray-500">就保費</dt><dd>${n(record.employmentInsurance)}</dd></div>}
             {Number(record.laborInsurance) > 0 && <div className="flex justify-between"><dt className="text-gray-500">勞保費</dt><dd>${n(record.laborInsurance)}</dd></div>}
             {Number(record.healthInsurance) > 0 && <div className="flex justify-between"><dt className="text-gray-500">健保費</dt><dd>${n(record.healthInsurance)}</dd></div>}
-            {Number(record.annualDues) > 0 && <div className="flex justify-between"><dt className="text-gray-500">常年會費</dt><dd>${n(record.annualDues)}</dd></div>}
             {Number(record.otherDeduction) > 0 && <div className="flex justify-between"><dt className="text-gray-500">其他扣款</dt><dd>${n(record.otherDeduction)}</dd></div>}
             <div className="flex justify-between pt-2 border-t border-gray-200 font-medium"><dt>應扣合計</dt><dd className="text-red-600">${n(record.totalDeductions)}</dd></div>
           </dl>
