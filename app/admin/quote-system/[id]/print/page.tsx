@@ -38,6 +38,8 @@ interface CompanyInfo {
   phone: string;
   email: string;
   taxId: string;
+  logoUrl: string;
+  stampUrl: string;
 }
 
 export default function QuotePrintPage() {
@@ -100,13 +102,18 @@ export default function QuotePrintPage() {
       <div className="max-w-[210mm] mx-auto bg-white p-8 sm:my-8 sm:shadow-lg" style={{ fontFamily: "'Noto Sans TC', 'Microsoft JhengHei', sans-serif" }}>
         {/* Header */}
         <div className="flex justify-between items-start mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{company?.name || "公司名稱"}</h1>
-            {company?.address && <p className="text-sm text-gray-600 mt-1">{company.address}</p>}
-            <div className="text-sm text-gray-600 mt-1 space-y-0.5">
-              {company?.phone && <p>電話：{company.phone}</p>}
-              {company?.email && <p>Email：{company.email}</p>}
-              {company?.taxId && <p>統一編號：{company.taxId}</p>}
+          <div className="flex items-start gap-4">
+            {company?.logoUrl && (
+              <img src={company.logoUrl} alt="Logo" className="w-16 h-16 object-contain" />
+            )}
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">{company?.name || "公司名稱"}</h1>
+              {company?.address && <p className="text-sm text-gray-600 mt-1">{company.address}</p>}
+              <div className="text-sm text-gray-600 mt-1 space-y-0.5">
+                {company?.phone && <p>電話：{company.phone}</p>}
+                {company?.email && <p>Email：{company.email}</p>}
+                {company?.taxId && <p>統一編號：{company.taxId}</p>}
+              </div>
             </div>
           </div>
           <div className="text-right">
@@ -195,16 +202,26 @@ export default function QuotePrintPage() {
         <div className="mt-12 pt-8 border-t border-gray-200">
           <div className="grid grid-cols-2 gap-8">
             <div>
-              <p className="text-sm font-medium text-gray-700 mb-8">報價方簽章</p>
-              <div className="border-b border-gray-400 w-48"></div>
-              <p className="text-xs text-gray-500 mt-1">{company?.name}</p>
+              <p className="text-sm font-medium text-gray-700 mb-3">報價方簽章</p>
+              <div className="flex items-end gap-3 mb-2">
+                <img src="/company/seal-large.png" alt="公司大章" className="w-20 h-20 object-contain" />
+                <img src="/company/seal-small.png" alt="公司小章" className="w-16 h-16 object-contain" />
+              </div>
+              <img src="/company/signature.png" alt="簽名" className="h-12 object-contain mb-1" />
+              <p className="text-xs text-gray-500">{company?.name}</p>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-700 mb-8">客戶確認簽章</p>
+              <p className="text-sm font-medium text-gray-700 mb-3">客戶確認簽章</p>
+              <div className="h-24"></div>
               <div className="border-b border-gray-400 w-48"></div>
               <p className="text-xs text-gray-500 mt-1">{quote.customerName}</p>
             </div>
           </div>
+          {company?.stampUrl && (
+            <div className="mt-4">
+              <img src={company.stampUrl} alt="發票章" className="w-24 h-24 object-contain" />
+            </div>
+          )}
         </div>
 
         {/* Prepared by */}
