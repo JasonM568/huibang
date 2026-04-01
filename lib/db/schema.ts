@@ -351,12 +351,15 @@ export const invoices = pgTable("invoices", {
   // 發票狀態
   invoiceStatus: varchar("invoice_status", { length: 20 }).default("unissued").notNull(),
   // unissued（未開）/ issued（已開）
+  taxInvoiceNo: varchar("tax_invoice_no", { length: 20 }),  // 發票號碼
   issuedDate: timestamp("issued_date"),    // 開立日期
   sentDate: timestamp("sent_date"),        // 寄出日期
   // 付款狀態
   paymentStatus: varchar("payment_status", { length: 20 }).default("unpaid").notNull(),
   // unpaid（未付）/ paid（已付）
-  paidDate: timestamp("paid_date"),
+  expectedPayDate: timestamp("expected_pay_date"),  // 預計付款日期
+  paidDate: timestamp("paid_date"),                 // 實際入帳日期
+  bankAccountLast5: varchar("bank_account_last5", { length: 5 }),  // 匯款帳號末5碼
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

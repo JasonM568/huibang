@@ -20,10 +20,13 @@ interface InvoiceDetail {
   taxAmount: string;
   totalAmount: string;
   invoiceStatus: string;
+  taxInvoiceNo: string | null;
   issuedDate: string | null;
   sentDate: string | null;
   paymentStatus: string;
+  expectedPayDate: string | null;
   paidDate: string | null;
+  bankAccountLast5: string | null;
   notes: string | null;
   createdAt: string;
   items: {
@@ -165,6 +168,18 @@ export default function InvoiceDetailPage() {
               </div>
 
               <div>
+                <label className="block text-sm text-gray-500 mb-1">發票號碼</label>
+                <input
+                  type="text"
+                  placeholder="例：AB-12345678"
+                  value={invoice.taxInvoiceNo || ""}
+                  onBlur={(e) => updateField({ taxInvoiceNo: e.target.value || null })}
+                  onChange={(e) => setInvoice({ ...invoice, taxInvoiceNo: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
                 <label className="block text-sm text-gray-500 mb-1">開立日期</label>
                 <input
                   type="date"
@@ -209,17 +224,38 @@ export default function InvoiceDetailPage() {
                 </select>
               </div>
 
-              {invoice.paidDate && (
-                <div>
-                  <label className="block text-sm text-gray-500 mb-1">付款日期</label>
-                  <input
-                    type="date"
-                    value={new Date(invoice.paidDate).toISOString().split("T")[0]}
-                    onChange={(e) => updateField({ paidDate: e.target.value || null })}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              )}
+              <div>
+                <label className="block text-sm text-gray-500 mb-1">預計付款日期</label>
+                <input
+                  type="date"
+                  value={invoice.expectedPayDate ? new Date(invoice.expectedPayDate).toISOString().split("T")[0] : ""}
+                  onChange={(e) => updateField({ expectedPayDate: e.target.value || null })}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-500 mb-1">實際入帳日期</label>
+                <input
+                  type="date"
+                  value={invoice.paidDate ? new Date(invoice.paidDate).toISOString().split("T")[0] : ""}
+                  onChange={(e) => updateField({ paidDate: e.target.value || null })}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-500 mb-1">匯款帳號末5碼</label>
+                <input
+                  type="text"
+                  maxLength={5}
+                  placeholder="例：12345"
+                  value={invoice.bankAccountLast5 || ""}
+                  onBlur={(e) => updateField({ bankAccountLast5: e.target.value || null })}
+                  onChange={(e) => setInvoice({ ...invoice, bankAccountLast5: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
           </div>
 

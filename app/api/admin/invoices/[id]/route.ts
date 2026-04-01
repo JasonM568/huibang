@@ -30,10 +30,13 @@ export async function GET(
         taxAmount: invoices.taxAmount,
         totalAmount: invoices.totalAmount,
         invoiceStatus: invoices.invoiceStatus,
+        taxInvoiceNo: invoices.taxInvoiceNo,
         issuedDate: invoices.issuedDate,
         sentDate: invoices.sentDate,
         paymentStatus: invoices.paymentStatus,
+        expectedPayDate: invoices.expectedPayDate,
         paidDate: invoices.paidDate,
+        bankAccountLast5: invoices.bankAccountLast5,
         notes: invoices.notes,
         createdAt: invoices.createdAt,
       })
@@ -74,10 +77,13 @@ export async function PATCH(
     const updates: Record<string, any> = { updatedAt: new Date() };
 
     if (body.invoiceStatus !== undefined) updates.invoiceStatus = body.invoiceStatus;
+    if (body.taxInvoiceNo !== undefined) updates.taxInvoiceNo = body.taxInvoiceNo || null;
     if (body.issuedDate !== undefined) updates.issuedDate = body.issuedDate ? new Date(body.issuedDate) : null;
     if (body.sentDate !== undefined) updates.sentDate = body.sentDate ? new Date(body.sentDate) : null;
     if (body.paymentStatus !== undefined) updates.paymentStatus = body.paymentStatus;
+    if (body.expectedPayDate !== undefined) updates.expectedPayDate = body.expectedPayDate ? new Date(body.expectedPayDate) : null;
     if (body.paidDate !== undefined) updates.paidDate = body.paidDate ? new Date(body.paidDate) : null;
+    if (body.bankAccountLast5 !== undefined) updates.bankAccountLast5 = body.bankAccountLast5 || null;
     if (body.notes !== undefined) updates.notes = body.notes;
 
     const [updated] = await db
