@@ -268,14 +268,14 @@ export default function UsersPage() {
                       <td className="px-4 py-3 text-center">
                         <button
                           onClick={async () => {
+                            const newVal = !user.canQuote;
                             const res = await fetch("/api/admin/users", {
                               method: "PATCH",
                               headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({ id: user.id, canQuote: !user.canQuote }),
+                              body: JSON.stringify({ id: user.id, canQuote: newVal }),
                             });
                             if (res.ok) {
-                              const data = await res.json();
-                              setUsers(users.map((u) => (u.id === user.id ? { ...u, canQuote: data.canQuote } : u)));
+                              setUsers(users.map((u) => (u.id === user.id ? { ...u, canQuote: newVal } : u)));
                             }
                           }}
                           className={`inline-block w-10 h-5 rounded-full transition-colors relative ${
@@ -292,14 +292,14 @@ export default function UsersPage() {
                       <td className="px-4 py-3 text-center">
                         <button
                           onClick={async () => {
+                            const newVal = !user.canSalary;
                             const res = await fetch("/api/admin/users", {
                               method: "PATCH",
                               headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({ id: user.id, canSalary: !user.canSalary }),
+                              body: JSON.stringify({ id: user.id, canSalary: newVal }),
                             });
                             if (res.ok) {
-                              const data = await res.json();
-                              setUsers(users.map((u) => (u.id === user.id ? { ...u, canSalary: data.canSalary } : u)));
+                              setUsers(users.map((u) => (u.id === user.id ? { ...u, canSalary: newVal } : u)));
                             }
                           }}
                           className={`inline-block w-10 h-5 rounded-full transition-colors relative ${
