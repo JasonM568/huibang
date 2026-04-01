@@ -21,11 +21,12 @@ export default function AdminLayout({
   const [session, setSession] = useState<Session | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Skip auth check on login page
+  // Skip layout on login and print pages
   const isLoginPage = pathname === "/admin/login";
+  const isPrintPage = pathname.endsWith("/print");
 
   useEffect(() => {
-    if (isLoginPage) return;
+    if (isLoginPage || isPrintPage) return;
 
     fetch("/api/admin/me")
       .then((res) => {
@@ -43,7 +44,7 @@ export default function AdminLayout({
       });
   }, [isLoginPage, router]);
 
-  if (isLoginPage) {
+  if (isLoginPage || isPrintPage) {
     return <>{children}</>;
   }
 
