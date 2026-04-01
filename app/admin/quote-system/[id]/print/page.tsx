@@ -81,10 +81,15 @@ export default function QuotePrintPage() {
   return (
     <>
       <style jsx global>{`
+        /* Hide admin layout for this page */
+        aside { display: none !important; }
+        .lg\\:ml-60 { margin-left: 0 !important; }
+        .lg\\:hidden, [class*="lg:hidden"] { display: none !important; }
+        main > div { padding: 0 !important; }
         @media print {
           body { margin: 0; padding: 0; }
           .no-print { display: none !important; }
-          @page { margin: 12mm; size: A4; }
+          @page { margin: 0; size: A4; }
         }
         @media screen {
           body { background: #f3f4f6; }
@@ -114,7 +119,7 @@ export default function QuotePrintPage() {
         </div>
       </div>
 
-      <div className="max-w-[210mm] mx-auto bg-white px-10 py-8 sm:my-8 sm:shadow-lg" style={{ fontFamily: "'Noto Sans TC', 'Microsoft JhengHei', sans-serif" }}>
+      <div className="max-w-[210mm] mx-auto bg-white px-10 py-8 print:px-[15mm] print:py-[12mm] print:max-w-none print:shadow-none sm:my-8 sm:shadow-lg" style={{ fontFamily: "'Noto Sans TC', 'Microsoft JhengHei', sans-serif" }}>
 
         {/* ===== Header ===== */}
         <div className="flex justify-between items-start mb-6">
