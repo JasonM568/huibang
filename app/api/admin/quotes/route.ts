@@ -94,8 +94,8 @@ export async function POST(request: Request) {
 
     // Calculate totals
     const subtotal = items.reduce(
-      (sum: number, item: { unitPrice: string; quantity: number }) =>
-        sum + parseFloat(item.unitPrice) * item.quantity,
+      (sum: number, item: { amount: string }) =>
+        sum + (parseFloat(item.amount) || 0),
       0
     );
     const discountAmount = subtotal * (parseFloat(body.discount || "0") / 100);
@@ -122,14 +122,14 @@ export async function POST(request: Request) {
     // Insert items
     if (items.length > 0) {
       await db.insert(quoteItems).values(
-        items.map((item: { serviceId?: string; name: string; specification?: string; unitPrice: string; quantity: number }) => ({
+        items.map((item: { serviceId?: string; name: string; specification?: string; amount: string }) => ({
           quoteId: quote.id,
           serviceId: item.serviceId || null,
           name: item.name,
           specification: item.specification || null,
-          unitPrice: item.unitPrice,
-          quantity: item.quantity,
-          amount: (parseFloat(item.unitPrice) * item.quantity).toFixed(2),
+          unitPrice: item.amount || "0",
+          quantity: 1,
+          amount: item.amount || "0",
         }))
       );
     }
