@@ -71,8 +71,8 @@ export async function PATCH(
     if (body.items) {
       const items = body.items;
       const subtotal = items.reduce(
-        (sum: number, item: { amount: string }) =>
-          sum + (parseFloat(item.amount) || 0),
+        (sum: number, item: { unitPrice: string; quantity: string }) =>
+          sum + (parseInt(item.unitPrice) || 0) * (parseInt(item.quantity) || 0),
         0
       );
       const discount = parseFloat(body.discount || "0");
@@ -102,14 +102,14 @@ export async function PATCH(
       await db.delete(quoteItems).where(eq(quoteItems.quoteId, id));
       if (items.length > 0) {
         await db.insert(quoteItems).values(
-          items.map((item: { serviceId?: string; name: string; specification?: string; amount: string }) => ({
+          items.map((item: { serviceId?: string; name: string; specification?: string; unitPrice: string; quantity: string }) => ({
             quoteId: id,
             serviceId: item.serviceId || null,
             name: item.name,
             specification: item.specification || null,
-            unitPrice: item.amount || "0",
-            quantity: 1,
-            amount: item.amount || "0",
+            unitPrice: item.unitPrice || "0",
+            quantity: parseInt(item.quantity) || 1,
+            amount: ((parseInt(item.unitPrice) || 0) * (parseInt(item.quantity) || 0)).toString(),
           }))
         );
       }

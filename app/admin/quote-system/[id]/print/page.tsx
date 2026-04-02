@@ -174,7 +174,9 @@ export default function QuotePrintPage() {
               <th className="border border-gray-300 px-2 py-1.5 text-center font-medium w-10">項次</th>
               <th className="border border-gray-300 px-2 py-1.5 text-left font-medium">項目</th>
               <th className="border border-gray-300 px-2 py-1.5 text-left font-medium">規格</th>
-              <th className="border border-gray-300 px-2 py-1.5 text-right font-medium w-28">金額</th>
+              <th className="border border-gray-300 px-2 py-1.5 text-right font-medium w-20">單價</th>
+              <th className="border border-gray-300 px-2 py-1.5 text-center font-medium w-12">數量</th>
+              <th className="border border-gray-300 px-2 py-1.5 text-right font-medium w-24">小計</th>
             </tr>
           </thead>
           <tbody>
@@ -183,6 +185,8 @@ export default function QuotePrintPage() {
                 <td className="border border-gray-300 px-2 py-1 text-center">{index + 1}</td>
                 <td className="border border-gray-300 px-2 py-1">{item.name}</td>
                 <td className="border border-gray-300 px-2 py-1 text-gray-600">{item.specification || ""}</td>
+                <td className="border border-gray-300 px-2 py-1 text-right">${Number(item.unitPrice).toLocaleString()}</td>
+                <td className="border border-gray-300 px-2 py-1 text-center">{item.quantity}</td>
                 <td className="border border-gray-300 px-2 py-1 text-right">${Number(item.amount).toLocaleString()}</td>
               </tr>
             ))}

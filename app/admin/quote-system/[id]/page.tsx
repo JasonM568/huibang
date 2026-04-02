@@ -169,7 +169,9 @@ export default function QuoteDetailPage() {
                 <tr className="border-b border-gray-100 text-left text-gray-500">
                   <th className="pb-2 font-medium">項目</th>
                   <th className="pb-2 font-medium">規格</th>
-                  <th className="pb-2 font-medium text-right">金額</th>
+                  <th className="pb-2 font-medium text-right">單價</th>
+                  <th className="pb-2 font-medium text-right">數量</th>
+                  <th className="pb-2 font-medium text-right">小計</th>
                 </tr>
               </thead>
               <tbody>
@@ -177,6 +179,8 @@ export default function QuoteDetailPage() {
                   <tr key={item.id} className="border-b border-gray-50">
                     <td className="py-2 font-medium text-gray-900">{item.name}</td>
                     <td className="py-2 text-gray-600">{item.specification || "-"}</td>
+                    <td className="py-2 text-gray-900 text-right">${Number(item.unitPrice).toLocaleString()}</td>
+                    <td className="py-2 text-gray-900 text-right">{item.quantity}</td>
                     <td className="py-2 text-gray-900 text-right">${Number(item.amount).toLocaleString()}</td>
                   </tr>
                 ))}

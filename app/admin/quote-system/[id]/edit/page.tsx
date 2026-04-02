@@ -19,7 +19,8 @@ interface QuoteItemForm {
   serviceId: string;
   name: string;
   specification: string;
-  amount: string;
+  unitPrice: string;
+  quantity: string;
 }
 
 export default function EditQuotePage() {
@@ -66,7 +67,8 @@ export default function EditQuotePage() {
           serviceId: item.serviceId || "",
           name: item.name,
           specification: item.specification || "",
-          amount: item.amount || item.unitPrice || "0",
+          unitPrice: item.unitPrice || "0",
+          quantity: (item.quantity || 1).toString(),
         }))
       );
       setLoadingQuote(false);
@@ -81,7 +83,8 @@ export default function EditQuotePage() {
         serviceId: service.id,
         name: service.name,
         specification: service.specification || "",
-        amount: service.unitPrice,
+        unitPrice: service.unitPrice,
+        quantity: newItems[index].quantity,
       };
     } else {
       newItems[index] = { ...newItems[index], serviceId: "" };
@@ -90,7 +93,7 @@ export default function EditQuotePage() {
   };
 
   const addItem = () => {
-    setItems([...items, { serviceId: "", name: "", specification: "", amount: "" }]);
+    setItems([...items, { serviceId: "", name: "", specification: "", unitPrice: "", quantity: "1" }]);
   };
 
   const removeItem = (index: number) => {
@@ -105,7 +108,7 @@ export default function EditQuotePage() {
   };
 
   const subtotal = items.reduce(
-    (sum, item) => sum + (parseFloat(item.amount) || 0),
+    (sum, item) => sum + (parseInt(item.unitPrice) || 0) * (parseInt(item.quantity) || 0),
     0
   );
   const discountAmount = subtotal * (parseFloat(form.discount) || 0) / 100;
@@ -216,7 +219,7 @@ export default function EditQuotePage() {
           <div className="space-y-3">
             {items.map((item, index) => (
               <div key={index} className="flex gap-2 items-start p-3 bg-gray-50 rounded-lg">
-                <div className="flex-1 grid grid-cols-1 sm:grid-cols-4 gap-2">
+                <div className="flex-1 grid grid-cols-1 sm:grid-cols-6 gap-2">
                   <div className="sm:col-span-2">
                     <select
                       value={item.serviceId}
@@ -249,11 +252,28 @@ export default function EditQuotePage() {
                       required
                       type="number"
                       step="1"
-                      placeholder="金額"
-                      value={item.amount}
-                      onChange={(e) => updateItem(index, "amount", e.target.value)}
+                      placeholder="單價"
+                      value={item.unitPrice}
+                      onChange={(e) => updateItem(index, "unitPrice", e.target.value)}
                       className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm"
                     />
+                  </div>
+                  <div>
+                    <input
+                      required
+                      type="number"
+                      step="1"
+                      min="1"
+                      placeholder="數量"
+                      value={item.quantity}
+                      onChange={(e) => updateItem(index, "quantity", e.target.value)}
+                      className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm"
+                    />
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-500 whitespace-nowrap">
+                      ${((parseInt(item.unitPrice) || 0) * (parseInt(item.quantity) || 0)).toLocaleString()}
+                    </span>
                   </div>
                 </div>
                 <button
