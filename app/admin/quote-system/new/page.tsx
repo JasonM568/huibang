@@ -33,7 +33,7 @@ export default function NewQuotePage() {
     customerId: "",
     discount: "0",
     taxRate: "5",
-    validUntil: new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0],
+    validUntil: new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0],
     notes: "",
   });
 
