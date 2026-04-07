@@ -251,7 +251,7 @@ export default function QuotePrintPage() {
                 </div>
               )}
               {showSignature && (
-                <img src="/company/signature.png" alt="簽名" className="object-contain" style={{ height: "100px", marginTop: "calc(10mm - 50px)" }} />
+                <img src="/company/signature.png" alt="簽名" className="object-contain" style={{ height: "8mm", marginTop: "calc(10mm - 4mm)" }} />
               )}
               {!showSeals && !showSignature && <div style={{ height: "20mm" }}></div>}
               <div className="border-b border-gray-400 w-40 mt-1"></div>
