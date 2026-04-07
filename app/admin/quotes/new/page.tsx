@@ -33,9 +33,42 @@ export default function NewQuotePage() {
     customerId: "",
     discount: "0",
     taxRate: "5",
-    validUntil: new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0],
+    validUntil: new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0],
     notes: "",
   });
+
+  // 新增客戶 modal
+  const [showNewCustomer, setShowNewCustomer] = useState(false);
+  const [newCustomer, setNewCustomer] = useState({ companyName: "", contactPerson: "", email: "", phone: "", taxId: "" });
+  const [creatingCustomer, setCreatingCustomer] = useState(false);
+
+  const handleCreateCustomer = async () => {
+    if (!newCustomer.companyName.trim() || !newCustomer.contactPerson.trim() || !newCustomer.email.trim()) {
+      alert("公司名稱、聯絡人、Email 為必填");
+      return;
+    }
+    setCreatingCustomer(true);
+    try {
+      const res = await fetch("/api/admin/customers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newCustomer),
+      });
+      if (res.ok) {
+        const customer = await res.json();
+        setCustomers(prev => [...prev, customer]);
+        setForm(f => ({ ...f, customerId: customer.id }));
+        setShowNewCustomer(false);
+        setNewCustomer({ companyName: "", contactPerson: "", email: "", phone: "", taxId: "" });
+      } else {
+        alert("建立失敗");
+      }
+    } catch {
+      alert("建立失敗");
+    } finally {
+      setCreatingCustomer(false);
+    }
+  };
 
   const [items, setItems] = useState<QuoteItemForm[]>([
     { serviceId: "", name: "", specification: "", unitPrice: "", quantity: 1 },
@@ -117,17 +150,26 @@ export default function NewQuotePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">客戶 *</label>
-              <select
-                required
-                value={form.customerId}
-                onChange={(e) => setForm({ ...form, customerId: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">選擇客戶</option>
-                {customers.map((c) => (
-                  <option key={c.id} value={c.id}>{c.companyName}</option>
-                ))}
-              </select>
+              <div className="flex gap-2">
+                <select
+                  required
+                  value={form.customerId}
+                  onChange={(e) => setForm({ ...form, customerId: e.target.value })}
+                  className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">選擇客戶</option>
+                  {customers.map((c) => (
+                    <option key={c.id} value={c.id}>{c.companyName}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => setShowNewCustomer(true)}
+                  className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 whitespace-nowrap"
+                >
+                  + 新增
+                </button>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">有效期限 *</label>
@@ -281,6 +323,75 @@ export default function NewQuotePage() {
           </button>
         </div>
       </form>
+
+      {/* 新增客戶 Modal */}
+      {showNewCustomer && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">新增客戶</h2>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">公司名稱 <span className="text-red-500">*</span></label>
+                <input
+                  value={newCustomer.companyName}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, companyName: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">聯絡人 <span className="text-red-500">*</span></label>
+                <input
+                  value={newCustomer.contactPerson}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, contactPerson: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email <span className="text-red-500">*</span></label>
+                <input
+                  type="email"
+                  value={newCustomer.email}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">電話</label>
+                <input
+                  value={newCustomer.phone}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">統一編號</label>
+                <input
+                  value={newCustomer.taxId}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, taxId: e.target.value })}
+                  onKeyDown={(e) => e.key === "Enter" && handleCreateCustomer()}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => { setShowNewCustomer(false); setNewCustomer({ companyName: "", contactPerson: "", email: "", phone: "", taxId: "" }); }}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleCreateCustomer}
+                disabled={!newCustomer.companyName.trim() || !newCustomer.contactPerson.trim() || !newCustomer.email.trim() || creatingCustomer}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+              >
+                {creatingCustomer ? "建立中..." : "建立"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
