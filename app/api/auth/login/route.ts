@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { adminUsers } from "@/lib/db/schema";
+import { adminUsers, loginLogs } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { signToken } from "@/lib/auth";
@@ -36,6 +36,18 @@ export async function POST(request: Request) {
         { status: 401 }
       );
     }
+
+    // 更新最後登入時間 + 寫入登入紀錄
+    const now = new Date();
+    await db.update(adminUsers).set({ lastLoginAt: now }).where(eq(adminUsers.id, user.id));
+    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "";
+    const userAgent = request.headers.get("user-agent") || "";
+    await db.insert(loginLogs).values({
+      userId: user.id,
+      loginAt: now,
+      ip: ip.slice(0, 50),
+      userAgent: userAgent.slice(0, 300),
+    });
 
     const token = await signToken({
       userId: user.id,

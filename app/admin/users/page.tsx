@@ -9,7 +9,15 @@ interface User {
   role: string;
   canQuote: boolean;
   canSalary: boolean;
+  lastLoginAt: string | null;
   createdAt: string;
+}
+
+interface LoginLog {
+  id: string;
+  loginAt: string;
+  ip: string | null;
+  userAgent: string | null;
 }
 
 const roleMap: Record<string, { label: string; color: string }> = {
@@ -28,6 +36,25 @@ export default function UsersPage() {
   const [form, setForm] = useState({ email: "", password: "", name: "", role: "editor" });
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
+
+  // 登入紀錄 modal
+  const [logUser, setLogUser] = useState<User | null>(null);
+  const [loginLogs, setLoginLogs] = useState<LoginLog[]>([]);
+  const [logsLoading, setLogsLoading] = useState(false);
+
+  const showLoginLogs = async (user: User) => {
+    setLogUser(user);
+    setLogsLoading(true);
+    try {
+      const res = await fetch(`/api/admin/users/login-logs?userId=${user.id}`);
+      const data = await res.json();
+      setLoginLogs(Array.isArray(data) ? data : []);
+    } catch {
+      setLoginLogs([]);
+    } finally {
+      setLogsLoading(false);
+    }
+  };
 
   // 編輯
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -225,7 +252,7 @@ export default function UsersPage() {
                   <th className="text-left px-4 py-3 font-medium text-gray-500">角色</th>
                   <th className="text-center px-4 py-3 font-medium text-gray-500">報價系統</th>
                   <th className="text-center px-4 py-3 font-medium text-gray-500">薪資管理</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-500">建立時間</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-500">最後上線</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">操作</th>
                 </tr>
               </thead>
@@ -310,7 +337,17 @@ export default function UsersPage() {
                         </button>
                       </td>
                       <td className="px-4 py-3 text-gray-500">
-                        {new Date(user.createdAt).toLocaleDateString("zh-TW")}
+                        {user.lastLoginAt ? (
+                          <button
+                            onClick={() => showLoginLogs(user)}
+                            className="text-blue-600 hover:text-blue-800 hover:underline text-left"
+                            title="點擊查看近 30 天登入紀錄"
+                          >
+                            {new Date(user.lastLoginAt).toLocaleString("zh-TW", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                          </button>
+                        ) : (
+                          <span className="text-gray-300">從未登入</span>
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         {isEditing ? (
@@ -368,6 +405,44 @@ export default function UsersPage() {
           </div>
         )}
       </div>
+
+      {/* Login logs modal */}
+      {logUser && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[80vh] flex flex-col">
+            <div className="flex items-center justify-between p-5 border-b border-gray-200">
+              <h2 className="text-lg font-bold text-gray-900">{logUser.name || logUser.email} — 近 30 天登入紀錄</h2>
+              <button onClick={() => setLogUser(null)} className="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+            </div>
+            <div className="overflow-y-auto p-5">
+              {logsLoading ? (
+                <div className="text-center py-8 text-gray-400">載入中...</div>
+              ) : loginLogs.length === 0 ? (
+                <div className="text-center py-8 text-gray-400">近 30 天無登入紀錄</div>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-200 text-gray-500">
+                      <th className="text-left py-2 font-medium">登入時間</th>
+                      <th className="text-left py-2 font-medium">IP</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {loginLogs.map((log) => (
+                      <tr key={log.id} className="border-b border-gray-50">
+                        <td className="py-2 text-gray-700">
+                          {new Date(log.loginAt).toLocaleString("zh-TW")}
+                        </td>
+                        <td className="py-2 text-gray-500 font-mono text-xs">{log.ip || "—"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Permission explanation */}
       <div className="mt-6 bg-gray-50 rounded-xl p-5 text-sm text-gray-500">

@@ -27,6 +27,7 @@ export async function GET() {
         role: adminUsers.role,
         canQuote: adminUsers.canQuote,
         canSalary: adminUsers.canSalary,
+        lastLoginAt: adminUsers.lastLoginAt,
         createdAt: adminUsers.createdAt,
       })
       .from(adminUsers)

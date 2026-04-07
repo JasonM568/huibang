@@ -51,7 +51,17 @@ export const adminUsers = pgTable("admin_users", {
   role: varchar("role", { length: 20 }).default("editor").notNull(),
   canQuote: boolean("can_quote").default(false).notNull(),
   canSalary: boolean("can_salary").default(false).notNull(),
+  lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// ===== 登入紀錄 =====
+export const loginLogs = pgTable("login_logs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").references(() => adminUsers.id, { onDelete: "cascade" }).notNull(),
+  loginAt: timestamp("login_at").defaultNow().notNull(),
+  ip: varchar("ip", { length: 50 }),
+  userAgent: varchar("user_agent", { length: 300 }),
 });
 
 // ===== Email 發送紀錄 =====

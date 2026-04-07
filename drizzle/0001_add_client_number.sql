@@ -43,6 +43,17 @@ CREATE TABLE salary_deductions (
   amount NUMERIC(10, 0) NOT NULL DEFAULT 0
 );
 
+-- ===== 登入紀錄 =====
+ALTER TABLE admin_users ADD COLUMN last_login_at TIMESTAMP;
+
+CREATE TABLE login_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES admin_users(id) ON DELETE CASCADE,
+  login_at TIMESTAMP DEFAULT NOW() NOT NULL,
+  ip VARCHAR(50),
+  user_agent VARCHAR(300)
+);
+
 -- ===== 薪資紀錄：新增單位備註說明欄位 =====
 ALTER TABLE salary_records ADD COLUMN internal_note TEXT;
 
