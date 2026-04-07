@@ -199,11 +199,13 @@ export default function QuotePrintPage() {
         {/* ===== 發票章格子 + 小計/稅額/總計 ===== */}
         <div className="flex justify-between items-start mt-2">
           {/* 發票章格子 */}
-          <div className="border border-gray-300 flex items-center justify-center" style={{ width: "200px", height: "150px" }}>
+          <div>
             {showStamp && company?.stampUrl ? (
-              <img src={company.stampUrl} alt="發票章" className="object-contain" style={{ width: "80%", height: "80%" }} />
+              <img src={company.stampUrl} alt="發票章" className="object-contain" style={{ width: "200px", height: "150px" }} />
             ) : (
-              <span className="text-xs text-gray-300">發票章</span>
+              <div className="border border-gray-300 flex items-center justify-center" style={{ width: "200px", height: "150px" }}>
+                <span className="text-xs text-gray-300">發票章</span>
+              </div>
             )}
           </div>
 
