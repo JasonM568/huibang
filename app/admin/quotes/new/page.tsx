@@ -43,8 +43,8 @@ export default function NewQuotePage() {
   const [creatingCustomer, setCreatingCustomer] = useState(false);
 
   const handleCreateCustomer = async () => {
-    if (!newCustomer.companyName.trim() || !newCustomer.contactPerson.trim() || !newCustomer.email.trim()) {
-      alert("公司名稱、聯絡人、Email 為必填");
+    if (!newCustomer.companyName.trim() || !newCustomer.contactPerson.trim() || !newCustomer.taxId.trim() || !newCustomer.phone.trim()) {
+      alert("公司名稱、聯絡人、統編、電話為必填");
       return;
     }
     setCreatingCustomer(true);
@@ -348,16 +348,15 @@ export default function NewQuotePage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">統一編號 <span className="text-red-500">*</span></label>
                 <input
-                  type="email"
-                  value={newCustomer.email}
-                  onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
+                  value={newCustomer.taxId}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, taxId: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">電話</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">電話 <span className="text-red-500">*</span></label>
                 <input
                   value={newCustomer.phone}
                   onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
@@ -365,10 +364,11 @@ export default function NewQuotePage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">統一編號</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                 <input
-                  value={newCustomer.taxId}
-                  onChange={(e) => setNewCustomer({ ...newCustomer, taxId: e.target.value })}
+                  type="email"
+                  value={newCustomer.email}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
                   onKeyDown={(e) => e.key === "Enter" && handleCreateCustomer()}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -383,7 +383,7 @@ export default function NewQuotePage() {
               </button>
               <button
                 onClick={handleCreateCustomer}
-                disabled={!newCustomer.companyName.trim() || !newCustomer.contactPerson.trim() || !newCustomer.email.trim() || creatingCustomer}
+                disabled={!newCustomer.companyName.trim() || !newCustomer.contactPerson.trim() || !newCustomer.taxId.trim() || !newCustomer.phone.trim() || creatingCustomer}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
               >
                 {creatingCustomer ? "建立中..." : "建立"}

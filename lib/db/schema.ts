@@ -277,11 +277,11 @@ export type EdmLog = typeof edmLogs.$inferSelect;
 export const customers = pgTable("customers", {
   id: uuid("id").primaryKey().defaultRandom(),
   companyName: varchar("company_name", { length: 200 }).notNull(),
-  taxId: varchar("tax_id", { length: 20 }),
+  taxId: varchar("tax_id", { length: 20 }).notNull(),
   contactPerson: varchar("contact_person", { length: 100 }).notNull(),
   address: text("address"),
-  email: varchar("email", { length: 100 }).notNull(),
-  phone: varchar("phone", { length: 30 }),
+  email: varchar("email", { length: 100 }),
+  phone: varchar("phone", { length: 30 }).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

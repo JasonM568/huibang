@@ -57,11 +57,11 @@ export async function POST(request: Request) {
       .insert(customers)
       .values({
         companyName: body.companyName,
-        taxId: body.taxId || null,
+        taxId: body.taxId,
         contactPerson: body.contactPerson,
         address: body.address || null,
-        email: body.email,
-        phone: body.phone || null,
+        email: body.email || null,
+        phone: body.phone,
       })
       .returning();
 
