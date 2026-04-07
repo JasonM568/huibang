@@ -204,7 +204,7 @@ export default function QuotePrintPage() {
               src={company.stampUrl}
               alt="發票章"
               className="absolute"
-              style={{ width: "31mm", height: "43mm", top: "calc(10.5mm - 43mm / 2)", left: "10px" }}
+              style={{ width: "43mm", height: "31mm", top: "calc(10.5mm - 31mm / 2)", left: "10px" }}
             />
           )}
 
