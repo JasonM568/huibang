@@ -66,14 +66,15 @@ export default function NewSalaryPage() {
     }
   };
 
-  // 該月總天數（用來算日薪基準）
+  // 日薪 = 底薪 / 30（固定基數）
+  const baseSalaryNum = parseInt(form.baseSalary) || 0;
+  const dailyWage = baseSalaryNum > 0 ? Math.round(baseSalaryNum / 30) : 0;
+  // 判斷是否足月（計薪天數 = 該月總天數）
   const monthLastDay = new Date((parseInt(form.year) + 1911), parseInt(form.month), 0).getDate();
-  // 日薪 = 底薪 / 該月總天數
-  const dailyWage = monthLastDay > 0
-    ? Math.round((parseInt(form.baseSalary) || 0) / monthLastDay)
-    : 0;
-  // 實際應領底薪 = 日薪 × 計薪天數
-  const actualBasePay = dailyWage * (parseInt(form.payDays) || 0);
+  const payDaysNum = parseInt(form.payDays) || 0;
+  const isFullMonth = payDaysNum >= monthLastDay;
+  // 足月 → 用底薪；不足月 → 日薪 × 計薪天數
+  const actualBasePay = isFullMonth ? baseSalaryNum : dailyWage * payDaysNum;
 
   // 日期起迄改變時自動算計薪天數
   const handleDateChange = (start: string, end: string) => {
@@ -170,10 +171,14 @@ export default function NewSalaryPage() {
         {/* 應領 */}
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <h2 className="text-base font-bold text-gray-900 mb-3">應領薪資金額</h2>
-          {(parseInt(form.baseSalary) || 0) > 0 && (parseInt(form.payDays) || 0) > 0 && (
+          {baseSalaryNum > 0 && payDaysNum > 0 && (
             <div className="text-xs text-gray-500 mb-3 bg-blue-50 px-3 py-2 rounded space-y-0.5">
-              <p>日薪：<span className="font-medium text-gray-700">${dailyWage.toLocaleString()}</span>（底薪 ${(parseInt(form.baseSalary) || 0).toLocaleString()} ÷ {monthLastDay} 天）</p>
-              <p>本期應領底薪：<span className="font-medium text-gray-700">${actualBasePay.toLocaleString()}</span>（日薪 ${dailyWage.toLocaleString()} × {form.payDays} 天）</p>
+              <p>日薪：<span className="font-medium text-gray-700">${dailyWage.toLocaleString()}</span>（底薪 ${baseSalaryNum.toLocaleString()} ÷ 30 天）</p>
+              {isFullMonth ? (
+                <p>足月，應領底薪：<span className="font-medium text-gray-700">${baseSalaryNum.toLocaleString()}</span></p>
+              ) : (
+                <p>不足月，應領底薪：<span className="font-medium text-gray-700">${actualBasePay.toLocaleString()}</span>（日薪 ${dailyWage.toLocaleString()} × {form.payDays} 天）</p>
+              )}
             </div>
           )}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
