@@ -66,16 +66,6 @@ export default function NewSalaryPage() {
     }
   };
 
-  // 日薪 = 底薪 / 30（固定基數）
-  const baseSalaryNum = parseInt(form.baseSalary) || 0;
-  const dailyWage = baseSalaryNum > 0 ? Math.round(baseSalaryNum / 30) : 0;
-  // 判斷是否足月（計薪天數 = 該月總天數）
-  const monthLastDay = new Date((parseInt(form.year) + 1911), parseInt(form.month), 0).getDate();
-  const payDaysNum = parseInt(form.payDays) || 0;
-  const isFullMonth = payDaysNum >= monthLastDay;
-  // 足月 → 用底薪；不足月 → 日薪 × 計薪天數
-  const actualBasePay = isFullMonth ? baseSalaryNum : dailyWage * payDaysNum;
-
   // 日期起迄改變時自動算計薪天數
   const handleDateChange = (start: string, end: string) => {
     let days = "";
@@ -86,9 +76,23 @@ export default function NewSalaryPage() {
     setForm(f => ({ ...f, workPeriodStart: start, workPeriodEnd: end, ...(days ? { payDays: days } : {}) }));
   };
 
+  // 足月判斷
+  const baseSalaryNum = parseInt(form.baseSalary) || 0;
+  const monthLastDay = new Date((parseInt(form.year) + 1911), parseInt(form.month), 0).getDate();
+  const payDaysNum = parseInt(form.payDays) || 0;
+  const isFullMonth = payDaysNum >= monthLastDay;
+
+  // 先算足月應領總額（底薪 + 所有獎金津貼 - 請假扣款）
   const bonusTotal = bonuses.reduce((s, b) => s + (parseInt(b.amount) || 0), 0);
+  const fullMonthEarnings = baseSalaryNum - (parseInt(form.leaveDeduction) || 0) + (parseInt(form.overtimePay) || 0) + (parseInt(form.fullAttendanceBonus) || 0) + (parseInt(form.supervisorAllowance) || 0) + bonusTotal;
+
+  // 日薪 = 足月應領總額 / 30
+  const dailyWage = fullMonthEarnings > 0 ? Math.round(fullMonthEarnings / 30) : 0;
+
+  // 足月 → 用足月應領總額；不足月 → 日薪 × 計薪天數
+  const totalEarnings = isFullMonth ? fullMonthEarnings : dailyWage * payDaysNum;
+
   const deductionTotal = deductions.reduce((s, d) => s + (parseInt(d.amount) || 0), 0);
-  const totalEarnings = actualBasePay - (parseInt(form.leaveDeduction) || 0) + (parseInt(form.overtimePay) || 0) + (parseInt(form.fullAttendanceBonus) || 0) + (parseInt(form.supervisorAllowance) || 0) + bonusTotal;
   const totalDeductions = (parseInt(form.laborInsurance) || 0) + (parseInt(form.healthInsurance) || 0) + (parseInt(form.otherDeduction) || 0) + deductionTotal;
   const netPay = totalEarnings - totalDeductions;
 
@@ -171,13 +175,14 @@ export default function NewSalaryPage() {
         {/* 應領 */}
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <h2 className="text-base font-bold text-gray-900 mb-3">應領薪資金額</h2>
-          {baseSalaryNum > 0 && payDaysNum > 0 && (
+          {fullMonthEarnings > 0 && payDaysNum > 0 && (
             <div className="text-xs text-gray-500 mb-3 bg-blue-50 px-3 py-2 rounded space-y-0.5">
-              <p>日薪：<span className="font-medium text-gray-700">${dailyWage.toLocaleString()}</span>（底薪 ${baseSalaryNum.toLocaleString()} ÷ 30 天）</p>
+              <p>足月應領總額：${fullMonthEarnings.toLocaleString()}</p>
+              <p>日薪：<span className="font-medium text-gray-700">${dailyWage.toLocaleString()}</span>（應領總額 ${fullMonthEarnings.toLocaleString()} ÷ 30 天）</p>
               {isFullMonth ? (
-                <p>足月，應領底薪：<span className="font-medium text-gray-700">${baseSalaryNum.toLocaleString()}</span></p>
+                <p>足月，應領：<span className="font-medium text-gray-700">${totalEarnings.toLocaleString()}</span></p>
               ) : (
-                <p>不足月，應領底薪：<span className="font-medium text-gray-700">${actualBasePay.toLocaleString()}</span>（日薪 ${dailyWage.toLocaleString()} × {form.payDays} 天）</p>
+                <p>不足月，應領：<span className="font-medium text-gray-700">${totalEarnings.toLocaleString()}</span>（日薪 ${dailyWage.toLocaleString()} × {form.payDays} 天）</p>
               )}
             </div>
           )}

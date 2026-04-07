@@ -69,24 +69,25 @@ export async function PATCH(
     const deductions = body.deductions;
 
     if (bonuses !== undefined) {
-      // 日薪計算：底薪 / 30（固定基數）
+      // 破月計算：日薪 = 足月應領總額 / 30
       const baseSalary = parseInt(body.baseSalary) || 0;
       const payDays = parseInt(body.payDays) || 0;
       const year = parseInt(body.year) || 0;
       const month = parseInt(body.month) || 0;
       const monthLastDay = year > 0 && month > 0 ? new Date(year + 1911, month, 0).getDate() : 30;
       const isFullMonth = payDays >= monthLastDay;
-      const dailyWage = baseSalary > 0 ? Math.round(baseSalary / 30) : 0;
-      const actualBasePay = isFullMonth ? baseSalary : dailyWage * payDays;
 
       const bonusTotal = bonuses.reduce((s: number, b: { amount: string }) => s + (parseInt(b.amount) || 0), 0);
       const deductionTotal = (deductions || []).reduce((s: number, d: { amount: string }) => s + (parseInt(d.amount) || 0), 0);
-      const totalEarnings = actualBasePay
+      const fullMonthEarnings = baseSalary
         - (parseInt(body.leaveDeduction) || 0)
         + (parseInt(body.overtimePay) || 0)
         + (parseInt(body.fullAttendanceBonus) || 0)
         + (parseInt(body.supervisorAllowance) || 0)
         + bonusTotal;
+
+      const dailyWage = fullMonthEarnings > 0 ? Math.round(fullMonthEarnings / 30) : 0;
+      const totalEarnings = isFullMonth ? fullMonthEarnings : dailyWage * payDays;
       const totalDeductions = (parseInt(body.laborInsurance) || 0)
         + (parseInt(body.healthInsurance) || 0)
         + (parseInt(body.otherDeduction) || 0)
