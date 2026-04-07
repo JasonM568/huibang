@@ -168,7 +168,7 @@ export default function QuotePrintPage() {
         </div>
 
         {/* ===== 項目表格 + 發票章疊加 ===== */}
-        <div className="relative" style={{ overflow: "visible" }}>
+        <div>
           <table className="w-full border-collapse mb-0" style={{ fontSize: "12px" }}>
             <thead>
               <tr className="bg-gray-100">
@@ -194,19 +194,20 @@ export default function QuotePrintPage() {
             </tbody>
           </table>
 
-          {/* 發票章：疊在表格最後幾列左下方，底部超出表格 */}
-          {showStamp && company?.stampUrl && (
-            <img
-              src={company.stampUrl}
-              alt="發票章"
-              className="absolute object-contain pointer-events-none"
-              style={{ width: "180px", height: "180px", bottom: "-60px", left: "10px" }}
-            />
-          )}
         </div>
 
-        {/* ===== 小計/稅額/總計 ===== */}
-        <div className="flex justify-end">
+        {/* ===== 發票章格子 + 小計/稅額/總計 ===== */}
+        <div className="flex justify-between items-start mt-2">
+          {/* 發票章格子 */}
+          <div className="border border-gray-300 flex items-center justify-center" style={{ width: "200px", height: "200px" }}>
+            {showStamp && company?.stampUrl ? (
+              <img src={company.stampUrl} alt="發票章" className="object-contain" style={{ width: "180px", height: "180px" }} />
+            ) : (
+              <span className="text-xs text-gray-300">發票章</span>
+            )}
+          </div>
+
+          {/* 總計區 */}
           <div className="w-60" style={{ fontSize: "12px" }}>
             <div className="flex justify-between py-1.5 border-b border-gray-200">
               <span className="text-gray-600">小計</span>
