@@ -201,7 +201,7 @@ export default function QuotePrintPage() {
           {/* 發票章格子 */}
           <div>
             {showStamp && company?.stampUrl ? (
-              <img src={company.stampUrl} alt="發票章" className="object-contain" style={{ width: "200px", height: "150px", display: "block" }} />
+              <img src={company.stampUrl} alt="發票章" style={{ maxWidth: "200px", maxHeight: "150px", display: "block" }} />
             ) : (
               <div className="border border-gray-300 flex items-center justify-center" style={{ width: "200px", height: "150px" }}>
                 <span className="text-xs text-gray-300">發票章</span>
