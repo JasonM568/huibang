@@ -96,11 +96,36 @@ export default function SalaryDetailPage() {
 
   const n = (v: string) => Number(v).toLocaleString();
 
+  // 日薪 = 底薪 / 30（固定基數）
+  const editBaseSalary = parseInt(form.baseSalary) || 0;
+  const editDailyWage = editBaseSalary > 0 ? Math.round(editBaseSalary / 30) : 0;
+  const editMonthLastDay = record ? new Date((record.year + 1911), record.month, 0).getDate() : 30;
+  const editPayDays = parseInt(form.payDays) || 0;
+  const editIsFullMonth = editPayDays >= editMonthLastDay;
+  const editActualBasePay = editIsFullMonth ? editBaseSalary : editDailyWage * editPayDays;
+
+  // 日期起迄改變時自動算計薪天數
+  const handleDateChange = (start: string, end: string) => {
+    let days = "";
+    if (start && end) {
+      const diff = Math.round((new Date(end).getTime() - new Date(start).getTime()) / 86400000) + 1;
+      if (diff > 0) days = String(diff);
+    }
+    setForm(f => ({ ...f, workPeriodStart: start, workPeriodEnd: end, ...(days ? { payDays: days } : {}) }));
+  };
+
   const bonusTotal = bonuses.reduce((s, b) => s + (parseInt(b.amount) || 0), 0);
   const deductionTotal = deductions.reduce((s, d) => s + (parseInt(d.amount) || 0), 0);
-  const editTotalEarnings = (parseInt(form.baseSalary) || 0) - (parseInt(form.leaveDeduction) || 0) + (parseInt(form.overtimePay) || 0) + (parseInt(form.fullAttendanceBonus) || 0) + (parseInt(form.supervisorAllowance) || 0) + bonusTotal;
+  const editTotalEarnings = editActualBasePay - (parseInt(form.leaveDeduction) || 0) + (parseInt(form.overtimePay) || 0) + (parseInt(form.fullAttendanceBonus) || 0) + (parseInt(form.supervisorAllowance) || 0) + bonusTotal;
   const editTotalDeductions = (parseInt(form.laborInsurance) || 0) + (parseInt(form.healthInsurance) || 0) + (parseInt(form.otherDeduction) || 0) + deductionTotal;
   const editNetPay = editTotalEarnings - editTotalDeductions;
+
+  // 檢視模式日薪計算
+  const viewBaseSalary = record ? Number(record.baseSalary) : 0;
+  const viewDailyWage = viewBaseSalary > 0 ? Math.round(viewBaseSalary / 30) : 0;
+  const viewPayDays = record?.payDays || 0;
+  const viewMonthLastDay = record ? new Date((record.year + 1911), record.month, 0).getDate() : 30;
+  const viewIsFullMonth = viewPayDays >= viewMonthLastDay;
 
   const renderField = (label: string, field: string) => (
     <div key={field}>
@@ -141,11 +166,11 @@ export default function SalaryDetailPage() {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block text-xs text-gray-500 mb-1">工作期間起</label>
-                <input type="date" value={form.workPeriodStart} onChange={(e) => setForm({ ...form, workPeriodStart: e.target.value })} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm" />
+                <input type="date" value={form.workPeriodStart} onChange={(e) => handleDateChange(e.target.value, form.workPeriodEnd)} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm" />
               </div>
               <div>
                 <label className="block text-xs text-gray-500 mb-1">工作期間迄</label>
-                <input type="date" value={form.workPeriodEnd} onChange={(e) => setForm({ ...form, workPeriodEnd: e.target.value })} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm" />
+                <input type="date" value={form.workPeriodEnd} onChange={(e) => handleDateChange(form.workPeriodStart, e.target.value)} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm" />
               </div>
               {renderField("計薪日數", "payDays")}
             </div>
@@ -154,6 +179,16 @@ export default function SalaryDetailPage() {
           {/* 應領 */}
           <div className="bg-white rounded-xl border border-gray-200 p-5">
             <h2 className="text-base font-bold text-gray-900 mb-3">應領薪資金額</h2>
+            {editBaseSalary > 0 && editPayDays > 0 && (
+              <div className="text-xs text-gray-500 mb-3 bg-blue-50 px-3 py-2 rounded space-y-0.5">
+                <p>日薪：<span className="font-medium text-gray-700">${editDailyWage.toLocaleString()}</span>（底薪 ${editBaseSalary.toLocaleString()} ÷ 30 天）</p>
+                {editIsFullMonth ? (
+                  <p>足月，應領底薪：<span className="font-medium text-gray-700">${editBaseSalary.toLocaleString()}</span></p>
+                ) : (
+                  <p>不足月，應領底薪：<span className="font-medium text-gray-700">${editActualBasePay.toLocaleString()}</span>（日薪 ${editDailyWage.toLocaleString()} × {form.payDays} 天）</p>
+                )}
+              </div>
+            )}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {renderField("基本薪資", "baseSalary")}
               <div>
@@ -234,6 +269,12 @@ export default function SalaryDetailPage() {
           {/* 應領 */}
           <div className="bg-white rounded-xl border border-gray-200 p-5">
             <h2 className="text-base font-bold text-gray-900 mb-3">應領薪資金額</h2>
+            {viewBaseSalary > 0 && viewPayDays > 0 && !viewIsFullMonth && (
+              <div className="text-xs text-gray-500 mb-3 bg-blue-50 px-3 py-2 rounded space-y-0.5">
+                <p>日薪：${viewDailyWage.toLocaleString()}（底薪 ${viewBaseSalary.toLocaleString()} ÷ 30 天）</p>
+                <p>不足月，應領底薪：<span className="font-medium text-gray-700">${(viewDailyWage * viewPayDays).toLocaleString()}</span>（日薪 ${viewDailyWage.toLocaleString()} × {viewPayDays} 天）</p>
+              </div>
+            )}
             <dl className="space-y-2 text-sm">
               <div className="flex justify-between"><dt className="text-gray-500">基本薪資</dt><dd>${n(record.baseSalary)}</dd></div>
               <div className="flex justify-between"><dt className="text-gray-500">計薪日</dt><dd>共{record.payDays}日</dd></div>
