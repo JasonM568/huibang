@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { salaryRecords, salaryBonuses, employees } from "@/lib/db/schema";
+import { salaryRecords, salaryBonuses, salaryDeductions, employees } from "@/lib/db/schema";
 import { desc, eq, and, sql } from "drizzle-orm";
 import { requireAuth } from "@/lib/auth";
 
@@ -52,6 +52,7 @@ export async function POST(request: Request) {
     await requireAuth();
     const body = await request.json();
     const bonuses = body.bonuses || [];
+    const deductions = body.deductions || [];
 
     // Calculate totals
     const bonusTotal = bonuses.reduce((s: number, b: { amount: string }) => s + (parseInt(b.amount) || 0), 0);
@@ -62,9 +63,11 @@ export async function POST(request: Request) {
       + (parseInt(body.supervisorAllowance) || 0)
       + bonusTotal;
 
+    const deductionTotal = deductions.reduce((s: number, d: { amount: string }) => s + (parseInt(d.amount) || 0), 0);
     const totalDeductions = (parseInt(body.laborInsurance) || 0)
       + (parseInt(body.healthInsurance) || 0)
-      + (parseInt(body.otherDeduction) || 0);
+      + (parseInt(body.otherDeduction) || 0)
+      + deductionTotal;
 
     const netPay = totalEarnings - totalDeductions;
 
@@ -98,6 +101,17 @@ export async function POST(request: Request) {
           salaryRecordId: record.id,
           name: b.name,
           amount: b.amount || "0",
+        }))
+      );
+    }
+
+    // Insert deductions
+    if (deductions.length > 0) {
+      await db.insert(salaryDeductions).values(
+        deductions.map((d: { name: string; amount: string }) => ({
+          salaryRecordId: record.id,
+          name: d.name,
+          amount: d.amount || "0",
         }))
       );
     }

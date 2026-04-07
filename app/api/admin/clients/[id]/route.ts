@@ -51,7 +51,7 @@ export async function PATCH(
     const updates: Record<string, any> = {};
     const allowedFields = [
       "brandName", "industry", "contactName", "contactEmail", "contactPhone",
-      "company", "website", "status", "planTier", "monthlyFee",
+      "taxId", "company", "website", "status", "planTier", "monthlyFee",
       "contractStart", "contractEnd", "assignedTo", "note",
     ];
 

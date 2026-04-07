@@ -4,6 +4,24 @@ import { clients } from "@/lib/db/schema";
 import { desc, eq, like, sql, and } from "drizzle-orm";
 import { requireAuth } from "@/lib/auth";
 
+async function generateClientNumber() {
+  const now = new Date();
+  const mm = (now.getMonth() + 1).toString().padStart(2, "0");
+  const dd = now.getDate().toString().padStart(2, "0");
+  const yy = now.getFullYear().toString().slice(-2);
+  const dateStr = `${mm}${dd}${yy}`;
+  const prefix = `C-${dateStr}-`;
+
+  // 查詢當天已有幾筆客戶
+  const [result] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(clients)
+    .where(like(clients.clientNumber, `${prefix}%`));
+
+  const seq = Number(result?.count || 0) + 1;
+  return `${prefix}${seq}`;
+}
+
 export async function GET(request: Request) {
   try {
     await requireAuth();
@@ -57,14 +75,25 @@ export async function POST(request: Request) {
     await requireAuth();
     const body = await request.json();
 
+    if (!body.brandName?.trim() || !body.contactEmail?.trim() || !body.contactPhone?.trim() || !body.taxId?.trim()) {
+      return NextResponse.json(
+        { error: "品牌名稱、Email、電話、統編為必填欄位" },
+        { status: 400 }
+      );
+    }
+
+    const clientNumber = await generateClientNumber();
+
     const [newClient] = await db
       .insert(clients)
       .values({
+        clientNumber,
         brandName: body.brandName,
         industry: body.industry || null,
         contactName: body.contactName || null,
-        contactEmail: body.contactEmail || null,
-        contactPhone: body.contactPhone || null,
+        contactEmail: body.contactEmail,
+        contactPhone: body.contactPhone,
+        taxId: body.taxId,
         company: body.company || null,
         website: body.website || null,
         status: body.status || "prospect",

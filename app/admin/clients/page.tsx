@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 interface Client {
   id: string;
+  clientNumber: string | null;
   createdAt: string;
   brandName: string;
   industry: string | null;
@@ -51,6 +52,9 @@ export default function AdminClientsPage() {
   // 新增客戶 modal
   const [showModal, setShowModal] = useState(false);
   const [newBrandName, setNewBrandName] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newPhone, setNewPhone] = useState("");
+  const [newTaxId, setNewTaxId] = useState("");
   const [creating, setCreating] = useState(false);
 
   const fetchData = useCallback(async (page = 1) => {
@@ -94,21 +98,33 @@ export default function AdminClientsPage() {
   };
 
   const handleCreate = async () => {
-    if (!newBrandName.trim()) return;
+    if (!newBrandName.trim() || !newEmail.trim() || !newPhone.trim() || !newTaxId.trim()) {
+      alert("請填寫所有必填欄位");
+      return;
+    }
     setCreating(true);
     try {
       const res = await fetch("/api/admin/clients", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ brandName: newBrandName.trim() }),
+        body: JSON.stringify({
+          brandName: newBrandName.trim(),
+          contactEmail: newEmail.trim(),
+          contactPhone: newPhone.trim(),
+          taxId: newTaxId.trim(),
+        }),
       });
       if (res.ok) {
         const client = await res.json();
         setShowModal(false);
         setNewBrandName("");
+        setNewEmail("");
+        setNewPhone("");
+        setNewTaxId("");
         router.push(`/admin/clients/${client.id}`);
       } else {
-        alert("建立失敗");
+        const data = await res.json();
+        alert(data.error || "建立失敗");
       }
     } catch {
       alert("建立失敗");
@@ -188,6 +204,7 @@ export default function AdminClientsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="text-left px-4 py-3 font-medium text-gray-500">客戶編號</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">品牌名稱</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">產業</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-500">方案</th>
@@ -209,6 +226,9 @@ export default function AdminClientsPage() {
                       key={c.id}
                       className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                     >
+                      <td className="px-4 py-3 text-gray-500 font-mono text-xs whitespace-nowrap">
+                        {c.clientNumber || "—"}
+                      </td>
                       <td className="px-4 py-3 font-medium text-gray-900">
                         {c.brandName}
                       </td>
@@ -294,23 +314,59 @@ export default function AdminClientsPage() {
                   type="text"
                   value={newBrandName}
                   onChange={(e) => setNewBrandName(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleCreate()}
                   placeholder="輸入品牌名稱"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   autoFocus
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  placeholder="輸入 Email"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  電話 <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={newPhone}
+                  onChange={(e) => setNewPhone(e.target.value)}
+                  placeholder="輸入電話"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  統一編號 <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={newTaxId}
+                  onChange={(e) => setNewTaxId(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+                  placeholder="輸入統編"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
             <div className="flex justify-end gap-3 mt-6">
               <button
-                onClick={() => { setShowModal(false); setNewBrandName(""); }}
+                onClick={() => { setShowModal(false); setNewBrandName(""); setNewEmail(""); setNewPhone(""); setNewTaxId(""); }}
                 className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
               >
                 取消
               </button>
               <button
                 onClick={handleCreate}
-                disabled={!newBrandName.trim() || creating}
+                disabled={!newBrandName.trim() || !newEmail.trim() || !newPhone.trim() || !newTaxId.trim() || creating}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
               >
                 {creating ? "建立中..." : "建立"}

@@ -90,6 +90,7 @@ export const siteSettings = pgTable("site_settings", {
 // ===== 客戶管理 =====
 export const clients = pgTable("clients", {
   id: uuid("id").primaryKey().defaultRandom(),
+  clientNumber: varchar("client_number", { length: 20 }).unique(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 
@@ -97,8 +98,9 @@ export const clients = pgTable("clients", {
   brandName: varchar("brand_name", { length: 100 }).notNull(),
   industry: varchar("industry", { length: 50 }),
   contactName: varchar("contact_name", { length: 50 }),
-  contactEmail: varchar("contact_email", { length: 100 }),
-  contactPhone: varchar("contact_phone", { length: 30 }),
+  contactEmail: varchar("contact_email", { length: 100 }).notNull(),
+  contactPhone: varchar("contact_phone", { length: 30 }).notNull(),
+  taxId: varchar("tax_id", { length: 20 }).notNull(),
   company: varchar("company", { length: 100 }),
   website: varchar("website", { length: 200 }),
 
@@ -413,11 +415,28 @@ export const salaryRecords = pgTable("salary_records", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// 員工固定薪資項目（如主管加給、績效獎金等，每月自動帶入）
+export const employeeAllowances = pgTable("employee_allowances", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  employeeId: uuid("employee_id").references(() => employees.id, { onDelete: "cascade" }).notNull(),
+  name: varchar("name", { length: 100 }).notNull(),
+  amount: numeric("amount", { precision: 10, scale: 0 }).default("0").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // 薪資獎金項目（多筆，如專案獎金）
 export const salaryBonuses = pgTable("salary_bonuses", {
   id: uuid("id").primaryKey().defaultRandom(),
   salaryRecordId: uuid("salary_record_id").references(() => salaryRecords.id, { onDelete: "cascade" }).notNull(),
   name: varchar("name", { length: 100 }).notNull(),    // 獎金名稱（如：專案獎金-中宇）
+  amount: numeric("amount", { precision: 10, scale: 0 }).default("0").notNull(),
+});
+
+// 薪資應扣項目（多筆，如代扣所得稅等）
+export const salaryDeductions = pgTable("salary_deductions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  salaryRecordId: uuid("salary_record_id").references(() => salaryRecords.id, { onDelete: "cascade" }).notNull(),
+  name: varchar("name", { length: 100 }).notNull(),
   amount: numeric("amount", { precision: 10, scale: 0 }).default("0").notNull(),
 });
 
@@ -448,5 +467,7 @@ export type QuoteItem = typeof quoteItems.$inferSelect;
 export type CompanyInfo = typeof companyInfo.$inferSelect;
 export type Invoice = typeof invoices.$inferSelect;
 export type Employee = typeof employees.$inferSelect;
+export type EmployeeAllowance = typeof employeeAllowances.$inferSelect;
 export type SalaryRecord = typeof salaryRecords.$inferSelect;
 export type SalaryBonus = typeof salaryBonuses.$inferSelect;
+export type SalaryDeduction = typeof salaryDeductions.$inferSelect;

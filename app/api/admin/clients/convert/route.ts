@@ -1,8 +1,25 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { submissions, clients } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, like, sql } from "drizzle-orm";
 import { requireAuth } from "@/lib/auth";
+
+async function generateClientNumber() {
+  const now = new Date();
+  const mm = (now.getMonth() + 1).toString().padStart(2, "0");
+  const dd = now.getDate().toString().padStart(2, "0");
+  const yy = now.getFullYear().toString().slice(-2);
+  const dateStr = `${mm}${dd}${yy}`;
+  const prefix = `C-${dateStr}-`;
+
+  const [result] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(clients)
+    .where(like(clients.clientNumber, `${prefix}%`));
+
+  const seq = Number(result?.count || 0) + 1;
+  return `${prefix}${seq}`;
+}
 
 export async function POST(request: Request) {
   try {
@@ -39,9 +56,12 @@ export async function POST(request: Request) {
     }
 
     // 建立客戶，帶入問卷資料
+    const clientNumber = await generateClientNumber();
+
     const [newClient] = await db
       .insert(clients)
       .values({
+        clientNumber,
         brandName: submission.brandName || "未命名品牌",
         industry: submission.industry || null,
         contactName: submission.contactName || null,

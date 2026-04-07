@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { employees } from "@/lib/db/schema";
+import { employees, employeeAllowances } from "@/lib/db/schema";
 import { desc, sql, ilike, eq } from "drizzle-orm";
 import { requireAuth } from "@/lib/auth";
 

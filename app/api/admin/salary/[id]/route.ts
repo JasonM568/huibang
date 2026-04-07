@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { salaryRecords, salaryBonuses, employees } from "@/lib/db/schema";
+import { salaryRecords, salaryBonuses, salaryDeductions, employees } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { requireAuth } from "@/lib/auth";
 
@@ -48,8 +48,9 @@ export async function GET(
     if (!record) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     const bonuses = await db.select().from(salaryBonuses).where(eq(salaryBonuses.salaryRecordId, id));
+    const deductions = await db.select().from(salaryDeductions).where(eq(salaryDeductions.salaryRecordId, id));
 
-    return NextResponse.json({ ...record, bonuses });
+    return NextResponse.json({ ...record, bonuses, deductions });
   } catch (error: unknown) {
     if (error instanceof Error && error.message === "Unauthorized") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
@@ -65,9 +66,11 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json();
     const bonuses = body.bonuses;
+    const deductions = body.deductions;
 
     if (bonuses !== undefined) {
       const bonusTotal = bonuses.reduce((s: number, b: { amount: string }) => s + (parseInt(b.amount) || 0), 0);
+      const deductionTotal = (deductions || []).reduce((s: number, d: { amount: string }) => s + (parseInt(d.amount) || 0), 0);
       const totalEarnings = (parseInt(body.baseSalary) || 0)
         - (parseInt(body.leaveDeduction) || 0)
         + (parseInt(body.overtimePay) || 0)
@@ -76,12 +79,13 @@ export async function PATCH(
         + bonusTotal;
       const totalDeductions = (parseInt(body.laborInsurance) || 0)
         + (parseInt(body.healthInsurance) || 0)
-        + (parseInt(body.otherDeduction) || 0);
+        + (parseInt(body.otherDeduction) || 0)
+        + deductionTotal;
       const netPay = totalEarnings - totalDeductions;
 
+      const { bonuses: _b, deductions: _d, ...recordData } = body;
       await db.update(salaryRecords).set({
-        ...body,
-        bonuses: undefined,
+        ...recordData,
         totalEarnings: totalEarnings.toString(),
         totalDeductions: totalDeductions.toString(),
         netPay: netPay.toString(),
@@ -98,6 +102,20 @@ export async function PATCH(
             amount: b.amount || "0",
           }))
         );
+      }
+
+      // Replace deductions
+      if (deductions !== undefined) {
+        await db.delete(salaryDeductions).where(eq(salaryDeductions.salaryRecordId, id));
+        if (deductions.length > 0) {
+          await db.insert(salaryDeductions).values(
+            deductions.map((d: { name: string; amount: string }) => ({
+              salaryRecordId: id,
+              name: d.name,
+              amount: d.amount || "0",
+            }))
+          );
+        }
       }
     } else {
       await db.update(salaryRecords).set({ ...body, updatedAt: new Date() }).where(eq(salaryRecords.id, id));

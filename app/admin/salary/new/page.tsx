@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-interface Employee { id: string; name: string; baseSalary: string; department: string | null; }
-interface BonusForm { name: string; amount: string; }
+interface Allowance { name: string; amount: string; }
+interface Employee { id: string; name: string; baseSalary: string; department: string | null; allowances?: Allowance[]; }
+interface ItemForm { name: string; amount: string; }
 
 export default function NewSalaryPage() {
   const router = useRouter();
@@ -21,20 +22,38 @@ export default function NewSalaryPage() {
     laborInsurance: "0", healthInsurance: "0",
     otherDeduction: "0", otherDeductionNote: "", note: "",
   });
-  const [bonuses, setBonuses] = useState<BonusForm[]>([]);
+  const [bonuses, setBonuses] = useState<ItemForm[]>([]);
+  const [deductions, setDeductions] = useState<ItemForm[]>([]);
 
   useEffect(() => {
     fetch("/api/admin/employees?all=1&active=1").then(r => r.json()).then(d => setEmployees(d.data || []));
   }, []);
 
-  const handleEmployeeSelect = (empId: string) => {
+  const handleEmployeeSelect = async (empId: string) => {
     const emp = employees.find(e => e.id === empId);
     setForm({ ...form, employeeId: empId, baseSalary: emp?.baseSalary || "0" });
+
+    if (empId) {
+      try {
+        const res = await fetch(`/api/admin/employees/${empId}`);
+        const data = await res.json();
+        if (data.allowances && data.allowances.length > 0) {
+          setBonuses(data.allowances.map((a: Allowance) => ({ name: a.name, amount: a.amount })));
+        } else {
+          setBonuses([]);
+        }
+      } catch {
+        setBonuses([]);
+      }
+    } else {
+      setBonuses([]);
+    }
   };
 
   const bonusTotal = bonuses.reduce((s, b) => s + (parseInt(b.amount) || 0), 0);
+  const deductionTotal = deductions.reduce((s, d) => s + (parseInt(d.amount) || 0), 0);
   const totalEarnings = (parseInt(form.baseSalary) || 0) - (parseInt(form.leaveDeduction) || 0) + (parseInt(form.overtimePay) || 0) + (parseInt(form.fullAttendanceBonus) || 0) + (parseInt(form.supervisorAllowance) || 0) + bonusTotal;
-  const totalDeductions = (parseInt(form.laborInsurance) || 0) + (parseInt(form.healthInsurance) || 0) + (parseInt(form.otherDeduction) || 0);
+  const totalDeductions = (parseInt(form.laborInsurance) || 0) + (parseInt(form.healthInsurance) || 0) + (parseInt(form.otherDeduction) || 0) + deductionTotal;
   const netPay = totalEarnings - totalDeductions;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,7 +62,7 @@ export default function NewSalaryPage() {
     const res = await fetch("/api/admin/salary", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, bonuses }),
+      body: JSON.stringify({ ...form, bonuses, deductions }),
     });
     if (res.ok) {
       const record = await res.json();
@@ -54,7 +73,7 @@ export default function NewSalaryPage() {
   const F = ({ label, field, w }: { label: string; field: string; w?: string }) => (
     <div className={w || ""}>
       <label className="block text-xs text-gray-500 mb-1">{label}</label>
-      <input type="number" value={(form as any)[field]} onChange={(e) => setForm({ ...form, [field]: e.target.value })} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <input type="number" value={(form as Record<string, string>)[field]} onChange={(e) => setForm({ ...form, [field]: e.target.value })} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
     </div>
   );
 
@@ -85,11 +104,11 @@ export default function NewSalaryPage() {
             </div>
             <div>
               <label className="block text-xs text-gray-500 mb-1">工作期間起</label>
-              <input value={form.workPeriodStart} onChange={(e) => setForm({ ...form, workPeriodStart: e.target.value })} placeholder="如：2/1" className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm" />
+              <input type="date" value={form.workPeriodStart} onChange={(e) => setForm({ ...form, workPeriodStart: e.target.value })} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm" />
             </div>
             <div>
               <label className="block text-xs text-gray-500 mb-1">工作期間迄</label>
-              <input value={form.workPeriodEnd} onChange={(e) => setForm({ ...form, workPeriodEnd: e.target.value })} placeholder="如：2/28" className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm" />
+              <input type="date" value={form.workPeriodEnd} onChange={(e) => setForm({ ...form, workPeriodEnd: e.target.value })} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm" />
             </div>
             <F label="計薪日數" field="payDays" />
           </div>
@@ -112,12 +131,12 @@ export default function NewSalaryPage() {
 
           <div className="mt-3 pt-3 border-t border-gray-100">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-gray-700">獎金項目</span>
-              <button type="button" onClick={() => setBonuses([...bonuses, { name: "", amount: "" }])} className="text-xs text-blue-600 hover:text-blue-800">+ 新增獎金</button>
+              <span className="text-xs font-medium text-gray-700">領薪項目</span>
+              <button type="button" onClick={() => setBonuses([...bonuses, { name: "", amount: "" }])} className="text-xs text-blue-600 hover:text-blue-800">+ 新增領薪項目</button>
             </div>
             {bonuses.map((b, i) => (
               <div key={i} className="flex gap-2 mb-2">
-                <input placeholder="獎金名稱" value={b.name} onChange={(e) => { const nb = [...bonuses]; nb[i].name = e.target.value; setBonuses(nb); }} className="flex-1 px-2 py-1.5 border border-gray-200 rounded text-sm" />
+                <input placeholder="項目名稱" value={b.name} onChange={(e) => { const nb = [...bonuses]; nb[i].name = e.target.value; setBonuses(nb); }} className="flex-1 px-2 py-1.5 border border-gray-200 rounded text-sm" />
                 <input type="number" placeholder="金額" value={b.amount} onChange={(e) => { const nb = [...bonuses]; nb[i].amount = e.target.value; setBonuses(nb); }} className="w-28 px-2 py-1.5 border border-gray-200 rounded text-sm" />
                 <button type="button" onClick={() => setBonuses(bonuses.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-600 text-sm">x</button>
               </div>
@@ -141,6 +160,21 @@ export default function NewSalaryPage() {
               <input value={form.otherDeductionNote} onChange={(e) => setForm({ ...form, otherDeductionNote: e.target.value })} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm" />
             </div>
           </div>
+
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-medium text-gray-700">應扣項目</span>
+              <button type="button" onClick={() => setDeductions([...deductions, { name: "", amount: "" }])} className="text-xs text-blue-600 hover:text-blue-800">+ 新增應扣項目</button>
+            </div>
+            {deductions.map((d, i) => (
+              <div key={i} className="flex gap-2 mb-2">
+                <input placeholder="項目名稱" value={d.name} onChange={(e) => { const nd = [...deductions]; nd[i].name = e.target.value; setDeductions(nd); }} className="flex-1 px-2 py-1.5 border border-gray-200 rounded text-sm" />
+                <input type="number" placeholder="金額" value={d.amount} onChange={(e) => { const nd = [...deductions]; nd[i].amount = e.target.value; setDeductions(nd); }} className="w-28 px-2 py-1.5 border border-gray-200 rounded text-sm" />
+                <button type="button" onClick={() => setDeductions(deductions.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-600 text-sm">x</button>
+              </div>
+            ))}
+          </div>
+
           <div className="mt-3 pt-3 border-t border-gray-100 text-sm text-right">
             <span className="text-gray-600">應扣合計：</span><span className="font-bold text-red-600">${totalDeductions.toLocaleString()}</span>
           </div>

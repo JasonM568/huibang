@@ -15,6 +15,7 @@ interface ClientStrategy {
 
 interface ClientData {
   id: string;
+  clientNumber: string | null;
   createdAt: string;
   updatedAt: string;
   brandName: string;
@@ -22,6 +23,7 @@ interface ClientData {
   contactName: string | null;
   contactEmail: string | null;
   contactPhone: string | null;
+  taxId: string | null;
   company: string | null;
   website: string | null;
   status: string;
@@ -72,6 +74,7 @@ export default function ClientDetailPage() {
     contactName: "",
     contactEmail: "",
     contactPhone: "",
+    taxId: "",
     company: "",
     website: "",
     status: "prospect",
@@ -103,6 +106,7 @@ export default function ClientDetailPage() {
         contactName: data.contactName || "",
         contactEmail: data.contactEmail || "",
         contactPhone: data.contactPhone || "",
+        taxId: data.taxId || "",
         company: data.company || "",
         website: data.website || "",
         status: data.status || "prospect",
@@ -128,6 +132,7 @@ export default function ClientDetailPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          taxId: form.taxId || null,
           monthlyFee: form.monthlyFee ? parseInt(form.monthlyFee) : null,
           planTier: form.planTier || null,
           contractStart: form.contractStart || null,
@@ -171,11 +176,16 @@ export default function ClientDetailPage() {
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-gray-900">{client.brandName}</h1>
-          <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${status.color}`}>
-            {status.label}
-          </span>
+        <div>
+          {client.clientNumber && (
+            <p className="text-sm text-gray-400 font-mono mb-1">{client.clientNumber}</p>
+          )}
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-gray-900">{client.brandName}</h1>
+            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${status.color}`}>
+              {status.label}
+            </span>
+          </div>
         </div>
         <div className="flex gap-3">
           {!editing ? (
@@ -281,13 +291,14 @@ export default function ClientDetailPage() {
           </div>
           {/* Email */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Email</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Email <span className="text-red-500">*</span></label>
             {editing ? (
               <input
                 type="email"
                 value={form.contactEmail}
                 onChange={(e) => setForm({ ...form, contactEmail: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
               />
             ) : (
               <p className="text-sm text-gray-900">{client.contactEmail || "—"}</p>
@@ -295,16 +306,32 @@ export default function ClientDetailPage() {
           </div>
           {/* 電話 */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">電話</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">電話 <span className="text-red-500">*</span></label>
             {editing ? (
               <input
                 type="text"
                 value={form.contactPhone}
                 onChange={(e) => setForm({ ...form, contactPhone: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
               />
             ) : (
               <p className="text-sm text-gray-900">{client.contactPhone || "—"}</p>
+            )}
+          </div>
+          {/* 統一編號 */}
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">統一編號 <span className="text-red-500">*</span></label>
+            {editing ? (
+              <input
+                type="text"
+                value={form.taxId}
+                onChange={(e) => setForm({ ...form, taxId: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            ) : (
+              <p className="text-sm text-gray-900">{client.taxId || "—"}</p>
             )}
           </div>
           {/* 負責人 */}
