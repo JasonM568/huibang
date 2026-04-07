@@ -66,14 +66,28 @@ export default function NewSalaryPage() {
     }
   };
 
-  // 日薪 = 底薪 / 計薪天數
-  const dailyWage = (parseInt(form.payDays) || 0) > 0
-    ? Math.round((parseInt(form.baseSalary) || 0) / (parseInt(form.payDays) || 1))
+  // 該月總天數（用來算日薪基準）
+  const monthLastDay = new Date((parseInt(form.year) + 1911), parseInt(form.month), 0).getDate();
+  // 日薪 = 底薪 / 該月總天數
+  const dailyWage = monthLastDay > 0
+    ? Math.round((parseInt(form.baseSalary) || 0) / monthLastDay)
     : 0;
+  // 實際應領底薪 = 日薪 × 計薪天數
+  const actualBasePay = dailyWage * (parseInt(form.payDays) || 0);
+
+  // 日期起迄改變時自動算計薪天數
+  const handleDateChange = (start: string, end: string) => {
+    let days = "";
+    if (start && end) {
+      const diff = Math.round((new Date(end).getTime() - new Date(start).getTime()) / 86400000) + 1;
+      if (diff > 0) days = String(diff);
+    }
+    setForm(f => ({ ...f, workPeriodStart: start, workPeriodEnd: end, ...(days ? { payDays: days } : {}) }));
+  };
 
   const bonusTotal = bonuses.reduce((s, b) => s + (parseInt(b.amount) || 0), 0);
   const deductionTotal = deductions.reduce((s, d) => s + (parseInt(d.amount) || 0), 0);
-  const totalEarnings = (parseInt(form.baseSalary) || 0) - (parseInt(form.leaveDeduction) || 0) + (parseInt(form.overtimePay) || 0) + (parseInt(form.fullAttendanceBonus) || 0) + (parseInt(form.supervisorAllowance) || 0) + bonusTotal;
+  const totalEarnings = actualBasePay - (parseInt(form.leaveDeduction) || 0) + (parseInt(form.overtimePay) || 0) + (parseInt(form.fullAttendanceBonus) || 0) + (parseInt(form.supervisorAllowance) || 0) + bonusTotal;
   const totalDeductions = (parseInt(form.laborInsurance) || 0) + (parseInt(form.healthInsurance) || 0) + (parseInt(form.otherDeduction) || 0) + deductionTotal;
   const netPay = totalEarnings - totalDeductions;
 
@@ -143,11 +157,11 @@ export default function NewSalaryPage() {
             </div>
             <div>
               <label className="block text-xs text-gray-500 mb-1">工作期間起</label>
-              <input type="date" value={form.workPeriodStart} onChange={(e) => setForm({ ...form, workPeriodStart: e.target.value })} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm" />
+              <input type="date" value={form.workPeriodStart} onChange={(e) => handleDateChange(e.target.value, form.workPeriodEnd)} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm" />
             </div>
             <div>
               <label className="block text-xs text-gray-500 mb-1">工作期間迄</label>
-              <input type="date" value={form.workPeriodEnd} onChange={(e) => setForm({ ...form, workPeriodEnd: e.target.value })} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm" />
+              <input type="date" value={form.workPeriodEnd} onChange={(e) => handleDateChange(form.workPeriodStart, e.target.value)} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm" />
             </div>
             {renderField("計薪日數", "payDays")}
           </div>
@@ -157,10 +171,10 @@ export default function NewSalaryPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <h2 className="text-base font-bold text-gray-900 mb-3">應領薪資金額</h2>
           {(parseInt(form.baseSalary) || 0) > 0 && (parseInt(form.payDays) || 0) > 0 && (
-            <p className="text-xs text-gray-500 mb-3 bg-blue-50 px-3 py-1.5 rounded">
-              日薪：<span className="font-medium text-gray-700">${dailyWage.toLocaleString()}</span>
-              （底薪 ${(parseInt(form.baseSalary) || 0).toLocaleString()} ÷ {form.payDays} 天）
-            </p>
+            <div className="text-xs text-gray-500 mb-3 bg-blue-50 px-3 py-2 rounded space-y-0.5">
+              <p>日薪：<span className="font-medium text-gray-700">${dailyWage.toLocaleString()}</span>（底薪 ${(parseInt(form.baseSalary) || 0).toLocaleString()} ÷ {monthLastDay} 天）</p>
+              <p>本期應領底薪：<span className="font-medium text-gray-700">${actualBasePay.toLocaleString()}</span>（日薪 ${dailyWage.toLocaleString()} × {form.payDays} 天）</p>
+            </div>
           )}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {renderField("基本薪資", "baseSalary")}
