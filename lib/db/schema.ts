@@ -411,6 +411,7 @@ export const salaryRecords = pgTable("salary_records", {
   totalDeductions: numeric("total_deductions", { precision: 10, scale: 0 }).default("0").notNull(), // 應扣合計
   netPay: numeric("net_pay", { precision: 10, scale: 0 }).default("0").notNull(),                   // 實領金額
   note: text("note"),
+  internalNote: text("internal_note"),                     // 單位備註說明（僅管理者可見）
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

@@ -43,6 +43,9 @@ CREATE TABLE salary_deductions (
   amount NUMERIC(10, 0) NOT NULL DEFAULT 0
 );
 
+-- ===== 薪資紀錄：新增單位備註說明欄位 =====
+ALTER TABLE salary_records ADD COLUMN internal_note TEXT;
+
 -- ===== customers 欄位調整：email 取消必填，taxId/phone 改必填 =====
 ALTER TABLE customers ALTER COLUMN email DROP NOT NULL;
 UPDATE customers SET tax_id = '' WHERE tax_id IS NULL;

@@ -18,7 +18,7 @@ interface SalaryDetail {
   laborInsurance: string; healthInsurance: string;
   otherDeduction: string; otherDeductionNote: string | null;
   totalEarnings: string; totalDeductions: string; netPay: string;
-  note: string | null; bonuses: ItemRow[]; deductions: ItemRow[];
+  note: string | null; internalNote: string | null; bonuses: ItemRow[]; deductions: ItemRow[];
 }
 
 export default function SalaryDetailPage() {
@@ -33,7 +33,7 @@ export default function SalaryDetailPage() {
     baseSalary: "0", leaveDays: "", leaveDeduction: "0",
     overtimePay: "0", fullAttendanceBonus: "0", supervisorAllowance: "0",
     laborInsurance: "0", healthInsurance: "0",
-    otherDeduction: "0", otherDeductionNote: "", note: "",
+    otherDeduction: "0", otherDeductionNote: "", note: "", internalNote: "",
     workPeriodStart: "", workPeriodEnd: "", payDays: "30",
   });
   const [bonuses, setBonuses] = useState<ItemRow[]>([]);
@@ -66,6 +66,7 @@ export default function SalaryDetailPage() {
       otherDeduction: record.otherDeduction,
       otherDeductionNote: record.otherDeductionNote || "",
       note: record.note || "",
+      internalNote: record.internalNote || "",
       workPeriodStart: record.workPeriodStart || "",
       workPeriodEnd: record.workPeriodEnd || "",
       payDays: record.payDays?.toString() || "30",
@@ -257,9 +258,15 @@ export default function SalaryDetailPage() {
           </div>
 
           {/* 備註 */}
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <label className="block text-xs text-gray-500 mb-1">備註</label>
-            <textarea value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} rows={2} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">備註（會顯示在薪資條上）</label>
+              <textarea value={form.note} onChange={(e) => setForm(f => ({ ...f, note: e.target.value }))} rows={2} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">單位備註說明（僅管理者可見，不會列印在薪資條）</label>
+              <textarea value={form.internalNote} onChange={(e) => setForm(f => ({ ...f, internalNote: e.target.value }))} rows={2} className="w-full px-2 py-1.5 border border-orange-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-orange-50" placeholder="內部備註..." />
+            </div>
           </div>
 
           {/* 實領 */}
@@ -317,6 +324,12 @@ export default function SalaryDetailPage() {
               <div className="mt-4 pt-4 border-t border-gray-100">
                 <p className="text-xs text-gray-500 mb-1">備註</p>
                 <p className="text-sm text-gray-700 whitespace-pre-wrap">{record.note}</p>
+              </div>
+            )}
+            {record.internalNote && (
+              <div className="mt-4 pt-4 border-t border-orange-200">
+                <p className="text-xs text-orange-500 mb-1">單位備註說明（僅管理者可見）</p>
+                <p className="text-sm text-gray-700 whitespace-pre-wrap bg-orange-50 px-2 py-1.5 rounded">{record.internalNote}</p>
               </div>
             )}
           </div>

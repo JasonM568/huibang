@@ -39,6 +39,7 @@ export async function GET(
         totalDeductions: salaryRecords.totalDeductions,
         netPay: salaryRecords.netPay,
         note: salaryRecords.note,
+        internalNote: salaryRecords.internalNote,
         createdAt: salaryRecords.createdAt,
       })
       .from(salaryRecords)

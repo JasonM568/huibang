@@ -29,7 +29,7 @@ export default function NewSalaryPage() {
     baseSalary: "0", leaveDays: "", leaveDeduction: "0",
     overtimePay: "0", fullAttendanceBonus: "0", supervisorAllowance: "0",
     laborInsurance: "0", healthInsurance: "0",
-    otherDeduction: "0", otherDeductionNote: "", note: "",
+    otherDeduction: "0", otherDeductionNote: "", note: "", internalNote: "",
   });
   const [bonuses, setBonuses] = useState<ItemForm[]>([]);
   const [deductions, setDeductions] = useState<ItemForm[]>([]);
@@ -246,6 +246,18 @@ export default function NewSalaryPage() {
 
           <div className="mt-3 pt-3 border-t border-gray-100 text-sm text-right">
             <span className="text-gray-600">應扣合計：</span><span className="font-bold text-red-600">${totalDeductions.toLocaleString()}</span>
+          </div>
+        </div>
+
+        {/* 備註 */}
+        <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">備註（會顯示在薪資條上）</label>
+            <textarea value={form.note} onChange={(e) => setForm(f => ({ ...f, note: e.target.value }))} rows={2} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">單位備註說明（僅管理者可見，不會列印在薪資條）</label>
+            <textarea value={form.internalNote} onChange={(e) => setForm(f => ({ ...f, internalNote: e.target.value }))} rows={2} className="w-full px-2 py-1.5 border border-orange-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-orange-50" placeholder="內部備註..." />
           </div>
         </div>
 

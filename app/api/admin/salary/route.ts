@@ -102,6 +102,7 @@ export async function POST(request: Request) {
       totalDeductions: totalDeductions.toString(),
       netPay: netPay.toString(),
       note: body.note || null,
+      internalNote: body.internalNote || null,
     }).returning();
 
     // Insert bonuses
