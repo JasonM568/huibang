@@ -277,7 +277,7 @@ export default function ClientDetailPage() {
           </div>
           {/* 聯絡人 */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">聯絡人</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">聯絡人 <span className="text-red-500">*</span></label>
             {editing ? (
               <input
                 type="text"
@@ -291,14 +291,13 @@ export default function ClientDetailPage() {
           </div>
           {/* Email */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Email <span className="text-red-500">*</span></label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Email</label>
             {editing ? (
               <input
                 type="email"
                 value={form.contactEmail}
                 onChange={(e) => setForm({ ...form, contactEmail: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
               />
             ) : (
               <p className="text-sm text-gray-900">{client.contactEmail || "—"}</p>
@@ -306,14 +305,13 @@ export default function ClientDetailPage() {
           </div>
           {/* 電話 */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">電話 <span className="text-red-500">*</span></label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">電話</label>
             {editing ? (
               <input
                 type="text"
                 value={form.contactPhone}
                 onChange={(e) => setForm({ ...form, contactPhone: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
               />
             ) : (
               <p className="text-sm text-gray-900">{client.contactPhone || "—"}</p>

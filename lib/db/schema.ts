@@ -107,9 +107,9 @@ export const clients = pgTable("clients", {
   // 品牌基本資料
   brandName: varchar("brand_name", { length: 100 }).notNull(),
   industry: varchar("industry", { length: 50 }),
-  contactName: varchar("contact_name", { length: 50 }),
-  contactEmail: varchar("contact_email", { length: 100 }).notNull(),
-  contactPhone: varchar("contact_phone", { length: 30 }).notNull(),
+  contactName: varchar("contact_name", { length: 50 }).notNull(),
+  contactEmail: varchar("contact_email", { length: 100 }),
+  contactPhone: varchar("contact_phone", { length: 30 }),
   taxId: varchar("tax_id", { length: 20 }).notNull(),
   company: varchar("company", { length: 100 }),
   website: varchar("website", { length: 200 }),

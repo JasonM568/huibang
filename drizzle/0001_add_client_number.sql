@@ -20,11 +20,11 @@ WHERE clients.id = numbered.id;
 -- 新增統一編號欄位（允許 NULL 以相容現有資料，新建立時由 API 驗證必填）
 ALTER TABLE clients ADD COLUMN tax_id VARCHAR(20);
 
--- 將 contact_email、contact_phone 設為 NOT NULL（現有空值先補預設值）
-UPDATE clients SET contact_email = '' WHERE contact_email IS NULL;
-UPDATE clients SET contact_phone = '' WHERE contact_phone IS NULL;
-ALTER TABLE clients ALTER COLUMN contact_email SET NOT NULL;
-ALTER TABLE clients ALTER COLUMN contact_phone SET NOT NULL;
+-- contact_name 設為 NOT NULL，contact_email/contact_phone 允許 NULL
+UPDATE clients SET contact_name = '' WHERE contact_name IS NULL;
+ALTER TABLE clients ALTER COLUMN contact_name SET NOT NULL;
+ALTER TABLE clients ALTER COLUMN contact_email DROP NOT NULL;
+ALTER TABLE clients ALTER COLUMN contact_phone DROP NOT NULL;
 
 -- ===== 員工固定薪資項目 =====
 CREATE TABLE employee_allowances (

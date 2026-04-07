@@ -52,8 +52,7 @@ export default function AdminClientsPage() {
   // 新增客戶 modal
   const [showModal, setShowModal] = useState(false);
   const [newBrandName, setNewBrandName] = useState("");
-  const [newEmail, setNewEmail] = useState("");
-  const [newPhone, setNewPhone] = useState("");
+  const [newContactName, setNewContactName] = useState("");
   const [newTaxId, setNewTaxId] = useState("");
   const [creating, setCreating] = useState(false);
 
@@ -98,7 +97,7 @@ export default function AdminClientsPage() {
   };
 
   const handleCreate = async () => {
-    if (!newBrandName.trim() || !newEmail.trim() || !newPhone.trim() || !newTaxId.trim()) {
+    if (!newBrandName.trim() || !newTaxId.trim() || !newContactName.trim()) {
       alert("請填寫所有必填欄位");
       return;
     }
@@ -109,8 +108,7 @@ export default function AdminClientsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           brandName: newBrandName.trim(),
-          contactEmail: newEmail.trim(),
-          contactPhone: newPhone.trim(),
+          contactName: newContactName.trim(),
           taxId: newTaxId.trim(),
         }),
       });
@@ -118,8 +116,7 @@ export default function AdminClientsPage() {
         const client = await res.json();
         setShowModal(false);
         setNewBrandName("");
-        setNewEmail("");
-        setNewPhone("");
+        setNewContactName("");
         setNewTaxId("");
         router.push(`/admin/clients/${client.id}`);
       } else {
@@ -321,52 +318,40 @@ export default function AdminClientsPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="email"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  placeholder="輸入 Email"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  電話 <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={newPhone}
-                  onChange={(e) => setNewPhone(e.target.value)}
-                  placeholder="輸入電話"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
                   統一編號 <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={newTaxId}
                   onChange={(e) => setNewTaxId(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleCreate()}
                   placeholder="輸入統編"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  聯絡人 <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={newContactName}
+                  onChange={(e) => setNewContactName(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+                  placeholder="輸入聯絡人"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
             <div className="flex justify-end gap-3 mt-6">
               <button
-                onClick={() => { setShowModal(false); setNewBrandName(""); setNewEmail(""); setNewPhone(""); setNewTaxId(""); }}
+                onClick={() => { setShowModal(false); setNewBrandName(""); setNewContactName(""); setNewTaxId(""); }}
                 className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
               >
                 取消
               </button>
               <button
                 onClick={handleCreate}
-                disabled={!newBrandName.trim() || !newEmail.trim() || !newPhone.trim() || !newTaxId.trim() || creating}
+                disabled={!newBrandName.trim() || !newTaxId.trim() || !newContactName.trim() || creating}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
               >
                 {creating ? "建立中..." : "建立"}

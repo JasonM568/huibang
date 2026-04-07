@@ -75,9 +75,9 @@ export async function POST(request: Request) {
     await requireAuth();
     const body = await request.json();
 
-    if (!body.brandName?.trim() || !body.contactEmail?.trim() || !body.contactPhone?.trim() || !body.taxId?.trim()) {
+    if (!body.brandName?.trim() || !body.taxId?.trim() || !body.contactName?.trim()) {
       return NextResponse.json(
-        { error: "品牌名稱、Email、電話、統編為必填欄位" },
+        { error: "品牌名稱、統編、聯絡人為必填欄位" },
         { status: 400 }
       );
     }
@@ -90,9 +90,9 @@ export async function POST(request: Request) {
         clientNumber,
         brandName: body.brandName,
         industry: body.industry || null,
-        contactName: body.contactName || null,
-        contactEmail: body.contactEmail,
-        contactPhone: body.contactPhone,
+        contactName: body.contactName,
+        contactEmail: body.contactEmail || null,
+        contactPhone: body.contactPhone || null,
         taxId: body.taxId,
         company: body.company || null,
         website: body.website || null,
