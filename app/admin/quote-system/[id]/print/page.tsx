@@ -196,21 +196,20 @@ export default function QuotePrintPage() {
 
         </div>
 
-        {/* ===== 發票章格子 + 小計/稅額/總計 ===== */}
-        <div className="flex justify-between items-start relative">
-          {/* 發票章：中心點距離表格底部 10.5mm，即往上移 43mm/2 - 10.5mm = 11mm */}
-          <div style={{ marginTop: "calc(10.5mm - 43mm / 2)" }}>
-            {showStamp && company?.stampUrl ? (
-              <img src={company.stampUrl} alt="發票章" style={{ width: "31mm", height: "43mm", display: "block" }} />
-            ) : (
-              <div className="border border-gray-300 flex items-center justify-center" style={{ width: "200px", height: "150px" }}>
-                <span className="text-xs text-gray-300">發票章</span>
-              </div>
-            )}
-          </div>
+        {/* ===== 發票章 + 小計/稅額/總計 ===== */}
+        <div className="relative">
+          {/* 發票章：absolute 定位，中心點距離此區塊頂部（=表格底部）10.5mm */}
+          {showStamp && company?.stampUrl && (
+            <img
+              src={company.stampUrl}
+              alt="發票章"
+              className="absolute"
+              style={{ width: "31mm", height: "43mm", top: "calc(10.5mm - 43mm / 2)", left: "10px" }}
+            />
+          )}
 
           {/* 總計區 */}
-          <div className="w-60" style={{ fontSize: "12px" }}>
+          <div className="w-60 ml-auto" style={{ fontSize: "12px" }}>
             <div className="flex justify-between py-1.5 border-b border-gray-200">
               <span className="text-gray-600">小計</span>
               <span className="font-medium">${Number(quote.subtotal).toLocaleString()}</span>
