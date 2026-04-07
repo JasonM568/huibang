@@ -18,10 +18,14 @@ export default function NewSalaryPage() {
   const [saving, setSaving] = useState(false);
   const now = new Date();
   const rocYear = now.getFullYear() - 1911;
+  const curMonth = now.getMonth() + 1;
+  const curLastDay = new Date(now.getFullYear(), curMonth, 0).getDate();
+  const curStart = `${now.getFullYear()}-${String(curMonth).padStart(2, "0")}-01`;
+  const curEnd = `${now.getFullYear()}-${String(curMonth).padStart(2, "0")}-${String(curLastDay).padStart(2, "0")}`;
 
   const [form, setForm] = useState({
-    employeeId: "", year: rocYear.toString(), month: (now.getMonth() + 1).toString(),
-    workPeriodStart: "", workPeriodEnd: "", payDays: "30",
+    employeeId: "", year: rocYear.toString(), month: curMonth.toString(),
+    workPeriodStart: curStart, workPeriodEnd: curEnd, payDays: String(curLastDay),
     baseSalary: "0", leaveDays: "", leaveDeduction: "0",
     overtimePay: "0", fullAttendanceBonus: "0", supervisorAllowance: "0",
     laborInsurance: "0", healthInsurance: "0",
@@ -82,6 +86,24 @@ export default function NewSalaryPage() {
     } else { alert("建立失敗"); setSaving(false); }
   };
 
+  const handleMonthChange = (month: string) => {
+    const y = parseInt(form.year) + 1911; // 民國轉西元
+    const m = parseInt(month);
+    const lastDay = new Date(y, m, 0).getDate(); // 該月最後一天
+    const start = `${y}-${String(m).padStart(2, "0")}-01`;
+    const end = `${y}-${String(m).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
+    setForm(f => ({ ...f, month, workPeriodStart: start, workPeriodEnd: end, payDays: String(lastDay) }));
+  };
+
+  const handleYearChange = (year: string) => {
+    const y = parseInt(year) + 1911;
+    const m = parseInt(form.month);
+    const lastDay = new Date(y, m, 0).getDate();
+    const start = `${y}-${String(m).padStart(2, "0")}-01`;
+    const end = `${y}-${String(m).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
+    setForm(f => ({ ...f, year, workPeriodStart: start, workPeriodEnd: end, payDays: String(lastDay) }));
+  };
+
   const renderField = (label: string, field: string, w?: string) => (
     <div className={w || ""} key={field}>
       <label className="block text-xs text-gray-500 mb-1">{label}</label>
@@ -106,11 +128,11 @@ export default function NewSalaryPage() {
             </div>
             <div>
               <label className="block text-xs text-gray-500 mb-1">民國年</label>
-              <input type="number" value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm" />
+              <input type="number" value={form.year} onChange={(e) => handleYearChange(e.target.value)} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm" />
             </div>
             <div>
               <label className="block text-xs text-gray-500 mb-1">月份</label>
-              <select value={form.month} onChange={(e) => setForm({ ...form, month: e.target.value })} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm">
+              <select value={form.month} onChange={(e) => handleMonthChange(e.target.value)} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm">
                 {Array.from({ length: 12 }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}月</option>)}
               </select>
             </div>
