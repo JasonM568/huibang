@@ -54,9 +54,18 @@ export async function POST(request: Request) {
     const bonuses = body.bonuses || [];
     const deductions = body.deductions || [];
 
-    // Calculate totals
+    // 日薪計算：底薪 / 30（固定基數）
+    const baseSalary = parseInt(body.baseSalary) || 0;
+    const payDays = parseInt(body.payDays) || 0;
+    const year = parseInt(body.year) || 0;
+    const month = parseInt(body.month) || 0;
+    const monthLastDay = year > 0 && month > 0 ? new Date(year + 1911, month, 0).getDate() : 30;
+    const isFullMonth = payDays >= monthLastDay;
+    const dailyWage = baseSalary > 0 ? Math.round(baseSalary / 30) : 0;
+    const actualBasePay = isFullMonth ? baseSalary : dailyWage * payDays;
+
     const bonusTotal = bonuses.reduce((s: number, b: { amount: string }) => s + (parseInt(b.amount) || 0), 0);
-    const totalEarnings = (parseInt(body.baseSalary) || 0)
+    const totalEarnings = actualBasePay
       - (parseInt(body.leaveDeduction) || 0)
       + (parseInt(body.overtimePay) || 0)
       + (parseInt(body.fullAttendanceBonus) || 0)

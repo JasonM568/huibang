@@ -80,7 +80,7 @@ export default function SalaryDetailPage() {
     const res = await fetch(`/api/admin/salary/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, bonuses, deductions }),
+      body: JSON.stringify({ ...form, year: record?.year, month: record?.month, bonuses, deductions }),
     });
     if (res.ok) {
       setEditing(false);
