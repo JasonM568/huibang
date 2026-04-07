@@ -167,39 +167,46 @@ export default function QuotePrintPage() {
           </div>
         </div>
 
-        {/* ===== 項目表格 ===== */}
-        <table className="w-full border-collapse mb-0" style={{ fontSize: "12px" }}>
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border border-gray-300 px-2 py-1.5 text-center font-medium w-10">項次</th>
-              <th className="border border-gray-300 px-2 py-1.5 text-left font-medium">項目</th>
-              <th className="border border-gray-300 px-2 py-1.5 text-left font-medium">規格</th>
-              <th className="border border-gray-300 px-2 py-1.5 text-right font-medium w-20">單價</th>
-              <th className="border border-gray-300 px-2 py-1.5 text-center font-medium w-12">數量</th>
-              <th className="border border-gray-300 px-2 py-1.5 text-right font-medium w-24">小計</th>
-            </tr>
-          </thead>
-          <tbody>
-            {quote.items.map((item, index) => (
-              <tr key={item.id}>
-                <td className="border border-gray-300 px-2 py-1 text-center">{index + 1}</td>
-                <td className="border border-gray-300 px-2 py-1">{item.name}</td>
-                <td className="border border-gray-300 px-2 py-1 text-gray-600">{item.specification || ""}</td>
-                <td className="border border-gray-300 px-2 py-1 text-right">${Number(item.unitPrice).toLocaleString()}</td>
-                <td className="border border-gray-300 px-2 py-1 text-center">{item.quantity}</td>
-                <td className="border border-gray-300 px-2 py-1 text-right">${Number(item.amount).toLocaleString()}</td>
+        {/* ===== 項目表格 + 發票章疊加 ===== */}
+        <div className="relative">
+          <table className="w-full border-collapse mb-0" style={{ fontSize: "12px" }}>
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border border-gray-300 px-2 py-1.5 text-center font-medium w-10">項次</th>
+                <th className="border border-gray-300 px-2 py-1.5 text-left font-medium">項目</th>
+                <th className="border border-gray-300 px-2 py-1.5 text-left font-medium">規格</th>
+                <th className="border border-gray-300 px-2 py-1.5 text-right font-medium w-20">單價</th>
+                <th className="border border-gray-300 px-2 py-1.5 text-center font-medium w-12">數量</th>
+                <th className="border border-gray-300 px-2 py-1.5 text-right font-medium w-24">小計</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {quote.items.map((item, index) => (
+                <tr key={item.id}>
+                  <td className="border border-gray-300 px-2 py-1 text-center">{index + 1}</td>
+                  <td className="border border-gray-300 px-2 py-1">{item.name}</td>
+                  <td className="border border-gray-300 px-2 py-1 text-gray-600">{item.specification || ""}</td>
+                  <td className="border border-gray-300 px-2 py-1 text-right">${Number(item.unitPrice).toLocaleString()}</td>
+                  <td className="border border-gray-300 px-2 py-1 text-center">{item.quantity}</td>
+                  <td className="border border-gray-300 px-2 py-1 text-right">${Number(item.amount).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
-        {/* ===== 發票章 + 小計/稅額/總計（底部對齊） ===== */}
-        <div className="flex justify-between items-end mt-3">
-          <div>
-            {showStamp && company?.stampUrl && (
-              <img src={company.stampUrl} alt="發票章" style={{ width: "225px", height: "225px" }} className="object-contain" />
-            )}
-          </div>
+          {/* 發票章：疊在表格左下角 */}
+          {showStamp && company?.stampUrl && (
+            <img
+              src={company.stampUrl}
+              alt="發票章"
+              className="absolute object-contain pointer-events-none"
+              style={{ width: "200px", height: "200px", bottom: 0, left: "10px" }}
+            />
+          )}
+        </div>
+
+        {/* ===== 小計/稅額/總計 ===== */}
+        <div className="flex justify-end">
           <div className="w-60" style={{ fontSize: "12px" }}>
             <div className="flex justify-between py-1.5 border-b border-gray-200">
               <span className="text-gray-600">小計</span>
