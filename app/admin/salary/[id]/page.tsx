@@ -1,10 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
-interface ItemRow { id?: string; name: string; amount: string; }
+interface ItemRow { _id: string; id?: string; name: string; amount: string; }
+
+let _nextId = 1;
+function newItem(name = "", amount = ""): ItemRow {
+  return { _id: `item-${_nextId++}`, name, amount };
+}
 interface SalaryDetail {
   id: string; employeeName: string | null; department: string | null; jobTitle: string | null; jobGrade: string | null;
   year: number; month: number; workPeriodStart: string | null; workPeriodEnd: string | null; payDays: number | null;
@@ -34,6 +39,13 @@ export default function SalaryDetailPage() {
   const [bonuses, setBonuses] = useState<ItemRow[]>([]);
   const [deductions, setDeductions] = useState<ItemRow[]>([]);
 
+  const updateBonus = useCallback((i: number, field: "name" | "amount", value: string) => {
+    setBonuses(prev => { const n = [...prev]; n[i] = { ...n[i], [field]: value }; return n; });
+  }, []);
+  const updateDeduction = useCallback((i: number, field: "name" | "amount", value: string) => {
+    setDeductions(prev => { const n = [...prev]; n[i] = { ...n[i], [field]: value }; return n; });
+  }, []);
+
   const fetchRecord = () => {
     fetch(`/api/admin/salary/${id}`).then(r => r.json()).then(d => { setRecord(d); setLoading(false); });
   };
@@ -58,8 +70,8 @@ export default function SalaryDetailPage() {
       workPeriodEnd: record.workPeriodEnd || "",
       payDays: record.payDays?.toString() || "30",
     });
-    setBonuses(record.bonuses.map(b => ({ name: b.name, amount: b.amount })));
-    setDeductions((record.deductions || []).map(d => ({ name: d.name, amount: d.amount })));
+    setBonuses(record.bonuses.map(b => newItem(b.name, b.amount)));
+    setDeductions((record.deductions || []).map(d => newItem(d.name, d.amount)));
     setEditing(true);
   };
 
@@ -90,10 +102,10 @@ export default function SalaryDetailPage() {
   const editTotalDeductions = (parseInt(form.laborInsurance) || 0) + (parseInt(form.healthInsurance) || 0) + (parseInt(form.otherDeduction) || 0) + deductionTotal;
   const editNetPay = editTotalEarnings - editTotalDeductions;
 
-  const F = ({ label, field }: { label: string; field: string }) => (
-    <div>
+  const renderField = (label: string, field: string) => (
+    <div key={field}>
       <label className="block text-xs text-gray-500 mb-1">{label}</label>
-      <input type="number" value={(form as Record<string, string>)[field]} onChange={(e) => setForm({ ...form, [field]: e.target.value })} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <input type="number" value={(form as Record<string, string>)[field]} onChange={(e) => setForm(f => ({ ...f, [field]: e.target.value }))} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
     </div>
   );
 
@@ -135,7 +147,7 @@ export default function SalaryDetailPage() {
                 <label className="block text-xs text-gray-500 mb-1">工作期間迄</label>
                 <input type="date" value={form.workPeriodEnd} onChange={(e) => setForm({ ...form, workPeriodEnd: e.target.value })} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm" />
               </div>
-              <F label="計薪日數" field="payDays" />
+              {renderField("計薪日數", "payDays")}
             </div>
           </div>
 
@@ -143,27 +155,27 @@ export default function SalaryDetailPage() {
           <div className="bg-white rounded-xl border border-gray-200 p-5">
             <h2 className="text-base font-bold text-gray-900 mb-3">應領薪資金額</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <F label="基本薪資" field="baseSalary" />
+              {renderField("基本薪資", "baseSalary")}
               <div>
                 <label className="block text-xs text-gray-500 mb-1">請假日數說明</label>
-                <input value={form.leaveDays} onChange={(e) => setForm({ ...form, leaveDays: e.target.value })} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm" />
+                <input value={form.leaveDays} onChange={(e) => setForm(f => ({ ...f, leaveDays: e.target.value }))} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm" />
               </div>
-              <F label="請假扣款" field="leaveDeduction" />
-              <F label="加班費" field="overtimePay" />
-              <F label="全勤獎金" field="fullAttendanceBonus" />
-              <F label="主管加給" field="supervisorAllowance" />
+              {renderField("請假扣款", "leaveDeduction")}
+              {renderField("加班費", "overtimePay")}
+              {renderField("全勤獎金", "fullAttendanceBonus")}
+              {renderField("主管加給", "supervisorAllowance")}
             </div>
 
             <div className="mt-3 pt-3 border-t border-gray-100">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-medium text-gray-700">領薪項目</span>
-                <button type="button" onClick={() => setBonuses([...bonuses, { name: "", amount: "" }])} className="text-xs text-blue-600 hover:text-blue-800">+ 新增領薪項目</button>
+                <button type="button" onClick={() => setBonuses(prev => [...prev, newItem()])} className="text-xs text-blue-600 hover:text-blue-800">+ 新增領薪項目</button>
               </div>
               {bonuses.map((b, i) => (
-                <div key={i} className="flex gap-2 mb-2">
-                  <input placeholder="項目名稱" value={b.name} onChange={(e) => { const nb = [...bonuses]; nb[i].name = e.target.value; setBonuses(nb); }} className="flex-1 px-2 py-1.5 border border-gray-200 rounded text-sm" />
-                  <input type="number" placeholder="金額" value={b.amount} onChange={(e) => { const nb = [...bonuses]; nb[i].amount = e.target.value; setBonuses(nb); }} className="w-28 px-2 py-1.5 border border-gray-200 rounded text-sm" />
-                  <button type="button" onClick={() => setBonuses(bonuses.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-600 text-sm">x</button>
+                <div key={b._id} className="flex gap-2 mb-2">
+                  <input placeholder="項目名稱" value={b.name} onChange={(e) => updateBonus(i, "name", e.target.value)} className="flex-1 px-2 py-1.5 border border-gray-200 rounded text-sm" />
+                  <input type="number" placeholder="金額" value={b.amount} onChange={(e) => updateBonus(i, "amount", e.target.value)} className="w-28 px-2 py-1.5 border border-gray-200 rounded text-sm" />
+                  <button type="button" onClick={() => setBonuses(prev => prev.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-600 text-sm">x</button>
                 </div>
               ))}
             </div>
@@ -177,25 +189,25 @@ export default function SalaryDetailPage() {
           <div className="bg-white rounded-xl border border-gray-200 p-5">
             <h2 className="text-base font-bold text-gray-900 mb-3">應扣金額</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <F label="勞保費" field="laborInsurance" />
-              <F label="健保費" field="healthInsurance" />
-              <F label="其他扣款" field="otherDeduction" />
+              {renderField("勞保費", "laborInsurance")}
+              {renderField("健保費", "healthInsurance")}
+              {renderField("其他扣款", "otherDeduction")}
               <div>
                 <label className="block text-xs text-gray-500 mb-1">其他扣款說明</label>
-                <input value={form.otherDeductionNote} onChange={(e) => setForm({ ...form, otherDeductionNote: e.target.value })} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm" />
+                <input value={form.otherDeductionNote} onChange={(e) => setForm(f => ({ ...f, otherDeductionNote: e.target.value }))} className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm" />
               </div>
             </div>
 
             <div className="mt-3 pt-3 border-t border-gray-100">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-medium text-gray-700">應扣項目</span>
-                <button type="button" onClick={() => setDeductions([...deductions, { name: "", amount: "" }])} className="text-xs text-blue-600 hover:text-blue-800">+ 新增應扣項目</button>
+                <button type="button" onClick={() => setDeductions(prev => [...prev, newItem()])} className="text-xs text-blue-600 hover:text-blue-800">+ 新增應扣項目</button>
               </div>
               {deductions.map((d, i) => (
-                <div key={i} className="flex gap-2 mb-2">
-                  <input placeholder="項目名稱" value={d.name} onChange={(e) => { const nd = [...deductions]; nd[i].name = e.target.value; setDeductions(nd); }} className="flex-1 px-2 py-1.5 border border-gray-200 rounded text-sm" />
-                  <input type="number" placeholder="金額" value={d.amount} onChange={(e) => { const nd = [...deductions]; nd[i].amount = e.target.value; setDeductions(nd); }} className="w-28 px-2 py-1.5 border border-gray-200 rounded text-sm" />
-                  <button type="button" onClick={() => setDeductions(deductions.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-600 text-sm">x</button>
+                <div key={d._id} className="flex gap-2 mb-2">
+                  <input placeholder="項目名稱" value={d.name} onChange={(e) => updateDeduction(i, "name", e.target.value)} className="flex-1 px-2 py-1.5 border border-gray-200 rounded text-sm" />
+                  <input type="number" placeholder="金額" value={d.amount} onChange={(e) => updateDeduction(i, "amount", e.target.value)} className="w-28 px-2 py-1.5 border border-gray-200 rounded text-sm" />
+                  <button type="button" onClick={() => setDeductions(prev => prev.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-600 text-sm">x</button>
                 </div>
               ))}
             </div>
