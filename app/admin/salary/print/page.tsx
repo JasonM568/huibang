@@ -11,96 +11,75 @@ interface SalaryRecord {
   overtimePay: string; fullAttendanceBonus: string; supervisorAllowance: string;
   laborInsurance: string; healthInsurance: string;
   otherDeduction: string; totalEarnings: string; totalDeductions: string; netPay: string;
-  bonuses: ItemRow[]; deductions: ItemRow[];
+  note: string | null; bonuses: ItemRow[]; deductions: ItemRow[];
 }
 
-function SalarySlip({ r, companyName }: { r: SalaryRecord; companyName: string }) {
-  const fmt = (v: string | number) => {
-    const num = Number(v);
-    return num > 0 ? `$ ${num.toLocaleString()}` : "";
-  };
+function SalarySlip({ r, showSignature }: { r: SalaryRecord; showSignature: boolean }) {
+  const amt = (v: string | number) => Number(v) > 0 ? Number(v).toLocaleString() : "";
+  const cell = "border border-gray-400 px-2 py-1";
+  const cellR = `${cell} text-right`;
+  const sectionHeader = `${cell} bg-gray-100 text-center align-middle font-medium`;
 
-  const earnRows: { label: string; value: string }[] = [
-    { label: "基本薪資", value: `$ ${Number(r.baseSalary).toLocaleString()}` },
-  ];
-  if (Number(r.leaveDeduction) > 0) earnRows.push({ label: "請假扣款", value: `- ${fmt(r.leaveDeduction)}` });
-  if (Number(r.overtimePay) > 0) earnRows.push({ label: "加班費", value: fmt(r.overtimePay) });
-  (r.bonuses || []).forEach(b => earnRows.push({ label: b.name, value: `$ ${Number(b.amount).toLocaleString()}` }));
-  if (Number(r.fullAttendanceBonus) > 0) earnRows.push({ label: "全勤獎金", value: fmt(r.fullAttendanceBonus) });
-  if (Number(r.supervisorAllowance) > 0) earnRows.push({ label: "主管加給", value: fmt(r.supervisorAllowance) });
+  const earnItems: { label: string; dollar?: boolean; value: string }[] = [];
+  earnItems.push({ label: "基本薪資", dollar: true, value: Number(r.baseSalary).toLocaleString() });
+  earnItems.push({ label: "計薪日", value: `共${r.payDays || 0}日` });
+  earnItems.push({ label: "請假日數", value: r.leaveDays || "" });
+  if (Number(r.leaveDeduction) > 0) earnItems.push({ label: "請假扣款", dollar: true, value: amt(r.leaveDeduction) });
+  if (Number(r.overtimePay) > 0) earnItems.push({ label: "加班費", dollar: true, value: amt(r.overtimePay) });
+  (r.bonuses || []).forEach(b => earnItems.push({ label: b.name, dollar: true, value: amt(b.amount) }));
+  if (Number(r.fullAttendanceBonus) > 0) earnItems.push({ label: "全勤獎金", dollar: true, value: amt(r.fullAttendanceBonus) });
+  if (Number(r.supervisorAllowance) > 0) earnItems.push({ label: "主管加給", dollar: true, value: amt(r.supervisorAllowance) });
 
-  const deductRows: { label: string; value: string }[] = [];
-  if (Number(r.laborInsurance) > 0) deductRows.push({ label: "勞保費", value: fmt(r.laborInsurance) });
-  if (Number(r.healthInsurance) > 0) deductRows.push({ label: "健保費", value: fmt(r.healthInsurance) });
-  if (Number(r.otherDeduction) > 0) deductRows.push({ label: "其他扣款", value: fmt(r.otherDeduction) });
-  (r.deductions || []).forEach(d => deductRows.push({ label: d.name, value: `$ ${Number(d.amount).toLocaleString()}` }));
-
-  const cell = "border border-gray-300 px-1 py-0.5";
+  const deductItems: { label: string; dollar?: boolean; value: string }[] = [];
+  if (Number(r.laborInsurance) > 0) deductItems.push({ label: "就保費", dollar: true, value: amt(r.laborInsurance) });
+  deductItems.push({ label: "勞保費", value: "" });
+  deductItems.push({ label: "健保費", value: "" });
+  deductItems.push({ label: "常年會費", value: "" });
+  if (Number(r.otherDeduction) > 0) deductItems.push({ label: "其他扣款", dollar: true, value: amt(r.otherDeduction) });
+  (r.deductions || []).forEach(d => deductItems.push({ label: d.name, dollar: true, value: amt(d.amount) }));
 
   return (
-    <div className="border border-gray-400 text-[10px] leading-tight" style={{ width: "48%", pageBreakInside: "avoid" }}>
-      <div className="px-2 pt-1.5 pb-1">
-        <div className="flex justify-between items-start">
-          <div>
-            <p className="font-bold text-xs">員工薪資表</p>
-            <p>月份：{r.year}年{r.month}月</p>
-            <p>單位：{r.department || ""}</p>
-            <p>工作期間：{r.workPeriodStart || `${r.month}/1`}～{r.workPeriodEnd || `${r.month}/28`}</p>
-          </div>
-          <p className="text-[9px] text-gray-500">{companyName}</p>
+    <div style={{ width: "48%", pageBreakInside: "avoid", fontSize: "10px", lineHeight: "1.35" }}>
+      <div className="flex justify-between items-start mb-0.5">
+        <div>
+          <p className="font-bold text-xs">員工薪資表</p>
+          <p>月份：{r.year}年{r.month}月</p>
+          <p>單位：{r.department || ""}</p>
+          <p>工作期間：{r.year}年{r.workPeriodStart ? new Date(r.workPeriodStart).getMonth() + 1 + "月" + new Date(r.workPeriodStart).getDate() + "日" : `${r.month}月1日`}～{r.workPeriodEnd ? new Date(r.workPeriodEnd).getMonth() + 1 + "月" + new Date(r.workPeriodEnd).getDate() + "日" : `${r.month}月28日`}</p>
         </div>
+        <p className="text-[9px] text-gray-500">{showSignature ? "公司留抵" : ""}</p>
       </div>
-      <table className="w-full border-collapse">
+      <table className="w-full border-collapse border border-gray-400">
         <tbody>
-          <tr><td className={`${cell} bg-gray-50`} colSpan={2}>職等</td><td className={cell} colSpan={2}>{r.jobGrade || ""}</td></tr>
-          <tr><td className={`${cell} bg-gray-50`} colSpan={2}>職位</td><td className={cell} colSpan={2}>{r.jobTitle || ""}</td></tr>
-          <tr><td className={`${cell} bg-gray-50`} colSpan={2}>姓名</td><td className={`${cell} bg-yellow-100 font-medium`} colSpan={2}>{r.employeeName}</td></tr>
-
-          {earnRows.map((row, i) => (
+          <tr><td className={cell} colSpan={2}>職等</td><td className={cell} colSpan={2}>{r.jobGrade || ""}</td></tr>
+          <tr><td className={cell} colSpan={2}>職位</td><td className={cell} colSpan={2}>{r.jobTitle || ""}</td></tr>
+          <tr><td className={cell} colSpan={2}>姓名</td><td className={`${cell} font-bold`} colSpan={2}>{r.employeeName}</td></tr>
+          {earnItems.map((item, i) => (
             <tr key={`e-${i}`}>
-              {i === 0 && <td className={`${cell} bg-gray-50 w-[14%] text-center align-middle`} rowSpan={earnRows.length + 2}>應<br/>領<br/>薪<br/>資</td>}
-              <td className={cell}>{row.label}</td>
-              <td className={`${cell} text-right`} colSpan={2}>{row.value}</td>
+              {i === 0 && <td className={sectionHeader} style={{ width: "14%" }} rowSpan={earnItems.length}>應<br/>領<br/>薪<br/>資<br/>金<br/>額</td>}
+              <td className={cell}>{item.label}</td>
+              {item.dollar ? (<><td className={cellR} style={{ width: "10%" }}>$</td><td className={cellR} style={{ width: "25%" }}>{item.value}</td></>) : (<td className={cellR} colSpan={2}>{item.value}</td>)}
             </tr>
           ))}
-          <tr>
-            <td className={cell}>計薪日</td>
-            <td className={`${cell} text-right`} colSpan={2}>共{r.payDays}日</td>
-          </tr>
-          <tr>
-            <td className={cell}>請假日數</td>
-            <td className={`${cell} text-right text-[8px]`} colSpan={2}>{r.leaveDays || ""}</td>
-          </tr>
-          <tr className="bg-blue-50">
-            <td className={`${cell} font-medium`} colSpan={2}>應領合計</td>
-            <td className={`${cell} text-right font-medium`} colSpan={2}>$ {Number(r.totalEarnings).toLocaleString()}</td>
-          </tr>
-
-          {deductRows.map((row, i) => (
+          {deductItems.map((item, i) => (
             <tr key={`d-${i}`}>
-              {i === 0 && <td className={`${cell} bg-gray-50 w-[14%] text-center align-middle`} rowSpan={deductRows.length}>應<br/>扣<br/>金<br/>額</td>}
-              <td className={cell}>{row.label}</td>
-              <td className={`${cell} text-right`} colSpan={2}>{row.value}</td>
+              {i === 0 && <td className={sectionHeader} rowSpan={deductItems.length}>應<br/>扣<br/>金<br/>額</td>}
+              <td className={cell}>{item.label}</td>
+              {item.dollar ? (<><td className={cellR}>$</td><td className={cellR}>{item.value}</td></>) : (<td className={cellR} colSpan={2}>{item.value}</td>)}
             </tr>
           ))}
-          {deductRows.length === 0 && (
-            <tr>
-              <td className={`${cell} bg-gray-50 text-center`}>應扣</td>
-              <td className={cell}>（無）</td>
-              <td className={`${cell} text-right`} colSpan={2}></td>
-            </tr>
-          )}
-          <tr className="bg-red-50">
-            <td className={`${cell} font-medium`} colSpan={2}>應扣合計</td>
-            <td className={`${cell} text-right font-medium`} colSpan={2}>$ {Number(r.totalDeductions).toLocaleString()}</td>
-          </tr>
-
-          <tr className="bg-yellow-50 font-bold">
-            <td className={cell} colSpan={2}>實領金額</td>
-            <td className={`${cell} text-right bg-yellow-100`} colSpan={2}>$ {Number(r.netPay).toLocaleString()}</td>
-          </tr>
+          <tr><td className={cell} colSpan={2}>合計</td><td className={cellR} colSpan={2}></td></tr>
+          <tr><td className={cell} colSpan={2}>實領金額</td><td className={cellR}>$</td><td className={`${cellR} font-bold bg-yellow-50`}>{Number(r.netPay).toLocaleString()}</td></tr>
+          <tr className="font-bold"><td className={cell} colSpan={2}>總計</td><td className={cellR}>$</td><td className={cellR}>{Number(r.netPay).toLocaleString()}</td></tr>
         </tbody>
       </table>
+      {r.note && <p className="mt-0.5 text-[9px] text-gray-600">{r.note}</p>}
+      {showSignature && (
+        <div className="mt-1.5 text-[9px]">
+          <p>領薪簽章：</p>
+          <div className="flex justify-between mt-3"><p>核准主管：</p><p>製表：</p></div>
+        </div>
+      )}
     </div>
   );
 }
@@ -118,9 +97,9 @@ export default function SalaryBatchPrintPage() {
     if (month) params.set("month", month);
     fetch(`/api/admin/salary?${params}`).then(r => r.json()).then(async (d) => {
       const full = await Promise.all(
-        (d.data || []).map(async (r: SalaryRecord) => {
-          const detail = await fetch(`/api/admin/salary/${r.id}`).then(res => res.json());
-          return { ...r, bonuses: detail.bonuses || [], deductions: detail.deductions || [] };
+        (d.data || []).map(async (rec: SalaryRecord) => {
+          const detail = await fetch(`/api/admin/salary/${rec.id}`).then(res => res.json());
+          return { ...rec, bonuses: detail.bonuses || [], deductions: detail.deductions || [] };
         })
       );
       setRecords(full);
@@ -143,8 +122,13 @@ export default function SalaryBatchPrintPage() {
       </div>
       <div className="max-w-[210mm] mx-auto bg-white p-4 sm:my-6 sm:shadow-lg print:p-0 print:shadow-none" style={{ fontFamily: "'Noto Sans TC', 'Microsoft JhengHei', sans-serif" }}>
         <h2 className="text-center font-bold text-base mb-3">{year}-{month}月份</h2>
-        <div className="flex flex-wrap gap-[2%] gap-y-3">
-          {records.map(r => <SalarySlip key={r.id} r={r} companyName="惠邦創意整合行銷有限公司" />)}
+        <div className="space-y-6">
+          {records.map(r => (
+            <div key={r.id} className="flex justify-between" style={{ pageBreakInside: "avoid" }}>
+              <SalarySlip r={r} showSignature={false} />
+              <SalarySlip r={r} showSignature={true} />
+            </div>
+          ))}
         </div>
       </div>
     </>
