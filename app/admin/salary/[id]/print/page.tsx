@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
-interface Bonus { name: string; amount: string; }
+interface ItemRow { name: string; amount: string; }
 interface Record {
   employeeName: string | null; department: string | null; jobGrade: string | null; jobTitle: string | null;
   year: number; month: number; workPeriodStart: string | null; workPeriodEnd: string | null; payDays: number | null;
@@ -11,11 +11,32 @@ interface Record {
   overtimePay: string; fullAttendanceBonus: string; supervisorAllowance: string;
   laborInsurance: string; healthInsurance: string;
   otherDeduction: string; totalEarnings: string; totalDeductions: string; netPay: string;
-  bonuses: Bonus[];
+  bonuses: ItemRow[]; deductions: ItemRow[];
 }
 
 function SalarySlip({ r, companyName }: { r: Record; companyName: string }) {
-  const n = (v: string) => Number(v) > 0 ? `$ ${Number(v).toLocaleString()}` : "";
+  const fmt = (v: string | number) => {
+    const num = Number(v);
+    return num > 0 ? `$ ${num.toLocaleString()}` : "";
+  };
+
+  const earnRows: { label: string; value: string }[] = [
+    { label: "基本薪資", value: `$ ${Number(r.baseSalary).toLocaleString()}` },
+  ];
+  if (Number(r.leaveDeduction) > 0) earnRows.push({ label: "請假扣款", value: `- ${fmt(r.leaveDeduction)}` });
+  if (Number(r.overtimePay) > 0) earnRows.push({ label: "加班費", value: fmt(r.overtimePay) });
+  (r.bonuses || []).forEach(b => earnRows.push({ label: b.name, value: `$ ${Number(b.amount).toLocaleString()}` }));
+  if (Number(r.fullAttendanceBonus) > 0) earnRows.push({ label: "全勤獎金", value: fmt(r.fullAttendanceBonus) });
+  if (Number(r.supervisorAllowance) > 0) earnRows.push({ label: "主管加給", value: fmt(r.supervisorAllowance) });
+
+  const deductRows: { label: string; value: string }[] = [];
+  if (Number(r.laborInsurance) > 0) deductRows.push({ label: "勞保費", value: fmt(r.laborInsurance) });
+  if (Number(r.healthInsurance) > 0) deductRows.push({ label: "健保費", value: fmt(r.healthInsurance) });
+  if (Number(r.otherDeduction) > 0) deductRows.push({ label: "其他扣款", value: fmt(r.otherDeduction) });
+  (r.deductions || []).forEach(d => deductRows.push({ label: d.name, value: `$ ${Number(d.amount).toLocaleString()}` }));
+
+  const cell = "border border-gray-300 px-1 py-0.5";
+
   return (
     <div className="border border-gray-400 text-[11px] leading-tight" style={{ width: "48%", pageBreakInside: "avoid" }}>
       <div className="px-2 pt-2 pb-1">
@@ -24,64 +45,59 @@ function SalarySlip({ r, companyName }: { r: Record; companyName: string }) {
             <p className="font-bold text-sm">員工薪資表</p>
             <p>月份：{r.year}年{r.month}月</p>
             <p>單位：{r.department || ""}</p>
-            <p>工作期間：{r.year}年{r.workPeriodStart || `${r.month}/1`}～{r.workPeriodEnd || `${r.month}/28`}</p>
+            <p>工作期間：{r.workPeriodStart || `${r.month}/1`}～{r.workPeriodEnd || `${r.month}/28`}</p>
           </div>
           <p className="text-[10px] text-gray-500">{companyName}</p>
         </div>
       </div>
       <table className="w-full border-collapse">
         <tbody>
-          <tr><td className="border border-gray-300 px-1 py-0.5 bg-gray-50" colSpan={2}>職　等</td><td className="border border-gray-300 px-1 py-0.5" colSpan={2}>{r.jobGrade || ""}</td></tr>
-          <tr><td className="border border-gray-300 px-1 py-0.5 bg-gray-50" colSpan={2}>職　位</td><td className="border border-gray-300 px-1 py-0.5" colSpan={2}>{r.jobTitle || ""}</td></tr>
-          <tr><td className="border border-gray-300 px-1 py-0.5 bg-gray-50" colSpan={2}>姓　名</td><td className="border border-gray-300 px-1 py-0.5 bg-yellow-100 font-medium" colSpan={2}>{r.employeeName}</td></tr>
-          <tr>
-            <td className="border border-gray-300 px-1 py-0.5 bg-gray-50 w-[15%]" rowSpan={6 + r.bonuses.length + (Number(r.leaveDeduction) > 0 ? 1 : 0) + (Number(r.overtimePay) > 0 ? 1 : 0)}>應<br/>領<br/>薪<br/>資<br/>金<br/>額</td>
-            <td className="border border-gray-300 px-1 py-0.5">基本薪資</td>
-            <td className="border border-gray-300 px-1 py-0.5 text-right">$</td>
-            <td className="border border-gray-300 px-1 py-0.5 text-right bg-yellow-100">{Number(r.baseSalary).toLocaleString()}</td>
-          </tr>
-          <tr>
-            <td className="border border-gray-300 px-1 py-0.5">計薪日</td>
-            <td className="border border-gray-300 px-1 py-0.5 text-right" colSpan={2}>共{r.payDays}日</td>
-          </tr>
-          <tr>
-            <td className="border border-gray-300 px-1 py-0.5">請假日數</td>
-            <td className="border border-gray-300 px-1 py-0.5 text-right text-[9px]" colSpan={2}>{r.leaveDays || ""}</td>
-          </tr>
-          {Number(r.leaveDeduction) > 0 && (
-            <tr><td className="border border-gray-300 px-1 py-0.5">請假扣款</td><td className="border border-gray-300 px-1 py-0.5 text-right" colSpan={2}>{n(r.leaveDeduction)}</td></tr>
-          )}
-          {Number(r.overtimePay) > 0 && (
-            <tr><td className="border border-gray-300 px-1 py-0.5">加班費</td><td className="border border-gray-300 px-1 py-0.5 text-right" colSpan={2}>{n(r.overtimePay)}</td></tr>
-          )}
-          {r.bonuses.map((b, i) => (
-            <tr key={i}><td className="border border-gray-300 px-1 py-0.5">{b.name}</td><td className="border border-gray-300 px-1 py-0.5 text-right">$</td><td className="border border-gray-300 px-1 py-0.5 text-right">{Number(b.amount).toLocaleString()}</td></tr>
+          <tr><td className={`${cell} bg-gray-50`} colSpan={2}>職　等</td><td className={cell} colSpan={2}>{r.jobGrade || ""}</td></tr>
+          <tr><td className={`${cell} bg-gray-50`} colSpan={2}>職　位</td><td className={cell} colSpan={2}>{r.jobTitle || ""}</td></tr>
+          <tr><td className={`${cell} bg-gray-50`} colSpan={2}>姓　名</td><td className={`${cell} bg-yellow-100 font-medium`} colSpan={2}>{r.employeeName}</td></tr>
+
+          {earnRows.map((row, i) => (
+            <tr key={`e-${i}`}>
+              {i === 0 && <td className={`${cell} bg-gray-50 w-[15%] text-center align-middle`} rowSpan={earnRows.length + 2}>應<br/>領<br/>薪<br/>資</td>}
+              <td className={cell}>{row.label}</td>
+              <td className={`${cell} text-right`} colSpan={2}>{row.value}</td>
+            </tr>
           ))}
-          {Number(r.fullAttendanceBonus) > 0 && (
-            <tr><td className="border border-gray-300 px-1 py-0.5">全勤獎金</td><td className="border border-gray-300 px-1 py-0.5 text-right">$</td><td className="border border-gray-300 px-1 py-0.5 text-right">{Number(r.fullAttendanceBonus).toLocaleString()}</td></tr>
-          )}
-          {Number(r.supervisorAllowance) > 0 && (
-            <tr><td className="border border-gray-300 px-1 py-0.5">主管加給</td><td className="border border-gray-300 px-1 py-0.5 text-right">$</td><td className="border border-gray-300 px-1 py-0.5 text-right">{Number(r.supervisorAllowance).toLocaleString()}</td></tr>
-          )}
-
           <tr>
-            <td className="border border-gray-300 px-1 py-0.5 bg-gray-50" rowSpan={3}>應<br/>扣<br/>金<br/>額</td>
-            <td className="border border-gray-300 px-1 py-0.5">勞保費</td>
-            <td className="border border-gray-300 px-1 py-0.5 text-right" colSpan={2}>{n(r.laborInsurance)}</td>
+            <td className={cell}>計薪日</td>
+            <td className={`${cell} text-right`} colSpan={2}>共{r.payDays}日</td>
           </tr>
-          <tr><td className="border border-gray-300 px-1 py-0.5">健保費</td><td className="border border-gray-300 px-1 py-0.5 text-right" colSpan={2}>{n(r.healthInsurance)}</td></tr>
           <tr>
-            <td className="border border-gray-300 px-1 py-0.5">合計</td>
-            <td className="border border-gray-300 px-1 py-0.5" colSpan={2}></td>
+            <td className={cell}>請假日數</td>
+            <td className={`${cell} text-right text-[9px]`} colSpan={2}>{r.leaveDays || ""}</td>
+          </tr>
+          <tr className="bg-blue-50">
+            <td className={`${cell} font-medium`} colSpan={2}>應領合計</td>
+            <td className={`${cell} text-right font-medium`} colSpan={2}>$ {Number(r.totalEarnings).toLocaleString()}</td>
           </tr>
 
-          <tr className="bg-gray-50">
-            <td className="border border-gray-300 px-1 py-0.5" colSpan={2}>實領金額</td>
-            <td className="border border-gray-300 px-1 py-1 text-right font-bold bg-yellow-100" colSpan={2}>$ {Number(r.netPay).toLocaleString()}</td>
+          {deductRows.map((row, i) => (
+            <tr key={`d-${i}`}>
+              {i === 0 && <td className={`${cell} bg-gray-50 w-[15%] text-center align-middle`} rowSpan={deductRows.length}>應<br/>扣<br/>金<br/>額</td>}
+              <td className={cell}>{row.label}</td>
+              <td className={`${cell} text-right`} colSpan={2}>{row.value}</td>
+            </tr>
+          ))}
+          {deductRows.length === 0 && (
+            <tr>
+              <td className={`${cell} bg-gray-50 w-[15%] text-center`}>應扣</td>
+              <td className={cell}>（無）</td>
+              <td className={`${cell} text-right`} colSpan={2}></td>
+            </tr>
+          )}
+          <tr className="bg-red-50">
+            <td className={`${cell} font-medium`} colSpan={2}>應扣合計</td>
+            <td className={`${cell} text-right font-medium`} colSpan={2}>$ {Number(r.totalDeductions).toLocaleString()}</td>
           </tr>
-          <tr className="font-bold">
-            <td className="border border-gray-300 px-1 py-1" colSpan={2}>總計</td>
-            <td className="border border-gray-300 px-1 py-1 text-right" colSpan={2}>$ {Number(r.netPay).toLocaleString()}</td>
+
+          <tr className="bg-yellow-50 font-bold">
+            <td className={cell} colSpan={2}>實領金額</td>
+            <td className={`${cell} text-right bg-yellow-100`} colSpan={2}>$ {Number(r.netPay).toLocaleString()}</td>
           </tr>
         </tbody>
       </table>

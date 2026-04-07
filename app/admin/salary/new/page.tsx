@@ -66,6 +66,11 @@ export default function NewSalaryPage() {
     }
   };
 
+  // 日薪 = 底薪 / 計薪天數
+  const dailyWage = (parseInt(form.payDays) || 0) > 0
+    ? Math.round((parseInt(form.baseSalary) || 0) / (parseInt(form.payDays) || 1))
+    : 0;
+
   const bonusTotal = bonuses.reduce((s, b) => s + (parseInt(b.amount) || 0), 0);
   const deductionTotal = deductions.reduce((s, d) => s + (parseInt(d.amount) || 0), 0);
   const totalEarnings = (parseInt(form.baseSalary) || 0) - (parseInt(form.leaveDeduction) || 0) + (parseInt(form.overtimePay) || 0) + (parseInt(form.fullAttendanceBonus) || 0) + (parseInt(form.supervisorAllowance) || 0) + bonusTotal;
@@ -151,6 +156,9 @@ export default function NewSalaryPage() {
         {/* 應領 */}
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <h2 className="text-base font-bold text-gray-900 mb-3">應領薪資金額</h2>
+          {dailyWage > 0 && (
+            <p className="text-xs text-gray-400 mb-3">日薪：${dailyWage.toLocaleString()}（底薪 ${(parseInt(form.baseSalary) || 0).toLocaleString()} ÷ {form.payDays} 天）</p>
+          )}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {renderField("基本薪資", "baseSalary")}
             <div>
