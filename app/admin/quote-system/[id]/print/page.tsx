@@ -194,7 +194,7 @@ export default function QuotePrintPage() {
         </table>
 
         {/* ===== 發票章 + 小計/稅額/總計（底部對齊） ===== */}
-        <div className="flex justify-between items-end" style={{ marginTop: "28px" }}>
+        <div className="flex justify-between items-end mt-3">
           <div>
             {showStamp && company?.stampUrl && (
               <img src={company.stampUrl} alt="發票章" style={{ width: "225px", height: "225px" }} className="object-contain" />
