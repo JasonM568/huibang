@@ -243,17 +243,17 @@ export default function QuotePrintPage() {
         <div className="mt-6 pt-4 border-t border-gray-200">
           <div className="grid grid-cols-2 gap-8">
             <div>
-              <p className="text-xs font-medium text-gray-700 mb-2">報價方簽章</p>
+              <p className="text-xs font-medium text-gray-700 relative">報價方簽章</p>
               {showSeals && (
-                <div className="flex items-end gap-2 mb-1">
+                <div className="flex items-end gap-2" style={{ marginTop: "calc(10mm - 32px)" }}>
                   <img src="/company/seal-large.png" alt="公司大章" className="w-16 h-16 object-contain" />
                   <img src="/company/seal-small.png" alt="公司小章" className="w-12 h-12 object-contain" />
                 </div>
               )}
               {showSignature && (
-                <img src="/company/signature.png" alt="簽名" style={{ height: "100px" }} className="object-contain" />
+                <img src="/company/signature.png" alt="簽名" className="object-contain" style={{ height: "100px", marginTop: "calc(10mm - 50px)" }} />
               )}
-              {!showSeals && !showSignature && <div className="h-16"></div>}
+              {!showSeals && !showSignature && <div style={{ height: "20mm" }}></div>}
               <div className="border-b border-gray-400 w-40 mt-1"></div>
               <p className="text-[10px] text-gray-500 mt-0.5">{company?.name}</p>
             </div>
