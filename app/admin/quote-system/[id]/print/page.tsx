@@ -197,9 +197,9 @@ export default function QuotePrintPage() {
         </div>
 
         {/* ===== 發票章格子 + 小計/稅額/總計 ===== */}
-        <div className="flex justify-between items-start mt-2">
-          {/* 發票章格子 */}
-          <div>
+        <div className="flex justify-between items-start relative">
+          {/* 發票章：中心點距離表格底部 10.5mm，即往上移 43mm/2 - 10.5mm = 11mm */}
+          <div style={{ marginTop: "calc(10.5mm - 43mm / 2)" }}>
             {showStamp && company?.stampUrl ? (
               <img src={company.stampUrl} alt="發票章" style={{ width: "31mm", height: "43mm", display: "block" }} />
             ) : (
