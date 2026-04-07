@@ -168,7 +168,7 @@ export default function QuotePrintPage() {
         </div>
 
         {/* ===== 項目表格 + 發票章疊加 ===== */}
-        <div className="relative">
+        <div className="relative" style={{ overflow: "visible" }}>
           <table className="w-full border-collapse mb-0" style={{ fontSize: "12px" }}>
             <thead>
               <tr className="bg-gray-100">
@@ -194,13 +194,13 @@ export default function QuotePrintPage() {
             </tbody>
           </table>
 
-          {/* 發票章：疊在表格左下角 */}
+          {/* 發票章：疊在表格最後幾列左下方，底部超出表格 */}
           {showStamp && company?.stampUrl && (
             <img
               src={company.stampUrl}
               alt="發票章"
               className="absolute object-contain pointer-events-none"
-              style={{ width: "200px", height: "200px", bottom: 0, left: "10px" }}
+              style={{ width: "180px", height: "180px", bottom: "-60px", left: "10px" }}
             />
           )}
         </div>
