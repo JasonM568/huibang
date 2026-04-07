@@ -193,8 +193,13 @@ export default function QuotePrintPage() {
           </tbody>
         </table>
 
-        {/* ===== 小計/稅額/總計 ===== */}
-        <div className="flex justify-end" style={{ marginTop: "8px" }}>
+        {/* ===== 發票章 + 小計/稅額/總計（底部對齊） ===== */}
+        <div className="flex justify-between items-end" style={{ marginTop: "28px" }}>
+          <div>
+            {showStamp && company?.stampUrl && (
+              <img src={company.stampUrl} alt="發票章" style={{ width: "225px", height: "225px" }} className="object-contain" />
+            )}
+          </div>
           <div className="w-60" style={{ fontSize: "12px" }}>
             <div className="flex justify-between py-1.5 border-b border-gray-200">
               <span className="text-gray-600">小計</span>
@@ -216,13 +221,6 @@ export default function QuotePrintPage() {
             </div>
           </div>
         </div>
-
-        {/* ===== 發票章（固定在表格最後一列下方 28px） ===== */}
-        {showStamp && company?.stampUrl && (
-          <div style={{ marginTop: "28px" }}>
-            <img src={company.stampUrl} alt="發票章" style={{ width: "225px", height: "225px" }} className="object-contain" />
-          </div>
-        )}
 
         {/* ===== 備註 ===== */}
         {quote.notes && (
