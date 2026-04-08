@@ -383,6 +383,7 @@ export const ledgerEntries = pgTable("ledger_entries", {
   id: uuid("id").primaryKey().defaultRandom(),
   type: varchar("type", { length: 20 }).notNull(),
   // type: payable（應付帳款）/ receivable（應收帳款）
+  invoiceRefId: uuid("invoice_ref_id").references(() => invoices.id, { onDelete: "cascade" }),  // 關聯請款單（自動建立的）
   description: varchar("description", { length: 300 }).notNull(),    // 款項說明
   amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),  // 金額
   counterparty: varchar("counterparty", { length: 200 }),            // 對象（公司/個人）

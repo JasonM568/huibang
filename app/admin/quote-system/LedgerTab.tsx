@@ -5,6 +5,7 @@ import { useEffect, useState, useCallback } from "react";
 interface LedgerEntry {
   id: string;
   type: string;
+  invoiceRefId: string | null;
   description: string;
   amount: string;
   counterparty: string | null;
@@ -298,7 +299,11 @@ export default function LedgerTab() {
                     <td className="px-4 py-3 text-gray-500 text-xs">{fmtDateTime(e.transactionDate)}</td>
                     <td className="px-4 py-3">
                       <button onClick={() => handleEdit(e)} className="text-blue-600 hover:text-blue-800 mr-3">編輯</button>
-                      <button onClick={() => handleDelete(e.id)} className="text-red-500 hover:text-red-700">刪除</button>
+                      {e.invoiceRefId ? (
+                        <span className="text-xs text-gray-400">來自請款單</span>
+                      ) : (
+                        <button onClick={() => handleDelete(e.id)} className="text-red-500 hover:text-red-700">刪除</button>
+                      )}
                     </td>
                   </tr>
                 );

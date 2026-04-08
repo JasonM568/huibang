@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { invoices, quotes, quoteItems, customers, adminUsers } from "@/lib/db/schema";
+import { invoices, quotes, quoteItems, customers, adminUsers, ledgerEntries } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { requireAuth } from "@/lib/auth";
 
@@ -91,6 +91,19 @@ export async function PATCH(
       .set(updates)
       .where(eq(invoices.id, id))
       .returning();
+
+    // 同步更新收支表
+    const ledgerUpdates: Record<string, unknown> = { updatedAt: new Date() };
+    if (body.paymentStatus !== undefined) {
+      ledgerUpdates.paymentStatus = body.paymentStatus === "paid" ? "received" : "pending_receive";
+    }
+    if (body.taxInvoiceNo !== undefined) ledgerUpdates.invoiceNo = body.taxInvoiceNo || null;
+    if (body.issuedDate !== undefined) ledgerUpdates.invoiceDate = body.issuedDate ? new Date(body.issuedDate) : null;
+    if (body.paidDate !== undefined) ledgerUpdates.transactionDate = body.paidDate ? new Date(body.paidDate) : null;
+
+    if (Object.keys(ledgerUpdates).length > 1) {
+      await db.update(ledgerEntries).set(ledgerUpdates).where(eq(ledgerEntries.invoiceRefId, id));
+    }
 
     return NextResponse.json(updated);
   } catch (error: unknown) {

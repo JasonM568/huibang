@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { invoices, quotes, customers, adminUsers } from "@/lib/db/schema";
+import { invoices, quotes, customers, adminUsers, ledgerEntries } from "@/lib/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
 import { requireAuth } from "@/lib/auth";
 
@@ -120,6 +120,19 @@ export async function POST(request: Request) {
         notes: body.notes || null,
       })
       .returning();
+
+    // 自動建立收支表 — 應收帳款
+    await db.insert(ledgerEntries).values({
+      type: "receivable",
+      invoiceRefId: invoice.id,
+      description: `請款單 ${invoice.invoiceNumber}（${customerName}）`,
+      amount: quote.totalAmount,
+      counterparty: customerName,
+      invoiceNo: null,
+      invoiceDate: null,
+      paymentStatus: "pending_receive",
+      transactionDate: null,
+    });
 
     return NextResponse.json(invoice, { status: 201 });
   } catch (error: unknown) {

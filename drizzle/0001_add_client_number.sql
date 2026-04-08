@@ -59,6 +59,8 @@ CREATE TABLE ledger_entries (
   updated_at TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
+ALTER TABLE ledger_entries ADD COLUMN invoice_ref_id UUID REFERENCES invoices(id) ON DELETE CASCADE;
+
 -- ===== 登入紀錄 =====
 ALTER TABLE admin_users ADD COLUMN last_login_at TIMESTAMP;
 
