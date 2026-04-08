@@ -5,10 +5,12 @@ import QuotesTab from "./QuotesTab";
 import CustomersTab from "./CustomersTab";
 import ServicesTab from "./ServicesTab";
 import InvoicesTab from "./InvoicesTab";
+import LedgerTab from "./LedgerTab";
 
 const tabs = [
   { key: "quotes", label: "報價單" },
   { key: "invoices", label: "請款單" },
+  { key: "ledger", label: "收支表" },
   { key: "customers", label: "客戶資料" },
   { key: "services", label: "服務項目" },
 ] as const;
@@ -42,6 +44,7 @@ export default function QuoteSystemPage() {
       {/* Tab Content */}
       {activeTab === "quotes" && <QuotesTab />}
       {activeTab === "invoices" && <InvoicesTab />}
+      {activeTab === "ledger" && <LedgerTab />}
       {activeTab === "customers" && <CustomersTab />}
       {activeTab === "services" && <ServicesTab />}
     </div>

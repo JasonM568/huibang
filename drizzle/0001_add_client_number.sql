@@ -43,6 +43,22 @@ CREATE TABLE salary_deductions (
   amount NUMERIC(10, 0) NOT NULL DEFAULT 0
 );
 
+-- ===== 收支表 =====
+CREATE TABLE ledger_entries (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  type VARCHAR(20) NOT NULL,
+  description VARCHAR(300) NOT NULL,
+  amount NUMERIC(12, 2) NOT NULL,
+  counterparty VARCHAR(200),
+  invoice_no VARCHAR(30),
+  invoice_date TIMESTAMP,
+  payment_status VARCHAR(20) NOT NULL DEFAULT 'pending',
+  transaction_date TIMESTAMP,
+  note TEXT,
+  created_at TIMESTAMP DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMP DEFAULT NOW() NOT NULL
+);
+
 -- ===== 登入紀錄 =====
 ALTER TABLE admin_users ADD COLUMN last_login_at TIMESTAMP;
 

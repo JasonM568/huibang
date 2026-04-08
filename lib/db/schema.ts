@@ -378,6 +378,24 @@ export const invoices = pgTable("invoices", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// ===== 收支表 =====
+export const ledgerEntries = pgTable("ledger_entries", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  type: varchar("type", { length: 20 }).notNull(),
+  // type: payable（應付帳款）/ receivable（應收帳款）
+  description: varchar("description", { length: 300 }).notNull(),    // 款項說明
+  amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),  // 金額
+  counterparty: varchar("counterparty", { length: 200 }),            // 對象（公司/個人）
+  invoiceNo: varchar("invoice_no", { length: 30 }),                  // 發票號碼
+  invoiceDate: timestamp("invoice_date"),                            // 發票憑證開立日期
+  paymentStatus: varchar("payment_status", { length: 20 }).default("pending").notNull(),
+  // paymentStatus: paid（已付）/ pending_pay（待付）/ received（已收）/ pending_receive（待收）
+  transactionDate: timestamp("transaction_date"),                    // 款項出入帳日期時間
+  note: text("note"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // ===== 薪資系統 =====
 
 // 員工
@@ -477,6 +495,7 @@ export type Quote = typeof quotes.$inferSelect;
 export type QuoteItem = typeof quoteItems.$inferSelect;
 export type CompanyInfo = typeof companyInfo.$inferSelect;
 export type Invoice = typeof invoices.$inferSelect;
+export type LedgerEntry = typeof ledgerEntries.$inferSelect;
 export type Employee = typeof employees.$inferSelect;
 export type EmployeeAllowance = typeof employeeAllowances.$inferSelect;
 export type SalaryRecord = typeof salaryRecords.$inferSelect;
