@@ -391,10 +391,18 @@ export const ledgerEntries = pgTable("ledger_entries", {
   invoiceDate: timestamp("invoice_date"),                            // 發票憑證開立日期
   paymentStatus: varchar("payment_status", { length: 20 }).default("pending").notNull(),
   // paymentStatus: paid（已付）/ pending_pay（待付）/ received（已收）/ pending_receive（待收）
+  expectedPayDate: timestamp("expected_pay_date"),                   // 預計出帳日期（應付用）
   transactionDate: timestamp("transaction_date"),                    // 款項出入帳日期時間
   note: text("note"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// ===== 常用對象 =====
+export const frequentCounterparties = pgTable("frequent_counterparties", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 200 }).notNull().unique(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 // ===== 薪資系統 =====

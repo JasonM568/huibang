@@ -12,10 +12,13 @@ interface LedgerEntry {
   invoiceNo: string | null;
   invoiceDate: string | null;
   paymentStatus: string;
+  expectedPayDate: string | null;
   transactionDate: string | null;
   note: string | null;
   createdAt: string;
 }
+
+interface Counterparty { id: string; name: string; }
 
 const statusMap: Record<string, { label: string; color: string }> = {
   paid: { label: "已付", color: "bg-green-100 text-green-700" },
@@ -24,21 +27,20 @@ const statusMap: Record<string, { label: string; color: string }> = {
   pending_receive: { label: "待收", color: "bg-orange-100 text-orange-700" },
 };
 
-const typeMap: Record<string, string> = {
-  payable: "應付帳款",
-  receivable: "應收帳款",
-};
+const typeMap: Record<string, string> = { payable: "應付帳款", receivable: "應收帳款" };
 
 const emptyForm = {
-  type: "payable" as string,
+  type: "payable",
   description: "",
   amount: "",
   counterparty: "",
   invoiceNo: "",
   invoiceDate: "",
   paymentStatus: "pending_pay",
+  expectedPayDate: "",
   transactionDate: "",
   note: "",
+  saveAsFrequent: false,
 };
 
 export default function LedgerTab() {
@@ -46,8 +48,8 @@ export default function LedgerTab() {
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [frequents, setFrequents] = useState<Counterparty[]>([]);
 
-  // Modal
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ ...emptyForm });
@@ -64,13 +66,16 @@ export default function LedgerTab() {
     setLoading(false);
   }, [filterType, filterStatus]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
-
-  const resetForm = () => {
-    setForm({ ...emptyForm });
-    setEditingId(null);
-    setShowForm(false);
+  const fetchFrequents = async () => {
+    const res = await fetch("/api/admin/counterparties");
+    const data = await res.json();
+    setFrequents(Array.isArray(data) ? data : []);
   };
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { fetchFrequents(); }, []);
+
+  const resetForm = () => { setForm({ ...emptyForm }); setEditingId(null); setShowForm(false); };
 
   const handleEdit = (e: LedgerEntry) => {
     setForm({
@@ -81,8 +86,10 @@ export default function LedgerTab() {
       invoiceNo: e.invoiceNo || "",
       invoiceDate: e.invoiceDate ? e.invoiceDate.slice(0, 10) : "",
       paymentStatus: e.paymentStatus,
+      expectedPayDate: e.expectedPayDate ? e.expectedPayDate.slice(0, 10) : "",
       transactionDate: e.transactionDate ? e.transactionDate.slice(0, 16) : "",
       note: e.note || "",
+      saveAsFrequent: false,
     });
     setEditingId(e.id);
     setShowForm(true);
@@ -91,14 +98,15 @@ export default function LedgerTab() {
   const handleSubmit = async (ev: React.FormEvent) => {
     ev.preventDefault();
     setSaving(true);
+    const { saveAsFrequent, ...payload } = form;
     const url = editingId ? `/api/admin/ledger/${editingId}` : "/api/admin/ledger";
     const method = editingId ? "PATCH" : "POST";
-    const res = await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+    const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
     if (res.ok) {
+      if (saveAsFrequent && form.counterparty.trim()) {
+        await fetch("/api/admin/counterparties", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: form.counterparty.trim() }) });
+        fetchFrequents();
+      }
       resetForm();
       fetchData();
     } else {
@@ -114,12 +122,13 @@ export default function LedgerTab() {
     fetchData();
   };
 
+  const handleDeleteFrequent = async (id: string) => {
+    await fetch(`/api/admin/counterparties?id=${id}`, { method: "DELETE" });
+    fetchFrequents();
+  };
+
   const handleTypeChange = (type: string) => {
-    setForm({
-      ...form,
-      type,
-      paymentStatus: type === "payable" ? "pending_pay" : "pending_receive",
-    });
+    setForm({ ...form, type, paymentStatus: type === "payable" ? "pending_pay" : "pending_receive" });
   };
 
   const fmt = (d: string | null) => {
@@ -127,39 +136,27 @@ export default function LedgerTab() {
     const date = new Date(d);
     return `${date.getFullYear()}/${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getDate().toString().padStart(2, "0")}`;
   };
-
   const fmtDateTime = (d: string | null) => {
     if (!d) return "—";
     const date = new Date(d);
     return `${fmt(d)} ${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
   };
 
-  // 統計
   const totalPayable = entries.filter(e => e.type === "payable").reduce((s, e) => s + Number(e.amount), 0);
   const totalReceivable = entries.filter(e => e.type === "receivable").reduce((s, e) => s + Number(e.amount), 0);
   const pendingPay = entries.filter(e => e.paymentStatus === "pending_pay").reduce((s, e) => s + Number(e.amount), 0);
   const pendingReceive = entries.filter(e => e.paymentStatus === "pending_receive").reduce((s, e) => s + Number(e.amount), 0);
 
+  const isPayable = form.type === "payable";
+
   return (
     <div>
       {/* 統計卡片 */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-        <div className="bg-red-50 rounded-lg p-3">
-          <p className="text-xs text-red-600">應付總額</p>
-          <p className="text-lg font-bold text-red-700">${totalPayable.toLocaleString()}</p>
-        </div>
-        <div className="bg-blue-50 rounded-lg p-3">
-          <p className="text-xs text-blue-600">應收總額</p>
-          <p className="text-lg font-bold text-blue-700">${totalReceivable.toLocaleString()}</p>
-        </div>
-        <div className="bg-yellow-50 rounded-lg p-3">
-          <p className="text-xs text-yellow-600">待付金額</p>
-          <p className="text-lg font-bold text-yellow-700">${pendingPay.toLocaleString()}</p>
-        </div>
-        <div className="bg-orange-50 rounded-lg p-3">
-          <p className="text-xs text-orange-600">待收金額</p>
-          <p className="text-lg font-bold text-orange-700">${pendingReceive.toLocaleString()}</p>
-        </div>
+        <div className="bg-red-50 rounded-lg p-3"><p className="text-xs text-red-600">應付總額</p><p className="text-lg font-bold text-red-700">${totalPayable.toLocaleString()}</p></div>
+        <div className="bg-blue-50 rounded-lg p-3"><p className="text-xs text-blue-600">應收總額</p><p className="text-lg font-bold text-blue-700">${totalReceivable.toLocaleString()}</p></div>
+        <div className="bg-yellow-50 rounded-lg p-3"><p className="text-xs text-yellow-600">待付金額</p><p className="text-lg font-bold text-yellow-700">${pendingPay.toLocaleString()}</p></div>
+        <div className="bg-orange-50 rounded-lg p-3"><p className="text-xs text-orange-600">待收金額</p><p className="text-lg font-bold text-orange-700">${pendingReceive.toLocaleString()}</p></div>
       </div>
 
       {/* 篩選 + 新增 */}
@@ -178,9 +175,7 @@ export default function LedgerTab() {
             <option value="pending_receive">待收</option>
           </select>
         </div>
-        <button onClick={() => { resetForm(); setShowForm(true); }} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
-          + 新增帳款
-        </button>
+        <button onClick={() => { resetForm(); setShowForm(true); }} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">+ 新增帳款</button>
       </div>
 
       {/* Modal */}
@@ -206,17 +201,38 @@ export default function LedgerTab() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">款項說明 *</label>
                 <input required value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
               </div>
+
+              {/* 對象 + 常用對象（應付帳款才顯示常用） */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">對象（公司/個人）</label>
-                <input value={form.counterparty} onChange={(e) => setForm({ ...form, counterparty: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                <div className="flex gap-2">
+                  <input value={form.counterparty} onChange={(e) => setForm({ ...form, counterparty: e.target.value })} className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" placeholder="輸入或從常用選取" />
+                  {isPayable && frequents.length > 0 && (
+                    <select
+                      value=""
+                      onChange={(e) => { if (e.target.value) setForm({ ...form, counterparty: e.target.value }); }}
+                      className="px-2 py-2 border border-gray-200 rounded-lg text-sm text-gray-500"
+                    >
+                      <option value="">常用</option>
+                      {frequents.map(f => <option key={f.id} value={f.name}>{f.name}</option>)}
+                    </select>
+                  )}
+                </div>
+                {isPayable && form.counterparty.trim() && !frequents.some(f => f.name === form.counterparty.trim()) && (
+                  <label className="flex items-center gap-1.5 mt-1.5 cursor-pointer">
+                    <input type="checkbox" checked={form.saveAsFrequent} onChange={(e) => setForm({ ...form, saveAsFrequent: e.target.checked })} className="w-3.5 h-3.5 rounded border-gray-300 text-blue-600" />
+                    <span className="text-xs text-gray-500">設為常用對象</span>
+                  </label>
+                )}
               </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">發票號碼</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{isPayable ? "發票/憑證號碼" : "發票號碼"}</label>
                   <input value={form.invoiceNo} onChange={(e) => setForm({ ...form, invoiceNo: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">發票開立日期</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{isPayable ? "憑證日期" : "發票開立日期"}</label>
                   <input type="date" value={form.invoiceDate} onChange={(e) => setForm({ ...form, invoiceDate: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
                 </div>
               </div>
@@ -224,16 +240,10 @@ export default function LedgerTab() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">付款狀態</label>
                   <select value={form.paymentStatus} onChange={(e) => setForm({ ...form, paymentStatus: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
-                    {form.type === "payable" ? (
-                      <>
-                        <option value="pending_pay">待付</option>
-                        <option value="paid">已付</option>
-                      </>
+                    {isPayable ? (
+                      <><option value="pending_pay">待付</option><option value="paid">已付</option></>
                     ) : (
-                      <>
-                        <option value="pending_receive">待收</option>
-                        <option value="received">已收</option>
-                      </>
+                      <><option value="pending_receive">待收</option><option value="received">已收</option></>
                     )}
                   </select>
                 </div>
@@ -242,6 +252,12 @@ export default function LedgerTab() {
                   <input type="datetime-local" value={form.transactionDate} onChange={(e) => setForm({ ...form, transactionDate: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
                 </div>
               </div>
+              {isPayable && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">預計出帳日期</label>
+                  <input type="date" value={form.expectedPayDate} onChange={(e) => setForm({ ...form, expectedPayDate: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">備註</label>
                 <textarea value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} rows={2} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
@@ -253,6 +269,21 @@ export default function LedgerTab() {
                 <button type="button" onClick={resetForm} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200">取消</button>
               </div>
             </form>
+
+            {/* 常用對象管理（應付帳款時顯示） */}
+            {isPayable && frequents.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <p className="text-xs font-medium text-gray-500 mb-2">常用對象管理</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {frequents.map(f => (
+                    <span key={f.id} className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded text-xs text-gray-600">
+                      {f.name}
+                      <button onClick={() => handleDeleteFrequent(f.id)} className="text-gray-400 hover:text-red-500">&times;</button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -271,8 +302,8 @@ export default function LedgerTab() {
                 <th className="px-4 py-3 font-medium">款項說明</th>
                 <th className="px-4 py-3 font-medium">對象</th>
                 <th className="px-4 py-3 font-medium text-right">金額</th>
-                <th className="px-4 py-3 font-medium">發票號碼</th>
-                <th className="px-4 py-3 font-medium">發票日期</th>
+                <th className="px-4 py-3 font-medium">憑證號碼</th>
+                <th className="px-4 py-3 font-medium">憑證日期</th>
                 <th className="px-4 py-3 font-medium">狀態</th>
                 <th className="px-4 py-3 font-medium">出入帳時間</th>
                 <th className="px-4 py-3 font-medium">操作</th>
@@ -284,9 +315,7 @@ export default function LedgerTab() {
                 return (
                   <tr key={e.id} className="border-b border-gray-50 hover:bg-gray-50">
                     <td className="px-4 py-3">
-                      <span className={`text-xs font-medium ${e.type === "payable" ? "text-red-600" : "text-blue-600"}`}>
-                        {typeMap[e.type] || e.type}
-                      </span>
+                      <span className={`text-xs font-medium ${e.type === "payable" ? "text-red-600" : "text-blue-600"}`}>{typeMap[e.type] || e.type}</span>
                     </td>
                     <td className="px-4 py-3 text-gray-900">{e.description}</td>
                     <td className="px-4 py-3 text-gray-600">{e.counterparty || "—"}</td>

@@ -51,6 +51,7 @@ export async function POST(request: Request) {
         invoiceNo: body.invoiceNo || null,
         invoiceDate: body.invoiceDate ? new Date(body.invoiceDate) : null,
         paymentStatus: body.paymentStatus || "pending",
+        expectedPayDate: body.expectedPayDate ? new Date(body.expectedPayDate) : null,
         transactionDate: body.transactionDate ? new Date(body.transactionDate) : null,
         note: body.note || null,
       })

@@ -60,6 +60,13 @@ CREATE TABLE ledger_entries (
 );
 
 ALTER TABLE ledger_entries ADD COLUMN invoice_ref_id UUID REFERENCES invoices(id) ON DELETE CASCADE;
+ALTER TABLE ledger_entries ADD COLUMN expected_pay_date TIMESTAMP;
+
+CREATE TABLE frequent_counterparties (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(200) NOT NULL UNIQUE,
+  created_at TIMESTAMP DEFAULT NOW() NOT NULL
+);
 
 -- ===== 登入紀錄 =====
 ALTER TABLE admin_users ADD COLUMN last_login_at TIMESTAMP;

@@ -19,6 +19,7 @@ export async function PATCH(
       if (body[f] !== undefined) updates[f] = body[f];
     }
     if (body.invoiceDate !== undefined) updates.invoiceDate = body.invoiceDate ? new Date(body.invoiceDate) : null;
+    if (body.expectedPayDate !== undefined) updates.expectedPayDate = body.expectedPayDate ? new Date(body.expectedPayDate) : null;
     if (body.transactionDate !== undefined) updates.transactionDate = body.transactionDate ? new Date(body.transactionDate) : null;
 
     const [updated] = await db
