@@ -138,7 +138,12 @@ function SalarySlip({ r, showSignature }: { r: SalaryRecord; showSignature: bool
       </table>
 
       {/* 備註 */}
-      {r.note && <p style={{ fontSize: "9px", marginTop: "2px" }} className="text-gray-600">{r.note}</p>}
+      {r.note && (
+        <div style={{ fontSize: "9px", marginTop: "4px" }}>
+          <p className="font-medium text-gray-700" style={{ marginBottom: "1px" }}>備註</p>
+          <p className="text-gray-600 whitespace-pre-wrap">{r.note}</p>
+        </div>
+      )}
 
       {/* 簽名欄 */}
       {showSignature && (
