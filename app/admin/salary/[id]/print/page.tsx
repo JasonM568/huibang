@@ -41,8 +41,8 @@ function SalarySlip({ r, showSignature }: { r: Record; showSignature: boolean })
   if (Number(r.supervisorAllowance) > 0) earn.push({ label: "主管加給", $: true, val: n(r.supervisorAllowance) });
 
   const deduct: { label: string; $?: boolean; val: string }[] = [];
-  deduct.push({ label: "勞保費", $: Number(r.laborInsurance) > 0, val: n(r.laborInsurance) });
-  deduct.push({ label: "健保費", val: "" });
+  if (Number(r.laborInsurance) > 0) deduct.push({ label: "勞保費", $: true, val: n(r.laborInsurance) });
+  if (Number(r.healthInsurance) > 0) deduct.push({ label: "健保費", $: true, val: n(r.healthInsurance) });
   deduct.push({ label: "常年會費", val: "" });
   if (Number(r.otherDeduction) > 0) deduct.push({ label: "其他扣款", $: true, val: n(r.otherDeduction) });
   (r.deductions || []).forEach(d => { if (Number(d.amount) > 0) deduct.push({ label: d.name, $: true, val: n(d.amount) }); });
