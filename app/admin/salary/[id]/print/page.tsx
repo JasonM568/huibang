@@ -61,10 +61,10 @@ function SalarySlip({ r, showSignature }: { r: Record; showSignature: boolean })
 
       <table className="w-full border-collapse" style={{ tableLayout: "fixed" }}>
         <colgroup>
-          <col style={{ width: "12%" }} />
-          <col style={{ width: "30%" }} />
+          <col style={{ width: "10%" }} />
+          <col style={{ width: "38%" }} />
           <col style={{ width: "8%" }} />
-          <col style={{ width: "50%" }} />
+          <col style={{ width: "44%" }} />
         </colgroup>
         <tbody>
           <tr>
