@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { companyInfo } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { requireAuth } from "@/lib/auth";
+import { requireRestrictedAccess } from "@/lib/auth";
 
 export async function GET() {
   try {
-    await requireAuth();
+    await requireRestrictedAccess();
 
     const [info] = await db
       .select()
@@ -33,7 +33,7 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   try {
-    await requireAuth();
+    await requireRestrictedAccess();
     const body = await request.json();
 
     const [existing] = await db

@@ -35,13 +35,16 @@ export async function requireAuth() {
   return session;
 }
 
-// 客戶管理權限：僅限特定 email
-const CLIENT_ACCESS_EMAILS = ["acc@huibang.com.tw", "chief@huibang.com.tw"];
+// 受限模組權限（客戶管理、報價系統、薪資管理）：僅限特定 email
+const RESTRICTED_EMAILS = ["acc@huibang.com.tw", "chief@huibang.com.tw"];
 
-export async function requireClientAccess() {
+export async function requireRestrictedAccess() {
   const session = await requireAuth();
-  if (!CLIENT_ACCESS_EMAILS.includes(session.email)) {
-    throw new Error("ClientForbidden");
+  if (!RESTRICTED_EMAILS.includes(session.email)) {
+    throw new Error("Forbidden");
   }
   return session;
 }
+
+// 向下相容
+export const requireClientAccess = requireRestrictedAccess;

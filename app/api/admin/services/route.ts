@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { services } from "@/lib/db/schema";
 import { desc, sql, ilike } from "drizzle-orm";
-import { requireAuth } from "@/lib/auth";
+import { requireRestrictedAccess } from "@/lib/auth";
 
 export async function GET(request: Request) {
   try {
-    await requireAuth();
+    await requireRestrictedAccess();
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
@@ -56,7 +56,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    await requireAuth();
+    await requireRestrictedAccess();
     const body = await request.json();
 
     const [service] = await db

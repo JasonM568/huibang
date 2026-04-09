@@ -55,15 +55,17 @@ export default function AdminLayout({
   };
 
   const isAdmin = session?.role === "admin";
+  const restrictedEmails = ["acc@huibang.com.tw", "chief@huibang.com.tw"];
+  const hasRestricted = restrictedEmails.includes(session?.email || "");
 
   const navItems = [
     { href: "/admin/dashboard", label: "儀表板", icon: "📊", show: true },
     { href: "/admin/submissions", label: "問卷列表", icon: "📋", show: true },
     { href: "/admin/contacts", label: "聯絡表單", icon: "💬", show: true },
-    { href: "/admin/clients", label: "客戶管理", icon: "🏢", show: true },
+    { href: "/admin/clients", label: "客戶管理", icon: "🏢", show: hasRestricted },
     { href: "/admin/content-studio", label: "貼文產生器", icon: "✨", show: true },
-    { href: "/admin/quote-system", label: "報價系統", icon: "📄", show: session?.canQuote || isAdmin },
-    { href: "/admin/salary", label: "薪資管理", icon: "💰", show: session?.canSalary || isAdmin },
+    { href: "/admin/quote-system", label: "報價系統", icon: "📄", show: hasRestricted },
+    { href: "/admin/salary", label: "薪資管理", icon: "💰", show: hasRestricted },
     { href: "/admin/users", label: "人員管理", icon: "👥", show: isAdmin },
     { href: "/admin/tracking", label: "追蹤碼管理", icon: "📈", show: true },
     { href: "/admin/diagnostic", label: "深度健診", icon: "🔬", show: true },

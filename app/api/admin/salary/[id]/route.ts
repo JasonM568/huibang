@@ -2,14 +2,14 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { salaryRecords, salaryBonuses, salaryDeductions, employees } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { requireAuth } from "@/lib/auth";
+import { requireRestrictedAccess } from "@/lib/auth";
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth();
+    await requireRestrictedAccess();
     const { id } = await params;
 
     const [record] = await db
@@ -63,7 +63,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth();
+    await requireRestrictedAccess();
     const { id } = await params;
     const body = await request.json();
     const bonuses = body.bonuses;
@@ -145,7 +145,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth();
+    await requireRestrictedAccess();
     const { id } = await params;
     await db.delete(salaryRecords).where(eq(salaryRecords.id, id));
     return NextResponse.json({ success: true });

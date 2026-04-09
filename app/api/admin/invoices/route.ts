@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { invoices, quotes, customers, adminUsers, ledgerEntries } from "@/lib/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
-import { requireAuth } from "@/lib/auth";
+import { requireRestrictedAccess } from "@/lib/auth";
 
 function generateInvoiceNumber(customerName: string) {
   const now = new Date();
@@ -15,7 +15,7 @@ function generateInvoiceNumber(customerName: string) {
 
 export async function GET(request: Request) {
   try {
-    await requireAuth();
+    await requireRestrictedAccess();
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
@@ -82,7 +82,7 @@ export async function GET(request: Request) {
 // POST: 從報價單建立請款單
 export async function POST(request: Request) {
   try {
-    const session = await requireAuth();
+    const session = await requireRestrictedAccess();
     const body = await request.json();
     const { quoteId } = body;
 

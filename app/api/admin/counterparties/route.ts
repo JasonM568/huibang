@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { frequentCounterparties } from "@/lib/db/schema";
 import { eq, asc } from "drizzle-orm";
-import { requireAuth } from "@/lib/auth";
+import { requireRestrictedAccess } from "@/lib/auth";
 
 export async function GET() {
   try {
-    await requireAuth();
+    await requireRestrictedAccess();
     const data = await db.select().from(frequentCounterparties).orderBy(asc(frequentCounterparties.name));
     return NextResponse.json(data);
   } catch (error: unknown) {
@@ -18,7 +18,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    await requireAuth();
+    await requireRestrictedAccess();
     const { name } = await request.json();
     if (!name?.trim()) return NextResponse.json({ error: "名稱為必填" }, { status: 400 });
 
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    await requireAuth();
+    await requireRestrictedAccess();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });

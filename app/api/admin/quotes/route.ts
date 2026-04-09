@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { quotes, quoteItems, customers, adminUsers } from "@/lib/db/schema";
 import { desc, eq, sql, ilike } from "drizzle-orm";
-import { requireAuth } from "@/lib/auth";
+import { requireRestrictedAccess } from "@/lib/auth";
 
 function generateQuoteNumber(customerName: string) {
   const now = new Date();
@@ -15,7 +15,7 @@ function generateQuoteNumber(customerName: string) {
 
 export async function GET(request: Request) {
   try {
-    await requireAuth();
+    await requireRestrictedAccess();
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
@@ -80,7 +80,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const session = await requireAuth();
+    const session = await requireRestrictedAccess();
     const body = await request.json();
 
     const items = body.items || [];

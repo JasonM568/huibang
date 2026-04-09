@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { ledgerEntries } from "@/lib/db/schema";
 import { desc, eq, and, sql } from "drizzle-orm";
-import { requireAuth } from "@/lib/auth";
+import { requireRestrictedAccess } from "@/lib/auth";
 
 export async function GET(request: Request) {
   try {
-    await requireAuth();
+    await requireRestrictedAccess();
     const { searchParams } = new URL(request.url);
     const type = searchParams.get("type"); // payable / receivable
     const status = searchParams.get("status");
@@ -34,7 +34,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    await requireAuth();
+    await requireRestrictedAccess();
     const body = await request.json();
 
     if (!body.type || !body.description || !body.amount) {

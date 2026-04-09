@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { employees, employeeAllowances } from "@/lib/db/schema";
 import { desc, sql, ilike, eq } from "drizzle-orm";
-import { requireAuth } from "@/lib/auth";
+import { requireRestrictedAccess } from "@/lib/auth";
 
 export async function GET(request: Request) {
   try {
-    await requireAuth();
+    await requireRestrictedAccess();
     const { searchParams } = new URL(request.url);
     const all = searchParams.get("all");
     const search = searchParams.get("search");
@@ -46,7 +46,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    await requireAuth();
+    await requireRestrictedAccess();
     const body = await request.json();
     const [emp] = await db.insert(employees).values({
       name: body.name,

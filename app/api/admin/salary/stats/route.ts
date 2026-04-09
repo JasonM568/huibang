@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { salaryRecords, employees } from "@/lib/db/schema";
 import { eq, and, sql } from "drizzle-orm";
-import { requireAuth } from "@/lib/auth";
+import { requireRestrictedAccess } from "@/lib/auth";
 
 export async function GET(request: Request) {
   try {
-    await requireAuth();
+    await requireRestrictedAccess();
     const { searchParams } = new URL(request.url);
     const year = searchParams.get("year");
     const employeeId = searchParams.get("employeeId");

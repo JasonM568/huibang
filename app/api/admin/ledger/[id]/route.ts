@@ -2,14 +2,14 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { ledgerEntries } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { requireAuth } from "@/lib/auth";
+import { requireRestrictedAccess } from "@/lib/auth";
 
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth();
+    await requireRestrictedAccess();
     const { id } = await params;
     const body = await request.json();
 
@@ -43,7 +43,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth();
+    await requireRestrictedAccess();
     const { id } = await params;
     await db.delete(ledgerEntries).where(eq(ledgerEntries.id, id));
     return NextResponse.json({ success: true });
