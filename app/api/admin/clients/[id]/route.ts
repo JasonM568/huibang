@@ -2,14 +2,14 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { clients, clientStrategies } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { requireAuth } from "@/lib/auth";
+import { requireClientAccess } from "@/lib/auth";
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth();
+    await requireClientAccess();
     const { id } = await params;
 
     const [client] = await db
@@ -34,6 +34,9 @@ export async function GET(
     if (error instanceof Error && error.message === "Unauthorized") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    if (error instanceof Error && error.message === "ClientForbidden") {
+      return NextResponse.json({ error: "無權限查看客戶管理" }, { status: 403 });
+    }
     console.error("Get client error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
@@ -44,7 +47,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth();
+    await requireClientAccess();
     const { id } = await params;
     const body = await request.json();
 
@@ -77,6 +80,9 @@ export async function PATCH(
     if (error instanceof Error && error.message === "Unauthorized") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    if (error instanceof Error && error.message === "ClientForbidden") {
+      return NextResponse.json({ error: "無權限查看客戶管理" }, { status: 403 });
+    }
     console.error("Update client error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
@@ -87,7 +93,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await requireAuth();
+    const session = await requireClientAccess();
     if (session.role !== "admin") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
@@ -101,6 +107,9 @@ export async function DELETE(
   } catch (error: unknown) {
     if (error instanceof Error && error.message === "Unauthorized") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (error instanceof Error && error.message === "ClientForbidden") {
+      return NextResponse.json({ error: "無權限查看客戶管理" }, { status: 403 });
     }
     console.error("Delete client error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

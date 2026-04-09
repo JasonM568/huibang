@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { submissions, clients } from "@/lib/db/schema";
 import { eq, like, sql } from "drizzle-orm";
-import { requireAuth } from "@/lib/auth";
+import { requireClientAccess } from "@/lib/auth";
 
 async function generateClientNumber() {
   const now = new Date();
@@ -23,7 +23,7 @@ async function generateClientNumber() {
 
 export async function POST(request: Request) {
   try {
-    await requireAuth();
+    await requireClientAccess();
     const { submissionId } = await request.json();
 
     if (!submissionId) {
@@ -85,6 +85,9 @@ export async function POST(request: Request) {
   } catch (error: unknown) {
     if (error instanceof Error && error.message === "Unauthorized") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (error instanceof Error && error.message === "ClientForbidden") {
+      return NextResponse.json({ error: "無權限查看客戶管理" }, { status: 403 });
     }
     console.error("Convert to client error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

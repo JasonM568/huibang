@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { clients } from "@/lib/db/schema";
 import { desc, eq, like, sql, and } from "drizzle-orm";
-import { requireAuth } from "@/lib/auth";
+import { requireClientAccess } from "@/lib/auth";
 
 async function generateClientNumber() {
   const now = new Date();
@@ -24,7 +24,7 @@ async function generateClientNumber() {
 
 export async function GET(request: Request) {
   try {
-    await requireAuth();
+    await requireClientAccess();
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
@@ -65,6 +65,9 @@ export async function GET(request: Request) {
     if (error instanceof Error && error.message === "Unauthorized") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    if (error instanceof Error && error.message === "ClientForbidden") {
+      return NextResponse.json({ error: "無權限查看客戶管理" }, { status: 403 });
+    }
     console.error("Admin clients error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
@@ -72,7 +75,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    await requireAuth();
+    await requireClientAccess();
     const body = await request.json();
 
     if (!body.brandName?.trim() || !body.taxId?.trim() || !body.contactName?.trim()) {
@@ -111,6 +114,9 @@ export async function POST(request: Request) {
   } catch (error: unknown) {
     if (error instanceof Error && error.message === "Unauthorized") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (error instanceof Error && error.message === "ClientForbidden") {
+      return NextResponse.json({ error: "無權限查看客戶管理" }, { status: 403 });
     }
     console.error("Create client error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

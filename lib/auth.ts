@@ -34,3 +34,14 @@ export async function requireAuth() {
   }
   return session;
 }
+
+// 客戶管理權限：僅限特定 email
+const CLIENT_ACCESS_EMAILS = ["acc@huibang.com.tw", "chief@huibang.com.tw"];
+
+export async function requireClientAccess() {
+  const session = await requireAuth();
+  if (!CLIENT_ACCESS_EMAILS.includes(session.email)) {
+    throw new Error("ClientForbidden");
+  }
+  return session;
+}

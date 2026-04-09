@@ -55,6 +55,7 @@ export default function AdminClientsPage() {
   const [newContactName, setNewContactName] = useState("");
   const [newTaxId, setNewTaxId] = useState("");
   const [creating, setCreating] = useState(false);
+  const [forbidden, setForbidden] = useState(false);
 
   const fetchData = useCallback(async (page = 1) => {
     setLoading(true);
@@ -65,6 +66,7 @@ export default function AdminClientsPage() {
     try {
       const res = await fetch(`/api/admin/clients?${params}`);
       if (res.status === 401) return;
+      if (res.status === 403) { setForbidden(true); setLoading(false); return; }
       const data = await res.json();
       setClients(data.data || []);
       setPagination(data.pagination || { page: 1, limit: 20, total: 0, totalPages: 0 });
@@ -134,6 +136,16 @@ export default function AdminClientsPage() {
     const d = new Date(dateStr);
     return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
   };
+
+  if (forbidden) {
+    return (
+      <div className="text-center py-20">
+        <p className="text-5xl mb-4">🔒</p>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">權限不足</h2>
+        <p className="text-gray-500">僅限授權人員查看客戶管理</p>
+      </div>
+    );
+  }
 
   return (
     <div>
