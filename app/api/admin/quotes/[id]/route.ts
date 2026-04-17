@@ -77,8 +77,8 @@ export async function PATCH(
       );
       const discount = parseFloat(body.discount || "0");
       const taxRate = parseFloat(body.taxRate || "5");
-      const afterDiscount = subtotal - subtotal * (discount / 100);
-      const taxAmount = afterDiscount * (taxRate / 100);
+      const afterDiscount = subtotal - Math.round(subtotal * (discount / 100));
+      const taxAmount = Math.round(afterDiscount * (taxRate / 100));
       const totalAmount = afterDiscount + taxAmount;
 
       // Update quote

@@ -111,9 +111,9 @@ export default function EditQuotePage() {
     (sum, item) => sum + (parseFloat(item.unitPrice) || 0) * (parseFloat(item.quantity) || 0),
     0
   );
-  const discountAmount = subtotal * (parseFloat(form.discount) || 0) / 100;
+  const discountAmount = Math.round(subtotal * (parseFloat(form.discount) || 0) / 100);
   const afterDiscount = subtotal - discountAmount;
-  const taxAmount = afterDiscount * (parseFloat(form.taxRate) || 0) / 100;
+  const taxAmount = Math.round(afterDiscount * (parseFloat(form.taxRate) || 0) / 100);
   const total = afterDiscount + taxAmount;
 
   const handleSubmit = async (e: React.FormEvent) => {

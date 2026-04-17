@@ -98,9 +98,9 @@ export async function POST(request: Request) {
         sum + (parseFloat(item.unitPrice) || 0) * (parseFloat(item.quantity) || 0),
       0
     );
-    const discountAmount = subtotal * (parseFloat(body.discount || "0") / 100);
+    const discountAmount = Math.round(subtotal * (parseFloat(body.discount || "0") / 100));
     const afterDiscount = subtotal - discountAmount;
-    const taxAmount = afterDiscount * (parseFloat(body.taxRate || "5") / 100);
+    const taxAmount = Math.round(afterDiscount * (parseFloat(body.taxRate || "5") / 100));
     const totalAmount = afterDiscount + taxAmount;
 
     const [quote] = await db
