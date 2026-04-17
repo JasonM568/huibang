@@ -79,7 +79,7 @@ export default function NewQuotePage() {
   };
 
   const subtotal = items.reduce(
-    (sum, item) => sum + (parseInt(item.unitPrice) || 0) * (parseInt(item.quantity) || 0),
+    (sum, item) => sum + (parseFloat(item.unitPrice) || 0) * (parseFloat(item.quantity) || 0),
     0
   );
   const discountAmount = subtotal * (parseFloat(form.discount) || 0) / 100;
@@ -240,7 +240,7 @@ export default function NewQuotePage() {
                   </div>
                   <div className="flex items-center">
                     <span className="text-sm text-gray-500 whitespace-nowrap">
-                      ${((parseInt(item.unitPrice) || 0) * (parseInt(item.quantity) || 0)).toLocaleString()}
+                      ${((parseFloat(item.unitPrice) || 0) * (parseFloat(item.quantity) || 0)).toLocaleString()}
                     </span>
                   </div>
                 </div>

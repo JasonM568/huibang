@@ -95,7 +95,7 @@ export async function POST(request: Request) {
     // Calculate totals
     const subtotal = items.reduce(
       (sum: number, item: { unitPrice: string; quantity: string }) =>
-        sum + (parseInt(item.unitPrice) || 0) * (parseInt(item.quantity) || 0),
+        sum + (parseFloat(item.unitPrice) || 0) * (parseFloat(item.quantity) || 0),
       0
     );
     const discountAmount = subtotal * (parseFloat(body.discount || "0") / 100);
@@ -129,7 +129,7 @@ export async function POST(request: Request) {
           specification: item.specification || null,
           unitPrice: item.unitPrice || "0",
           quantity: parseInt(item.quantity) || 1,
-          amount: ((parseInt(item.unitPrice) || 0) * (parseInt(item.quantity) || 0)).toString(),
+          amount: ((parseFloat(item.unitPrice) || 0) * (parseFloat(item.quantity) || 0)).toString(),
         }))
       );
     }

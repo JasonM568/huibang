@@ -72,7 +72,7 @@ export async function PATCH(
       const items = body.items;
       const subtotal = items.reduce(
         (sum: number, item: { unitPrice: string; quantity: string }) =>
-          sum + (parseInt(item.unitPrice) || 0) * (parseInt(item.quantity) || 0),
+          sum + (parseFloat(item.unitPrice) || 0) * (parseFloat(item.quantity) || 0),
         0
       );
       const discount = parseFloat(body.discount || "0");
@@ -109,7 +109,7 @@ export async function PATCH(
             specification: item.specification || null,
             unitPrice: item.unitPrice || "0",
             quantity: parseInt(item.quantity) || 1,
-            amount: ((parseInt(item.unitPrice) || 0) * (parseInt(item.quantity) || 0)).toString(),
+            amount: ((parseFloat(item.unitPrice) || 0) * (parseFloat(item.quantity) || 0)).toString(),
           }))
         );
       }
