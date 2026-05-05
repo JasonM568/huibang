@@ -5,6 +5,18 @@ Next.js 14 (App Router) + Drizzle ORM + PostgreSQL (Supabase) + Tailwind CSS
 Deployed on Vercel, auto-deploys on push to `main`.
 Repo: https://github.com/JasonM568/huibang.git
 
+## Development Methodology — SDD (Spec-Driven Development)
+
+**所有系統優化與調整都必須以 SDD（Spec-Driven Development）方式進行。**
+
+流程：
+1. **Spec 先行**：動工前先寫清楚規格——目標、變更範圍、輸入/輸出、邊界條件、驗收標準。
+2. **與使用者對齊**：規格寫完先和使用者確認，確認後才開始實作。
+3. **依規格實作**：實作過程嚴格依照已確認的規格，不擅自擴張範圍。
+4. **依規格驗收**：完成後對照規格逐項檢查，確認所有驗收條件達成。
+
+不得跳過 Spec 直接動手改 code。即使是小調整，也要先用一段話描述「要改什麼、為什麼、改完應該是什麼樣子」再動工。
+
 ## Key Commands
 - `npm run dev` — local dev server
 - `npm run build` — production build (same as Vercel)

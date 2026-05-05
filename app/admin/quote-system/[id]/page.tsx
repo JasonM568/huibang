@@ -76,6 +76,20 @@ export default function QuoteDetailPage() {
     router.push("/admin/quote-system");
   };
 
+  const handleDuplicate = async () => {
+    if (!confirm("確定要複製此報價單？")) return;
+    const res = await fetch(`/api/admin/quotes/${id}/duplicate`, {
+      method: "POST",
+    });
+    if (res.ok) {
+      const data = await res.json();
+      router.push(`/admin/quote-system/${data.id}/edit`);
+    } else {
+      const err = await res.json().catch(() => ({ error: "複製失敗" }));
+      alert(err.error || "複製失敗");
+    }
+  };
+
   if (loading) {
     return <div className="text-center py-12 text-gray-400">載入中...</div>;
   }
@@ -104,6 +118,12 @@ export default function QuoteDetailPage() {
             className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
           >
             查看 PDF
+          </button>
+          <button
+            onClick={handleDuplicate}
+            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200"
+          >
+            複製此報價單
           </button>
           {!isLocked && (
             <>

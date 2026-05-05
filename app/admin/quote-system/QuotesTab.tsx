@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface Quote {
   id: string;
@@ -22,6 +23,7 @@ const statusMap: Record<string, { label: string; color: string }> = {
 };
 
 export default function QuotesTab() {
+  const router = useRouter();
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -46,6 +48,20 @@ export default function QuotesTab() {
     if (!confirm("確定要刪除此報價單？")) return;
     await fetch(`/api/admin/quotes/${id}`, { method: "DELETE" });
     fetchQuotes();
+  };
+
+  const handleDuplicate = async (id: string) => {
+    if (!confirm("確定要複製此報價單？")) return;
+    const res = await fetch(`/api/admin/quotes/${id}/duplicate`, {
+      method: "POST",
+    });
+    if (res.ok) {
+      const data = await res.json();
+      router.push(`/admin/quote-system/${data.id}/edit`);
+    } else {
+      const err = await res.json().catch(() => ({ error: "複製失敗" }));
+      alert(err.error || "複製失敗");
+    }
   };
 
   return (
@@ -126,6 +142,12 @@ export default function QuotesTab() {
                       >
                         查看
                       </Link>
+                      <button
+                        onClick={() => handleDuplicate(q.id)}
+                        className="text-gray-600 hover:text-gray-800 mr-3"
+                      >
+                        複製
+                      </button>
                       <button
                         onClick={() => handleDelete(q.id)}
                         className="text-red-500 hover:text-red-700"
