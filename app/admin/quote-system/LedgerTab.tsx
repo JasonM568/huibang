@@ -48,6 +48,7 @@ export default function LedgerTab() {
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [selectedMonths, setSelectedMonths] = useState<Set<string>>(new Set());
   const [frequents, setFrequents] = useState<Counterparty[]>([]);
 
   const [showForm, setShowForm] = useState(false);
@@ -63,6 +64,7 @@ export default function LedgerTab() {
     const res = await fetch(`/api/admin/ledger?${params}`);
     const data = await res.json();
     setEntries(data.data || []);
+    setSelectedMonths(new Set());
     setLoading(false);
   }, [filterType, filterStatus]);
 
@@ -142,10 +144,40 @@ export default function LedgerTab() {
     return `${fmt(d)} ${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
   };
 
-  const totalPayable = entries.filter(e => e.type === "payable").reduce((s, e) => s + Number(e.amount), 0);
-  const totalReceivable = entries.filter(e => e.type === "receivable").reduce((s, e) => s + Number(e.amount), 0);
-  const pendingPay = entries.filter(e => e.paymentStatus === "pending_pay").reduce((s, e) => s + Number(e.amount), 0);
-  const pendingReceive = entries.filter(e => e.paymentStatus === "pending_receive").reduce((s, e) => s + Number(e.amount), 0);
+  // 依出入帳日期分月；無日期歸「未分類」(none)
+  const monthKeyOf = (e: LedgerEntry) => {
+    if (!e.transactionDate) return "none";
+    const d = new Date(e.transactionDate);
+    return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, "0")}`;
+  };
+  const monthLabel = (key: string) => key === "none" ? "未分類" : key.replace("-", "/");
+
+  // 目前資料中出現過的月份（年-月由新到舊，未分類置底）
+  const availableMonths = Array.from(new Set(entries.map(monthKeyOf)))
+    .sort((a, b) => {
+      if (a === "none") return 1;
+      if (b === "none") return -1;
+      return b.localeCompare(a);
+    });
+
+  // 勾選的月份篩選；都不勾＝全部
+  const filteredEntries = selectedMonths.size === 0
+    ? entries
+    : entries.filter(e => selectedMonths.has(monthKeyOf(e)));
+
+  const toggleMonth = (key: string) => {
+    setSelectedMonths((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  const totalPayable = filteredEntries.filter(e => e.type === "payable").reduce((s, e) => s + Number(e.amount), 0);
+  const totalReceivable = filteredEntries.filter(e => e.type === "receivable").reduce((s, e) => s + Number(e.amount), 0);
+  const pendingPay = filteredEntries.filter(e => e.paymentStatus === "pending_pay").reduce((s, e) => s + Number(e.amount), 0);
+  const pendingReceive = filteredEntries.filter(e => e.paymentStatus === "pending_receive").reduce((s, e) => s + Number(e.amount), 0);
 
   const isPayable = form.type === "payable";
 
@@ -177,6 +209,33 @@ export default function LedgerTab() {
         </div>
         <button onClick={() => { resetForm(); setShowForm(true); }} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">+ 新增帳款</button>
       </div>
+
+      {/* 月份勾選 */}
+      {availableMonths.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          <span className="text-xs text-gray-500">月份：</span>
+          {availableMonths.map((key) => {
+            const active = selectedMonths.has(key);
+            return (
+              <label
+                key={key}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium cursor-pointer border ${active ? "bg-blue-50 border-blue-300 text-blue-700" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"}`}
+              >
+                <input
+                  type="checkbox"
+                  checked={active}
+                  onChange={() => toggleMonth(key)}
+                  className="w-3.5 h-3.5 rounded border-gray-300 text-blue-600"
+                />
+                {monthLabel(key)}
+              </label>
+            );
+          })}
+          {selectedMonths.size > 0 && (
+            <button onClick={() => setSelectedMonths(new Set())} className="text-xs text-gray-400 hover:text-gray-600 underline ml-1">清除</button>
+          )}
+        </div>
+      )}
 
       {/* Modal */}
       {showForm && (
@@ -291,7 +350,7 @@ export default function LedgerTab() {
       {/* Table */}
       {loading ? (
         <div className="text-center py-12 text-gray-400">載入中...</div>
-      ) : entries.length === 0 ? (
+      ) : filteredEntries.length === 0 ? (
         <div className="text-center py-12 text-gray-400">尚無收支記錄</div>
       ) : (
         <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
@@ -310,7 +369,7 @@ export default function LedgerTab() {
               </tr>
             </thead>
             <tbody>
-              {entries.map((e) => {
+              {filteredEntries.map((e) => {
                 const status = statusMap[e.paymentStatus] || { label: e.paymentStatus, color: "bg-gray-100 text-gray-700" };
                 return (
                   <tr key={e.id} className="border-b border-gray-50 hover:bg-gray-50">
