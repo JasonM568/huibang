@@ -10,7 +10,8 @@ interface SalaryRecord {
   baseSalary: string; leaveDays: string | null; leaveDeduction: string;
   overtimePay: string; fullAttendanceBonus: string; supervisorAllowance: string;
   laborInsurance: string; healthInsurance: string;
-  otherDeduction: string; totalEarnings: string; totalDeductions: string; netPay: string;
+  otherDeduction: string; otherDeductionNote: string | null;
+  totalEarnings: string; totalDeductions: string; netPay: string;
   note: string | null; bonuses: ItemRow[]; deductions: ItemRow[];
 }
 
@@ -45,8 +46,7 @@ function SalarySlip({ r, showSignature }: { r: SalaryRecord; showSignature: bool
   const deduct: { label: string; $?: boolean; val: string }[] = [];
   if (Number(r.laborInsurance) > 0) deduct.push({ label: "勞保費", $: true, val: n(r.laborInsurance) });
   if (Number(r.healthInsurance) > 0) deduct.push({ label: "健保費", $: true, val: n(r.healthInsurance) });
-  deduct.push({ label: "常年會費", val: "" });
-  if (Number(r.otherDeduction) > 0) deduct.push({ label: "其他扣款", $: true, val: n(r.otherDeduction) });
+  if (Number(r.otherDeduction) > 0) deduct.push({ label: r.otherDeductionNote ? `其他扣款（${r.otherDeductionNote}）` : "其他扣款", $: true, val: n(r.otherDeduction) });
   (r.deductions || []).forEach(d => { if (Number(d.amount) > 0) deduct.push({ label: d.name, $: true, val: n(d.amount) }); });
 
   return (
@@ -205,6 +205,17 @@ export default function SalaryBatchPrintPage() {
             </div>
           ))}
         </div>
+        {records.length > 0 && (
+          <div className="flex justify-between" style={{ marginTop: "16px", pageBreakInside: "avoid" }}>
+            <div style={{ width: "48%" }} />
+            <div style={{ width: "48%" }}>
+              <div className="flex justify-between items-center border-t-2 border-gray-700" style={{ fontSize: "11px", paddingTop: "4px", fontWeight: "bold" }}>
+                <span>當月薪資總金額（{records.length} 人）</span>
+                <span>$ {records.reduce((s, r) => s + Number(r.netPay), 0).toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

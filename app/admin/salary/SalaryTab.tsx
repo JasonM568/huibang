@@ -42,6 +42,19 @@ export default function SalaryTab() {
     fetchRecords();
   };
 
+  const handleDuplicate = async (id: string) => {
+    if (!confirm("確定要複製此薪資紀錄到下個月？")) return;
+    const res = await fetch(`/api/admin/salary/${id}/duplicate`, { method: "POST" });
+    if (res.ok) {
+      const data = await res.json();
+      setYear(data.year.toString());
+      setMonth(data.month.toString());
+    } else {
+      const err = await res.json().catch(() => ({ error: "複製失敗" }));
+      alert(err.error || "複製失敗");
+    }
+  };
+
   const totalNetPay = records.reduce((s, r) => s + Number(r.netPay), 0);
 
   return (
@@ -93,6 +106,7 @@ export default function SalaryTab() {
                     <td className="px-4 py-3 text-gray-900 text-right font-medium">${Number(r.netPay).toLocaleString()}</td>
                     <td className="px-4 py-3">
                       <Link href={`/admin/salary/${r.id}`} className="text-blue-600 hover:text-blue-800 mr-3">查看</Link>
+                      <button onClick={() => handleDuplicate(r.id)} className="text-green-600 hover:text-green-800 mr-3">複製</button>
                       <button onClick={() => handleDelete(r.id)} className="text-red-500 hover:text-red-700">刪除</button>
                     </td>
                   </tr>

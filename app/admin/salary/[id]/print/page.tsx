@@ -10,7 +10,8 @@ interface Record {
   baseSalary: string; leaveDays: string | null; leaveDeduction: string;
   overtimePay: string; fullAttendanceBonus: string; supervisorAllowance: string;
   laborInsurance: string; healthInsurance: string;
-  otherDeduction: string; totalEarnings: string; totalDeductions: string; netPay: string;
+  otherDeduction: string; otherDeductionNote: string | null;
+  totalEarnings: string; totalDeductions: string; netPay: string;
   note: string | null; bonuses: ItemRow[]; deductions: ItemRow[];
 }
 
@@ -43,8 +44,7 @@ function SalarySlip({ r, showSignature }: { r: Record; showSignature: boolean })
   const deduct: { label: string; $?: boolean; val: string }[] = [];
   if (Number(r.laborInsurance) > 0) deduct.push({ label: "勞保費", $: true, val: n(r.laborInsurance) });
   if (Number(r.healthInsurance) > 0) deduct.push({ label: "健保費", $: true, val: n(r.healthInsurance) });
-  deduct.push({ label: "常年會費", val: "" });
-  if (Number(r.otherDeduction) > 0) deduct.push({ label: "其他扣款", $: true, val: n(r.otherDeduction) });
+  if (Number(r.otherDeduction) > 0) deduct.push({ label: r.otherDeductionNote ? `其他扣款（${r.otherDeductionNote}）` : "其他扣款", $: true, val: n(r.otherDeduction) });
   (r.deductions || []).forEach(d => { if (Number(d.amount) > 0) deduct.push({ label: d.name, $: true, val: n(d.amount) }); });
 
   return (
