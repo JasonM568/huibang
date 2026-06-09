@@ -20,6 +20,7 @@ const statusMap: Record<string, { label: string; color: string }> = {
   accepted: { label: "已接受", color: "bg-green-100 text-green-700" },
   rejected: { label: "已拒絕", color: "bg-red-100 text-red-700" },
   expired: { label: "已過期", color: "bg-yellow-100 text-yellow-700" },
+  invoiced: { label: "轉請款單", color: "bg-indigo-100 text-indigo-700" },
 };
 
 export default function QuotesTab() {
@@ -86,6 +87,7 @@ export default function QuotesTab() {
             <option value="accepted">已接受</option>
             <option value="rejected">已拒絕</option>
             <option value="expired">已過期</option>
+            <option value="invoiced">轉請款單</option>
           </select>
         </div>
         <Link

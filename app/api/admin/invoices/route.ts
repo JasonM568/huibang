@@ -134,6 +134,12 @@ export async function POST(request: Request) {
       transactionDate: null,
     });
 
+    // 來源報價單狀態自動更新為「轉請款單」
+    await db
+      .update(quotes)
+      .set({ status: "invoiced", updatedAt: new Date() })
+      .where(eq(quotes.id, quote.id));
+
     return NextResponse.json(invoice, { status: 201 });
   } catch (error: unknown) {
     if (error instanceof Error && error.message === "Unauthorized") {
