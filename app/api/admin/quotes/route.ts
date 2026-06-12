@@ -100,8 +100,13 @@ export async function POST(request: Request) {
     );
     const discountAmount = Math.round(subtotal * (parseFloat(body.discount || "0") / 100));
     const afterDiscount = subtotal - discountAmount;
-    const taxAmount = Math.round(afterDiscount * (parseFloat(body.taxRate || "5") / 100));
-    const totalAmount = afterDiscount + taxAmount;
+    const taxRate = parseFloat(body.taxRate || "5");
+    const taxType = body.taxType === "inclusive" ? "inclusive" : "exclusive";
+    // inclusive（含稅）：輸入金額已含稅，總計 = 折扣後金額，稅額為內含反推
+    const taxAmount = taxType === "inclusive"
+      ? Math.round(afterDiscount - afterDiscount / (1 + taxRate / 100))
+      : Math.round(afterDiscount * (taxRate / 100));
+    const totalAmount = taxType === "inclusive" ? afterDiscount : afterDiscount + taxAmount;
 
     const [quote] = await db
       .insert(quotes)
@@ -111,6 +116,7 @@ export async function POST(request: Request) {
         userId: session.userId,
         discount: body.discount || "0",
         taxRate: body.taxRate || "5",
+        taxType,
         validUntil: new Date(body.validUntil),
         notes: body.notes || null,
         subtotal: subtotal.toFixed(2),

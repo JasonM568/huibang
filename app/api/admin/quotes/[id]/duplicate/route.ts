@@ -60,6 +60,7 @@ export async function POST(
         userId: session.userId,
         discount: source.discount,
         taxRate: source.taxRate,
+        taxType: source.taxType,
         validUntil: newValidUntil,
         status: "draft",
         notes: source.notes,

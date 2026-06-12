@@ -88,3 +88,6 @@ UPDATE customers SET tax_id = '' WHERE tax_id IS NULL;
 UPDATE customers SET phone = '' WHERE phone IS NULL;
 ALTER TABLE customers ALTER COLUMN tax_id SET NOT NULL;
 ALTER TABLE customers ALTER COLUMN phone SET NOT NULL;
+
+-- 2026-06-12: 報價單新增計稅方式（exclusive 稅外加 / inclusive 含稅）
+ALTER TABLE quotes ADD COLUMN IF NOT EXISTS tax_type varchar(20) DEFAULT 'exclusive' NOT NULL;

@@ -27,6 +27,7 @@ export async function GET(
         userName: adminUsers.name,
         discount: quotes.discount,
         taxRate: quotes.taxRate,
+        taxType: quotes.taxType,
         validUntil: quotes.validUntil,
         status: quotes.status,
         notes: quotes.notes,
@@ -77,9 +78,13 @@ export async function PATCH(
       );
       const discount = parseFloat(body.discount || "0");
       const taxRate = parseFloat(body.taxRate || "5");
+      const taxType = body.taxType === "inclusive" ? "inclusive" : "exclusive";
       const afterDiscount = subtotal - Math.round(subtotal * (discount / 100));
-      const taxAmount = Math.round(afterDiscount * (taxRate / 100));
-      const totalAmount = afterDiscount + taxAmount;
+      // inclusive（含稅）：輸入金額已含稅，總計 = 折扣後金額，稅額為內含反推
+      const taxAmount = taxType === "inclusive"
+        ? Math.round(afterDiscount - afterDiscount / (1 + taxRate / 100))
+        : Math.round(afterDiscount * (taxRate / 100));
+      const totalAmount = taxType === "inclusive" ? afterDiscount : afterDiscount + taxAmount;
 
       // Update quote
       const [updated] = await db
@@ -88,6 +93,7 @@ export async function PATCH(
           customerId: body.customerId,
           discount: body.discount,
           taxRate: body.taxRate,
+          taxType,
           validUntil: body.validUntil ? new Date(body.validUntil) : undefined,
           notes: body.notes,
           subtotal: subtotal.toFixed(2),

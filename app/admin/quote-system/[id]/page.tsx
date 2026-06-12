@@ -17,6 +17,7 @@ interface QuoteDetail {
   userName: string | null;
   discount: string;
   taxRate: string;
+  taxType: string;
   validUntil: string;
   status: string;
   notes: string | null;
@@ -212,8 +213,8 @@ export default function QuoteDetailPage() {
               {parseFloat(quote.discount) > 0 && (
                 <div className="text-gray-600">折扣 ({quote.discount}%)：<span className="text-red-600">-${(Number(quote.subtotal) * parseFloat(quote.discount) / 100).toLocaleString()}</span></div>
               )}
-              <div className="text-gray-600">稅額 ({quote.taxRate}%)：<span className="font-medium text-gray-900">${Number(quote.taxAmount).toLocaleString()}</span></div>
-              <div className="text-lg font-bold text-gray-900">總計：${Number(quote.totalAmount).toLocaleString()}</div>
+              <div className="text-gray-600">稅額 ({quote.taxType === "inclusive" ? `內含 ${quote.taxRate}` : quote.taxRate}%)：<span className="font-medium text-gray-900">${Number(quote.taxAmount).toLocaleString()}</span></div>
+              <div className="text-lg font-bold text-gray-900">總計{quote.taxType === "inclusive" ? "（含稅）" : ""}：${Number(quote.totalAmount).toLocaleString()}</div>
             </div>
           </div>
 

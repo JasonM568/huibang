@@ -316,6 +316,8 @@ export const quotes = pgTable("quotes", {
   userId: uuid("user_id").references(() => adminUsers.id).notNull(),
   discount: numeric("discount", { precision: 5, scale: 2 }).default("0").notNull(),
   taxRate: numeric("tax_rate", { precision: 5, scale: 2 }).default("5").notNull(),
+  taxType: varchar("tax_type", { length: 20 }).default("exclusive").notNull(),
+  // exclusive（稅外加）/ inclusive（含稅）
   validUntil: timestamp("valid_until").notNull(),
   status: varchar("status", { length: 20 }).default("draft").notNull(),
   notes: text("notes"),

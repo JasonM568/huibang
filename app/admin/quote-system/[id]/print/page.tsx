@@ -15,6 +15,7 @@ interface QuoteDetail {
   userName: string | null;
   discount: string;
   taxRate: string;
+  taxType: string;
   validUntil: string;
   status: string;
   notes: string | null;
@@ -221,11 +222,11 @@ export default function QuotePrintPage() {
               </div>
             )}
             <div className="flex justify-between py-1.5 border-b border-gray-200">
-              <span className="text-gray-600">稅額 ({quote.taxRate}%)</span>
+              <span className="text-gray-600">稅額 ({quote.taxType === "inclusive" ? `內含 ${quote.taxRate}` : quote.taxRate}%)</span>
               <span className="font-medium">${Number(quote.taxAmount).toLocaleString()}</span>
             </div>
             <div className="flex justify-between py-2 font-bold text-base">
-              <span>總計</span>
+              <span>總計{quote.taxType === "inclusive" ? "（含稅）" : ""}</span>
               <span>${Number(quote.totalAmount).toLocaleString()}</span>
             </div>
           </div>
