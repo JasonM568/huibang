@@ -21,6 +21,7 @@ interface QuoteItemForm {
   specification: string;
   unitPrice: string;
   quantity: string;
+  discount: string;
 }
 
 export default function EditQuotePage() {
@@ -33,7 +34,6 @@ export default function EditQuotePage() {
 
   const [form, setForm] = useState({
     customerId: "",
-    discount: "0",
     taxRate: "5",
     taxType: "exclusive",
     validUntil: "",
@@ -58,7 +58,6 @@ export default function EditQuotePage() {
 
       setForm({
         customerId: quoteData.customerId,
-        discount: quoteData.discount,
         taxRate: quoteData.taxRate,
         taxType: quoteData.taxType || "exclusive",
         validUntil: new Date(quoteData.validUntil).toISOString().split("T")[0],
@@ -71,6 +70,7 @@ export default function EditQuotePage() {
           specification: item.specification || "",
           unitPrice: item.unitPrice || "0",
           quantity: (item.quantity || 1).toString(),
+          discount: (item.discount ?? "0").toString(),
         }))
       );
       setLoadingQuote(false);
@@ -87,6 +87,7 @@ export default function EditQuotePage() {
         specification: service.specification || "",
         unitPrice: service.unitPrice,
         quantity: newItems[index].quantity,
+        discount: newItems[index].discount,
       };
     } else {
       newItems[index] = { ...newItems[index], serviceId: "" };
@@ -95,7 +96,7 @@ export default function EditQuotePage() {
   };
 
   const addItem = () => {
-    setItems([...items, { serviceId: "", name: "", specification: "", unitPrice: "", quantity: "1" }]);
+    setItems([...items, { serviceId: "", name: "", specification: "", unitPrice: "", quantity: "1", discount: "0" }]);
   };
 
   const removeItem = (index: number) => {
@@ -109,15 +110,22 @@ export default function EditQuotePage() {
     setItems(newItems);
   };
 
-  const subtotal = items.reduce(
+  // 單一項次折後金額（小計）
+  const lineAmount = (item: QuoteItemForm) =>
+    Math.round(
+      (parseFloat(item.unitPrice) || 0) *
+        (parseFloat(item.quantity) || 0) *
+        (1 - (parseFloat(item.discount) || 0) / 100)
+    );
+  const listSubtotal = items.reduce(
     (sum, item) => sum + (parseFloat(item.unitPrice) || 0) * (parseFloat(item.quantity) || 0),
     0
-  );
-  const discountAmount = Math.round(subtotal * (parseFloat(form.discount) || 0) / 100);
-  const afterDiscount = subtotal - discountAmount;
+  ); // 折前小計
+  const afterDiscount = items.reduce((sum, item) => sum + lineAmount(item), 0); // 折後小計
+  const discountAmount = listSubtotal - afterDiscount; // 折扣總額
   const taxRateNum = parseFloat(form.taxRate) || 0;
   const isInclusive = form.taxType === "inclusive";
-  // 含稅：輸入金額已含稅，總計 = 折扣後金額，稅額為內含反推
+  // 含稅：輸入金額已含稅，總計 = 折後小計，稅額為內含反推
   const taxAmount = isInclusive
     ? Math.round(afterDiscount - afterDiscount / (1 + taxRateNum / 100))
     : Math.round(afterDiscount * (taxRateNum / 100));
@@ -179,16 +187,6 @@ export default function EditQuotePage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">折扣 (%)</label>
-              <input
-                type="number"
-                step="0.01"
-                value={form.discount}
-                onChange={(e) => setForm({ ...form, discount: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">稅率 (%)</label>
               <input
                 type="number"
@@ -237,7 +235,7 @@ export default function EditQuotePage() {
           <div className="space-y-3">
             {items.map((item, index) => (
               <div key={index} className="flex gap-2 items-start p-3 bg-gray-50 rounded-lg">
-                <div className="flex-1 grid grid-cols-1 sm:grid-cols-6 gap-2">
+                <div className="flex-1 grid grid-cols-1 sm:grid-cols-7 gap-2">
                   <div className="sm:col-span-2">
                     <select
                       value={item.serviceId}
@@ -288,9 +286,21 @@ export default function EditQuotePage() {
                       className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm"
                     />
                   </div>
+                  <div>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="100"
+                      placeholder="折扣%"
+                      value={item.discount}
+                      onChange={(e) => updateItem(index, "discount", e.target.value)}
+                      className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm"
+                    />
+                  </div>
                   <div className="flex items-center">
                     <span className="text-sm text-gray-500 whitespace-nowrap">
-                      ${((parseFloat(item.unitPrice) || 0) * (parseFloat(item.quantity) || 0)).toLocaleString()}
+                      ${lineAmount(item).toLocaleString()}
                     </span>
                   </div>
                 </div>
@@ -307,9 +317,9 @@ export default function EditQuotePage() {
 
           {/* Totals */}
           <div className="mt-4 pt-4 border-t border-gray-200 text-sm text-right space-y-1">
-            <div className="text-gray-600">小計：<span className="font-medium text-gray-900">${subtotal.toLocaleString()}</span></div>
-            {parseFloat(form.discount) > 0 && (
-              <div className="text-gray-600">折扣 ({form.discount}%)：<span className="text-red-600">-${discountAmount.toLocaleString()}</span></div>
+            <div className="text-gray-600">小計：<span className="font-medium text-gray-900">${listSubtotal.toLocaleString()}</span></div>
+            {discountAmount > 0 && (
+              <div className="text-gray-600">折扣：<span className="text-red-600">-${discountAmount.toLocaleString()}</span></div>
             )}
             <div className="text-gray-600">稅額 ({isInclusive ? `內含 ${form.taxRate}` : form.taxRate}%)：<span className="font-medium text-gray-900">${taxAmount.toLocaleString()}</span></div>
             <div className="text-lg font-bold text-gray-900">總計{isInclusive ? "（含稅）" : ""}：${total.toLocaleString()}</div>

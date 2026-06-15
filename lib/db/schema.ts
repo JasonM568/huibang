@@ -337,6 +337,8 @@ export const quoteItems = pgTable("quote_items", {
   specification: text("specification"),
   unitPrice: numeric("unit_price", { precision: 10, scale: 2 }).notNull(),
   quantity: integer("quantity").default(1).notNull(),
+  discount: numeric("discount", { precision: 5, scale: 2 }).default("0").notNull(),
+  // 該項次折扣百分比；amount = round(unitPrice × quantity × (1 - discount/100))
   amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
 });
 

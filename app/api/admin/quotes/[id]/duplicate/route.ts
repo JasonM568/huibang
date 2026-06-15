@@ -84,6 +84,7 @@ export async function POST(
           specification: item.specification,
           unitPrice: item.unitPrice,
           quantity: item.quantity,
+          discount: item.discount,
           amount: item.amount,
         }))
       );

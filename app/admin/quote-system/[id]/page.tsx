@@ -31,6 +31,7 @@ interface QuoteDetail {
     specification: string | null;
     unitPrice: string;
     quantity: number;
+    discount: string;
     amount: string;
   }[];
 }
@@ -100,6 +101,13 @@ export default function QuoteDetailPage() {
   }
 
   const isLocked = quote.status === "invoiced";
+
+  // 折前小計與折扣總額由項次推導（subtotal 已存折後小計）
+  const listSubtotal = quote.items.reduce(
+    (sum, item) => sum + Number(item.unitPrice) * item.quantity,
+    0
+  );
+  const discountTotal = listSubtotal - quote.items.reduce((sum, item) => sum + Number(item.amount), 0);
 
   return (
     <div>
@@ -192,6 +200,7 @@ export default function QuoteDetailPage() {
                   <th className="pb-2 font-medium">規格</th>
                   <th className="pb-2 font-medium text-right">單價</th>
                   <th className="pb-2 font-medium text-right">數量</th>
+                  <th className="pb-2 font-medium text-right">折扣</th>
                   <th className="pb-2 font-medium text-right">小計</th>
                 </tr>
               </thead>
@@ -202,6 +211,7 @@ export default function QuoteDetailPage() {
                     <td className="py-2 text-gray-600">{item.specification || "-"}</td>
                     <td className="py-2 text-gray-900 text-right">${Number(item.unitPrice).toLocaleString()}</td>
                     <td className="py-2 text-gray-900 text-right">{item.quantity}</td>
+                    <td className="py-2 text-gray-900 text-right">{Number(item.discount) > 0 ? `${Number(item.discount)}%` : "-"}</td>
                     <td className="py-2 text-gray-900 text-right">${Number(item.amount).toLocaleString()}</td>
                   </tr>
                 ))}
@@ -209,9 +219,9 @@ export default function QuoteDetailPage() {
             </table>
 
             <div className="mt-4 pt-4 border-t border-gray-200 text-sm text-right space-y-1">
-              <div className="text-gray-600">小計：<span className="font-medium text-gray-900">${Number(quote.subtotal).toLocaleString()}</span></div>
-              {parseFloat(quote.discount) > 0 && (
-                <div className="text-gray-600">折扣 ({quote.discount}%)：<span className="text-red-600">-${(Number(quote.subtotal) * parseFloat(quote.discount) / 100).toLocaleString()}</span></div>
+              <div className="text-gray-600">小計：<span className="font-medium text-gray-900">${listSubtotal.toLocaleString()}</span></div>
+              {discountTotal > 0 && (
+                <div className="text-gray-600">折扣：<span className="text-red-600">-${discountTotal.toLocaleString()}</span></div>
               )}
               <div className="text-gray-600">稅額 ({quote.taxType === "inclusive" ? `內含 ${quote.taxRate}` : quote.taxRate}%)：<span className="font-medium text-gray-900">${Number(quote.taxAmount).toLocaleString()}</span></div>
               <div className="text-lg font-bold text-gray-900">總計{quote.taxType === "inclusive" ? "（含稅）" : ""}：${Number(quote.totalAmount).toLocaleString()}</div>

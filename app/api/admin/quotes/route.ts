@@ -92,17 +92,20 @@ export async function POST(request: Request) {
       .where(eq(customers.id, body.customerId));
     const customerName = customer?.companyName || "未知客戶";
 
-    // Calculate totals
-    const subtotal = items.reduce(
-      (sum: number, item: { unitPrice: string; quantity: string }) =>
-        sum + (parseFloat(item.unitPrice) || 0) * (parseFloat(item.quantity) || 0),
+    // Calculate totals — 每個項次各自折扣，amount 為折後金額
+    // afterDiscount（折後小計，未稅）= 各項次折後金額之和
+    const afterDiscount = items.reduce(
+      (sum: number, item: { unitPrice: string; quantity: string; discount?: string }) =>
+        sum + Math.round(
+          (parseFloat(item.unitPrice) || 0) *
+            (parseFloat(item.quantity) || 0) *
+            (1 - (parseFloat(item.discount || "0") || 0) / 100)
+        ),
       0
     );
-    const discountAmount = Math.round(subtotal * (parseFloat(body.discount || "0") / 100));
-    const afterDiscount = subtotal - discountAmount;
     const taxRate = parseFloat(body.taxRate || "5");
     const taxType = body.taxType === "inclusive" ? "inclusive" : "exclusive";
-    // inclusive（含稅）：輸入金額已含稅，總計 = 折扣後金額，稅額為內含反推
+    // inclusive（含稅）：輸入金額已含稅，總計 = 折後小計，稅額為內含反推
     const taxAmount = taxType === "inclusive"
       ? Math.round(afterDiscount - afterDiscount / (1 + taxRate / 100))
       : Math.round(afterDiscount * (taxRate / 100));
@@ -114,28 +117,33 @@ export async function POST(request: Request) {
         quoteNumber: generateQuoteNumber(customerName),
         customerId: body.customerId,
         userId: session.userId,
-        discount: body.discount || "0",
+        discount: "0", // 折扣已下放至各項次，整單折扣欄位停用
         taxRate: body.taxRate || "5",
         taxType,
         validUntil: new Date(body.validUntil),
         notes: body.notes || null,
-        subtotal: subtotal.toFixed(2),
+        subtotal: afterDiscount.toFixed(2), // 折後小計（未稅）
         taxAmount: taxAmount.toFixed(2),
         totalAmount: totalAmount.toFixed(2),
       })
       .returning();
 
-    // Insert items
+    // Insert items — amount 為該項次折後金額
     if (items.length > 0) {
       await db.insert(quoteItems).values(
-        items.map((item: { serviceId?: string; name: string; specification?: string; unitPrice: string; quantity: string }) => ({
+        items.map((item: { serviceId?: string; name: string; specification?: string; unitPrice: string; quantity: string; discount?: string }) => ({
           quoteId: quote.id,
           serviceId: item.serviceId || null,
           name: item.name,
           specification: item.specification || null,
           unitPrice: item.unitPrice || "0",
           quantity: parseInt(item.quantity) || 1,
-          amount: ((parseFloat(item.unitPrice) || 0) * (parseFloat(item.quantity) || 0)).toString(),
+          discount: item.discount || "0",
+          amount: Math.round(
+            (parseFloat(item.unitPrice) || 0) *
+              (parseFloat(item.quantity) || 0) *
+              (1 - (parseFloat(item.discount || "0") || 0) / 100)
+          ).toString(),
         }))
       );
     }

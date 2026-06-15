@@ -91,3 +91,6 @@ ALTER TABLE customers ALTER COLUMN phone SET NOT NULL;
 
 -- 2026-06-12: 報價單新增計稅方式（exclusive 稅外加 / inclusive 含稅）
 ALTER TABLE quotes ADD COLUMN IF NOT EXISTS tax_type varchar(20) DEFAULT 'exclusive' NOT NULL;
+
+-- 2026-06-15: 報價項次各自折扣（amount 改存折後金額；quotes.subtotal 改存折後小計）
+ALTER TABLE quote_items ADD COLUMN IF NOT EXISTS discount numeric(5,2) DEFAULT 0 NOT NULL;

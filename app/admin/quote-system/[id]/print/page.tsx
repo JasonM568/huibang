@@ -29,6 +29,7 @@ interface QuoteDetail {
     specification: string | null;
     unitPrice: string;
     quantity: number;
+    discount: string;
     amount: string;
   }[];
 }
@@ -78,6 +79,14 @@ export default function QuotePrintPage() {
     const date = new Date(d);
     return `${date.getFullYear()}/${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getDate().toString().padStart(2, "0")}`;
   };
+
+  // 折前小計與折扣總額由項次推導（subtotal 已存折後小計）
+  const listSubtotal = quote.items.reduce(
+    (sum, item) => sum + Number(item.unitPrice) * item.quantity,
+    0
+  );
+  const discountTotal = listSubtotal - quote.items.reduce((sum, item) => sum + Number(item.amount), 0);
+  const hasDiscount = quote.items.some((item) => Number(item.discount) > 0);
 
   return (
     <>
@@ -178,6 +187,9 @@ export default function QuotePrintPage() {
                 <th className="border border-gray-300 px-2 py-1.5 text-left font-medium">規格</th>
                 <th className="border border-gray-300 px-2 py-1.5 text-right font-medium w-20">單價</th>
                 <th className="border border-gray-300 px-2 py-1.5 text-center font-medium w-12">數量</th>
+                {hasDiscount && (
+                  <th className="border border-gray-300 px-2 py-1.5 text-center font-medium w-12">折扣</th>
+                )}
                 <th className="border border-gray-300 px-2 py-1.5 text-right font-medium w-24">小計</th>
               </tr>
             </thead>
@@ -189,6 +201,9 @@ export default function QuotePrintPage() {
                   <td className="border border-gray-300 px-2 py-1 text-gray-600">{item.specification || ""}</td>
                   <td className="border border-gray-300 px-2 py-1 text-right">${Number(item.unitPrice).toLocaleString()}</td>
                   <td className="border border-gray-300 px-2 py-1 text-center">{item.quantity}</td>
+                  {hasDiscount && (
+                    <td className="border border-gray-300 px-2 py-1 text-center">{Number(item.discount) > 0 ? `${Number(item.discount)}%` : "-"}</td>
+                  )}
                   <td className="border border-gray-300 px-2 py-1 text-right">${Number(item.amount).toLocaleString()}</td>
                 </tr>
               ))}
@@ -213,12 +228,12 @@ export default function QuotePrintPage() {
           <div className="w-60 ml-auto" style={{ fontSize: "12px" }}>
             <div className="flex justify-between py-1.5 border-b border-gray-200">
               <span className="text-gray-600">小計</span>
-              <span className="font-medium">${Number(quote.subtotal).toLocaleString()}</span>
+              <span className="font-medium">${listSubtotal.toLocaleString()}</span>
             </div>
-            {parseFloat(quote.discount) > 0 && (
+            {discountTotal > 0 && (
               <div className="flex justify-between py-1.5 border-b border-gray-200">
-                <span className="text-gray-600">折扣 ({quote.discount}%)</span>
-                <span className="text-red-600">-${(Number(quote.subtotal) * parseFloat(quote.discount) / 100).toLocaleString()}</span>
+                <span className="text-gray-600">折扣</span>
+                <span className="text-red-600">-${discountTotal.toLocaleString()}</span>
               </div>
             )}
             <div className="flex justify-between py-1.5 border-b border-gray-200">
