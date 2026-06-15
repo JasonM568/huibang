@@ -232,6 +232,19 @@ export default function EditQuotePage() {
             </button>
           </div>
 
+          {/* 欄位標題（與下方輸入列對齊，手機版隱藏） */}
+          <div className="hidden sm:flex gap-2 items-start px-3 mb-1">
+            <div className="flex-1 grid grid-cols-7 gap-2 text-xs font-medium text-gray-500">
+              <div className="col-span-2">項目</div>
+              <div>規格</div>
+              <div>單價</div>
+              <div>數量</div>
+              <div>折扣 (%)</div>
+              <div className="text-right">小計</div>
+            </div>
+            <span className="invisible mt-1">x</span>
+          </div>
+
           <div className="space-y-3">
             {items.map((item, index) => (
               <div key={index} className="flex gap-2 items-start p-3 bg-gray-50 rounded-lg">
