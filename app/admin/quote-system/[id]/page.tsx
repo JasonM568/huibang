@@ -42,6 +42,7 @@ const statusOptions = [
   { value: "accepted", label: "已接受" },
   { value: "rejected", label: "已拒絕" },
   { value: "expired", label: "已過期" },
+  { value: "partial", label: "分期請款中" },
   { value: "invoiced", label: "已轉請款" },
 ];
 
@@ -219,7 +220,8 @@ export default function QuoteDetailPage() {
     return <div className="text-center py-12 text-gray-400">找不到此報價單</div>;
   }
 
-  const isLocked = quote.status === "invoiced";
+  const fullyBilled = quote.status === "invoiced";      // 已請滿 100%
+  const hasInvoices = quote.status === "invoiced" || quote.status === "partial"; // 已有請款單
 
   // 折前小計與折扣總額由項次推導（subtotal 已存折後小計）
   const listSubtotal = quote.items.reduce(
@@ -236,8 +238,11 @@ export default function QuoteDetailPage() {
             ← 返回報價系統
           </Link>
           <h1 className="text-2xl font-bold text-gray-900 mt-1">{quote.quoteNumber}</h1>
-          {isLocked && (
+          {fullyBilled && (
             <p className="text-xs text-orange-600 mt-1">此報價單已轉為請款單，無法修改</p>
+          )}
+          {hasInvoices && !fullyBilled && (
+            <p className="text-xs text-purple-600 mt-1">此報價單分期請款中，可繼續開立下一期；如需修改請先刪除已開立的請款單</p>
           )}
         </div>
         <div className="flex items-center gap-3">
@@ -253,26 +258,30 @@ export default function QuoteDetailPage() {
           >
             複製此報價單
           </button>
-          {!isLocked && (
+          {!hasInvoices && (
+            <Link
+              href={`/admin/quote-system/${id}/edit`}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+            >
+              編輯
+            </Link>
+          )}
+          {!fullyBilled && (
+            <button
+              onClick={openInvoiceModal}
+              className="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600"
+            >
+              {hasInvoices ? "繼續開立請款單" : "轉請款單"}
+            </button>
+          )}
+          {!hasInvoices && (
             <>
-              <Link
-                href={`/admin/quote-system/${id}/edit`}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
-              >
-                編輯
-              </Link>
-              <button
-                onClick={openInvoiceModal}
-                className="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600"
-              >
-                轉請款單
-              </button>
               <select
                 value={quote.status}
                 onChange={(e) => updateStatus(e.target.value)}
                 className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                {statusOptions.filter(s => s.value !== "invoiced").map((s) => (
+                {statusOptions.filter((s) => s.value !== "invoiced" && s.value !== "partial").map((s) => (
                   <option key={s.value} value={s.value}>{s.label}</option>
                 ))}
               </select>
@@ -401,10 +410,30 @@ export default function QuoteDetailPage() {
             </dl>
           </div>
 
-          {/* 已開立的請款單 */}
-          {quoteInvoices.length > 0 && (
+          {/* 分期請款明細 */}
+          {quoteInvoices.length > 0 && (() => {
+            const billed = round2(
+              quoteInvoices.reduce((s, i) => s + (i.installmentNo ? Number(i.installmentPercent || 0) : 100), 0)
+            );
+            const unbilled = round2(100 - billed);
+            const qTotal = Number(quote.totalAmount);
+            const billedAmt = round2(quoteInvoices.reduce((s, i) => s + Number(i.totalAmount || 0), 0));
+            return (
             <div className="bg-white rounded-xl border border-gray-200 p-5">
-              <h2 className="text-base font-bold text-gray-900 mb-3">已開立的請款單</h2>
+              <h2 className="text-base font-bold text-gray-900 mb-3">分期請款明細</h2>
+
+              {/* 已送 / 待請款 摘要 */}
+              <div className="mb-3 grid grid-cols-2 gap-2 text-center">
+                <div className="rounded-lg bg-purple-50 py-2">
+                  <div className="text-lg font-bold text-purple-700">{billed}%</div>
+                  <div className="text-xs text-gray-500">已送請款（${billedAmt.toLocaleString()}）</div>
+                </div>
+                <div className="rounded-lg bg-gray-50 py-2">
+                  <div className={`text-lg font-bold ${unbilled > 0 ? "text-gray-900" : "text-green-600"}`}>{unbilled}%</div>
+                  <div className="text-xs text-gray-500">待請款（${round2(qTotal - billedAmt).toLocaleString()}）</div>
+                </div>
+              </div>
+
               <div className="space-y-2">
                 {quoteInvoices.map((inv) => (
                   <Link
@@ -427,19 +456,9 @@ export default function QuoteDetailPage() {
                   </Link>
                 ))}
               </div>
-              {(() => {
-                const billed = round2(
-                  quoteInvoices.reduce((s, i) => s + (i.installmentNo ? Number(i.installmentPercent || 0) : 100), 0)
-                );
-                return (
-                  <p className="text-xs text-gray-500 mt-3">
-                    已請款 {billed}%
-                    {billed < 99.995 && `，剩餘 ${round2(100 - billed)}% 可繼續開立`}
-                  </p>
-                );
-              })()}
             </div>
-          )}
+            );
+          })()}
         </div>
       </div>
 

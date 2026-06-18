@@ -169,18 +169,27 @@ export async function DELETE(
         0
       );
 
-      // 未達 100% 且報價單仍鎖在「已轉請款」→ 解鎖回可編輯狀態
-      if (billedPercent < 99.995) {
-        const [q] = await db
-          .select({ status: quotes.status })
-          .from(quotes)
+      const [q] = await db
+        .select({ status: quotes.status })
+        .from(quotes)
+        .where(eq(quotes.id, target.quoteId));
+
+      // 依剩餘請款比例回推報價單狀態
+      // 100%→已轉請款；0<x<100→分期請款中；0→（若原為請款相關狀態）解鎖回已送出
+      let nextStatus: string | null = null;
+      if (billedPercent >= 99.995) {
+        nextStatus = "invoiced";
+      } else if (billedPercent > 0) {
+        nextStatus = "partial";
+      } else if (q?.status === "invoiced" || q?.status === "partial") {
+        nextStatus = "sent";
+      }
+
+      if (nextStatus && q?.status !== nextStatus) {
+        await db
+          .update(quotes)
+          .set({ status: nextStatus, updatedAt: new Date() })
           .where(eq(quotes.id, target.quoteId));
-        if (q?.status === "invoiced") {
-          await db
-            .update(quotes)
-            .set({ status: "sent", updatedAt: new Date() })
-            .where(eq(quotes.id, target.quoteId));
-        }
       }
     }
 

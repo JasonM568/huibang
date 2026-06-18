@@ -225,13 +225,14 @@ export async function POST(request: Request) {
         created.push(invoice);
       }
 
-      // 僅在累計請款達 100% 時才鎖定報價單（否則保留可繼續開下一期）
-      if (cumPercent >= 99.995) {
-        await db
-          .update(quotes)
-          .set({ status: "invoiced", updatedAt: new Date() })
-          .where(eq(quotes.id, quote.id));
-      }
+      // 達 100% → 已轉請款；未達 → 分期請款中（仍可繼續開下一期）
+      await db
+        .update(quotes)
+        .set({
+          status: cumPercent >= 99.995 ? "invoiced" : "partial",
+          updatedAt: new Date(),
+        })
+        .where(eq(quotes.id, quote.id));
 
       return NextResponse.json(
         { installments: created, count: created.length, first: created[0], billedPercent: cumPercent },

@@ -51,7 +51,7 @@ export default function EditQuotePage() {
       setCustomers(custData.data || []);
       setServices(svcData.data || []);
 
-      if (quoteData.status === "invoiced") {
+      if (quoteData.status === "invoiced" || quoteData.status === "partial") {
         router.push(`/admin/quote-system/${id}`);
         return;
       }
