@@ -22,11 +22,13 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get("limit") || "20");
     const invoiceStatus = searchParams.get("invoiceStatus");
     const paymentStatus = searchParams.get("paymentStatus");
+    const quoteId = searchParams.get("quoteId");
     const offset = (page - 1) * limit;
 
     const conditions = [];
     if (invoiceStatus) conditions.push(eq(invoices.invoiceStatus, invoiceStatus));
     if (paymentStatus) conditions.push(eq(invoices.paymentStatus, paymentStatus));
+    if (quoteId) conditions.push(eq(invoices.quoteId, quoteId));
 
     const where = conditions.length > 0
       ? sql`${sql.join(conditions, sql` AND `)}`
@@ -38,7 +40,9 @@ export async function GET(request: Request) {
         invoiceNumber: invoices.invoiceNumber,
         quoteNumber: quotes.quoteNumber,
         customerName: customers.companyName,
+        installmentNo: invoices.installmentNo,
         installmentLabel: invoices.installmentLabel,
+        installmentPercent: invoices.installmentPercent,
         totalAmount: invoices.totalAmount,
         invoiceStatus: invoices.invoiceStatus,
         issuedDate: invoices.issuedDate,
@@ -110,56 +114,96 @@ export async function POST(request: Request) {
 
     const round2 = (n: number) => Math.round(n * 100) / 100;
 
-    // ===== 分期請款：installments = [{ label, percent }] =====
+    const qSub = Number(quote.subtotal);
+    const qTax = Number(quote.taxAmount);
+    const qTotal = Number(quote.totalAmount);
+
+    // 統計此報價單「已請款」比例與金額（全額單計為 100%，分期單以 installmentPercent 累計）
+    const existing = await db
+      .select({
+        installmentNo: invoices.installmentNo,
+        installmentPercent: invoices.installmentPercent,
+        subtotal: invoices.subtotal,
+        taxAmount: invoices.taxAmount,
+        totalAmount: invoices.totalAmount,
+      })
+      .from(invoices)
+      .where(eq(invoices.quoteId, quote.id));
+
+    let billedPercent = 0;
+    let billedSub = 0;
+    let billedTax = 0;
+    let billedTotal = 0;
+    let maxNo = 0;
+    for (const e of existing) {
+      billedPercent += e.installmentNo ? Number(e.installmentPercent || 0) : 100;
+      billedSub += Number(e.subtotal);
+      billedTax += Number(e.taxAmount);
+      billedTotal += Number(e.totalAmount);
+      if (e.installmentNo) maxNo = Math.max(maxNo, e.installmentNo);
+    }
+    billedPercent = round2(billedPercent);
+
+    if (billedPercent >= 99.995) {
+      return NextResponse.json(
+        { error: "此報價單已全額請款，無法再開立請款單" },
+        { status: 400 }
+      );
+    }
+
+    // ===== 分期請款：installments = [{ label, percent }]，每列產生一張本期請款單 =====
     const installments = Array.isArray(body.installments) ? body.installments : null;
     if (installments && installments.length > 0) {
-      const totalPercent = installments.reduce(
-        (s: number, i: { percent: number | string }) => s + Number(i.percent),
-        0
+      for (const i of installments) {
+        if (!(Number(i.percent) > 0)) {
+          return NextResponse.json({ error: "每期百分比需大於 0" }, { status: 400 });
+        }
+      }
+      const sumNew = round2(
+        installments.reduce((s: number, i: { percent: number | string }) => s + Number(i.percent), 0)
       );
-      if (Math.abs(totalPercent - 100) > 0.01) {
+      if (round2(billedPercent + sumNew) > 100.005) {
         return NextResponse.json(
-          { error: "分期百分比總和必須為 100%" },
+          {
+            error: `超過報價單可請款比例：已請款 ${billedPercent}%，最多再請 ${round2(100 - billedPercent)}%`,
+          },
           { status: 400 }
         );
       }
 
-      const qSub = Number(quote.subtotal);
-      const qTax = Number(quote.taxAmount);
-      const qTotal = Number(quote.totalAmount);
       const baseNumber = generateInvoiceNumber(customerName);
-
       const created = [];
-      let accSub = 0;
-      let accTax = 0;
-      let accTotal = 0;
+      // 從「已請款」基準往上累計，使最後補足 100% 的那一期吸收尾差
+      let cumPercent = billedPercent;
+      let cumSub = billedSub;
+      let cumTax = billedTax;
+      let cumTotal = billedTotal;
 
       for (let idx = 0; idx < installments.length; idx++) {
-        const inst = installments[idx];
-        const pct = Number(inst.percent);
-        const isLast = idx === installments.length - 1;
-        // 最後一期吸收四捨五入尾差，確保各期總和精確等於報價單總額
-        const sub = isLast ? round2(qSub - accSub) : round2((qSub * pct) / 100);
-        const tax = isLast ? round2(qTax - accTax) : round2((qTax * pct) / 100);
-        const total = isLast ? round2(qTotal - accTotal) : round2((qTotal * pct) / 100);
-        if (!isLast) {
-          accSub += sub;
-          accTax += tax;
-          accTotal += total;
-        }
-        const label = (inst.label && String(inst.label).trim()) || `第${idx + 1}期款`;
+        const pct = Number(installments[idx].percent);
+        cumPercent = round2(cumPercent + pct);
+        const reaches100 = cumPercent >= 99.995;
+        const sub = reaches100 ? round2(qSub - cumSub) : round2((qSub * pct) / 100);
+        const tax = reaches100 ? round2(qTax - cumTax) : round2((qTax * pct) / 100);
+        const total = reaches100 ? round2(qTotal - cumTotal) : round2((qTotal * pct) / 100);
+        cumSub = round2(cumSub + sub);
+        cumTax = round2(cumTax + tax);
+        cumTotal = round2(cumTotal + total);
+
+        const no = maxNo + idx + 1;
+        const label = (installments[idx].label && String(installments[idx].label).trim()) || `第${no}期款`;
 
         const [invoice] = await db
           .insert(invoices)
           .values({
-            invoiceNumber: `${baseNumber}-P${idx + 1}`,
+            invoiceNumber: `${baseNumber}-P${no}`,
             quoteId: quote.id,
             customerId: quote.customerId,
             userId: session.userId,
             subtotal: String(sub),
             taxAmount: String(tax),
             totalAmount: String(total),
-            installmentNo: idx + 1,
+            installmentNo: no,
             installmentLabel: label,
             installmentPercent: String(pct),
             notes: body.notes || null,
@@ -181,18 +225,21 @@ export async function POST(request: Request) {
         created.push(invoice);
       }
 
-      await db
-        .update(quotes)
-        .set({ status: "invoiced", updatedAt: new Date() })
-        .where(eq(quotes.id, quote.id));
+      // 僅在累計請款達 100% 時才鎖定報價單（否則保留可繼續開下一期）
+      if (cumPercent >= 99.995) {
+        await db
+          .update(quotes)
+          .set({ status: "invoiced", updatedAt: new Date() })
+          .where(eq(quotes.id, quote.id));
+      }
 
       return NextResponse.json(
-        { installments: created, count: created.length, first: created[0] },
+        { installments: created, count: created.length, first: created[0], billedPercent: cumPercent },
         { status: 201 }
       );
     }
 
-    // ===== 全額請款（維持原行為）=====
+    // ===== 全額請款（僅在尚未請款時）=====
     const [invoice] = await db
       .insert(invoices)
       .values({

@@ -53,10 +53,19 @@ export default function QuoteDetailPage() {
 
   // 轉請款單 / 分期請款 Modal
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [invoiceMode, setInvoiceMode] = useState<"full" | "installment">("full");
   const [installments, setInstallments] = useState<{ label: string; percent: string }[]>([
     { label: "", percent: "100" },
   ]);
   const [submitting, setSubmitting] = useState(false);
+  // 此報價單已請款比例與金額（分期單以 % 累計，全額單計為 100%）
+  const [billedPercent, setBilledPercent] = useState(0);
+  const [billedTotal, setBilledTotal] = useState(0);
+
+  // 此報價單已開立的請款單
+  const [quoteInvoices, setQuoteInvoices] = useState<
+    { id: string; invoiceNumber: string; installmentNo: number | null; installmentLabel: string | null; installmentPercent: string | null; totalAmount: string }[]
+  >([]);
 
   const fetchQuote = async () => {
     const res = await fetch(`/api/admin/quotes/${id}`);
@@ -66,8 +75,17 @@ export default function QuoteDetailPage() {
     setLoading(false);
   };
 
+  const fetchQuoteInvoices = async () => {
+    const res = await fetch(`/api/admin/invoices?quoteId=${id}&limit=100`);
+    if (res.ok) {
+      const d = await res.json();
+      setQuoteInvoices(d.data || []);
+    }
+  };
+
   useEffect(() => {
     fetchQuote();
+    fetchQuoteInvoices();
   }, [id]);
 
   const updateStatus = async (status: string) => {
@@ -99,40 +117,70 @@ export default function QuoteDetailPage() {
     }
   };
 
-  const openInvoiceModal = () => {
-    setInstallments([{ label: "", percent: "100" }]);
+  const round2 = (n: number) => Math.round(n * 100) / 100;
+  const remainingPercent = round2(100 - billedPercent);
+
+  const openInvoiceModal = async () => {
+    // 先抓此報價單既有的請款單，算出已請款比例與剩餘比例
+    let billed = 0;
+    let billedAmt = 0;
+    try {
+      const res = await fetch(`/api/admin/invoices?quoteId=${id}&limit=100`);
+      if (res.ok) {
+        const data = await res.json();
+        for (const inv of data.data || []) {
+          billed += inv.installmentNo ? Number(inv.installmentPercent || 0) : 100;
+          billedAmt += Number(inv.totalAmount || 0);
+        }
+      }
+    } catch {
+      /* ignore，當作尚未請款 */
+    }
+    billed = round2(billed);
+    const remain = round2(100 - billed);
+    setBilledPercent(billed);
+    setBilledTotal(billedAmt);
+    // 已請款過 → 預設分期模式並帶入剩餘比例；尚未請款 → 預設全額
+    setInvoiceMode(billed > 0 ? "installment" : "full");
+    setInstallments([{ label: "", percent: String(remain > 0 ? remain : 0) }]);
     setShowInvoiceModal(true);
   };
 
-  const totalPercent = installments.reduce((s, i) => s + (Number(i.percent) || 0), 0);
-  const percentValid = Math.abs(totalPercent - 100) < 0.01;
+  const sumNewPercent = round2(installments.reduce((s, i) => s + (Number(i.percent) || 0), 0));
+  // 新增各期百分比合計需 > 0 且不超過剩餘可請款比例
+  const installmentValid =
+    sumNewPercent > 0 &&
+    installments.every((i) => Number(i.percent) > 0) &&
+    round2(billedPercent + sumNewPercent) <= 100.005;
 
-  // 預覽各期金額（最後一期吸收尾差），與後端算法一致
-  const round2 = (n: number) => Math.round(n * 100) / 100;
+  // 預覽各期金額（補足 100% 的那一期吸收尾差），與後端算法一致
   const previewAmounts = (() => {
     if (!quote) return [];
     const qTotal = Number(quote.totalAmount);
-    let acc = 0;
-    return installments.map((inst, idx) => {
-      const isLast = idx === installments.length - 1;
-      const amt = isLast ? round2(qTotal - acc) : round2((qTotal * (Number(inst.percent) || 0)) / 100);
-      if (!isLast) acc += amt;
+    let cumPercent = billedPercent;
+    let cumTotal = billedTotal;
+    return installments.map((inst) => {
+      const pct = Number(inst.percent) || 0;
+      cumPercent = round2(cumPercent + pct);
+      const reaches100 = cumPercent >= 99.995;
+      const amt = reaches100 ? round2(qTotal - cumTotal) : round2((qTotal * pct) / 100);
+      cumTotal = round2(cumTotal + amt);
       return amt;
     });
   })();
 
   const submitInvoice = async () => {
-    if (installments.length > 1 && !percentValid) {
-      alert("分期百分比總和必須為 100%");
-      return;
-    }
     setSubmitting(true);
     try {
-      const isInstallment = installments.length > 1;
       const body: Record<string, unknown> = { quoteId: id };
-      if (isInstallment) {
-        body.installments = installments.map((inst, idx) => ({
-          label: inst.label.trim() || `第${idx + 1}期款`,
+      if (invoiceMode === "installment") {
+        if (!installmentValid) {
+          alert(`本次分期合計需大於 0% 且不超過剩餘可請款比例（剩餘 ${remainingPercent}%）`);
+          setSubmitting(false);
+          return;
+        }
+        body.installments = installments.map((inst) => ({
+          label: inst.label.trim(),
           percent: Number(inst.percent) || 0,
         }));
       }
@@ -148,9 +196,13 @@ export default function QuoteDetailPage() {
       }
       const data = await res.json();
       setShowInvoiceModal(false);
-      if (isInstallment) {
-        // 分期：回到請款單列表（已產生多張）
-        router.push(`/admin/quote-system?tab=invoices`);
+      if (invoiceMode === "installment") {
+        // 單張→直接看該張；多張→回請款單列表
+        if (data.count === 1 && data.first) {
+          router.push(`/admin/quote-system/invoice/${data.first.id}`);
+        } else {
+          router.push(`/admin/quote-system?tab=invoices`);
+        }
       } else {
         router.push(`/admin/quote-system/invoice/${data.id}`);
       }
@@ -348,6 +400,46 @@ export default function QuoteDetailPage() {
               </div>
             </dl>
           </div>
+
+          {/* 已開立的請款單 */}
+          {quoteInvoices.length > 0 && (
+            <div className="bg-white rounded-xl border border-gray-200 p-5">
+              <h2 className="text-base font-bold text-gray-900 mb-3">已開立的請款單</h2>
+              <div className="space-y-2">
+                {quoteInvoices.map((inv) => (
+                  <Link
+                    key={inv.id}
+                    href={`/admin/quote-system/invoice/${inv.id}`}
+                    className="flex items-center justify-between gap-2 p-2 rounded-lg border border-gray-100 hover:bg-gray-50 text-sm"
+                  >
+                    <span className="flex items-center gap-2 min-w-0">
+                      {inv.installmentLabel ? (
+                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 shrink-0">
+                          {inv.installmentLabel}
+                          {inv.installmentPercent ? `${Number(inv.installmentPercent)}%` : ""}
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 shrink-0">全額</span>
+                      )}
+                      <span className="font-mono text-gray-500 text-xs truncate">{inv.invoiceNumber}</span>
+                    </span>
+                    <span className="text-gray-900 shrink-0">${Number(inv.totalAmount).toLocaleString()}</span>
+                  </Link>
+                ))}
+              </div>
+              {(() => {
+                const billed = round2(
+                  quoteInvoices.reduce((s, i) => s + (i.installmentNo ? Number(i.installmentPercent || 0) : 100), 0)
+                );
+                return (
+                  <p className="text-xs text-gray-500 mt-3">
+                    已請款 {billed}%
+                    {billed < 99.995 && `，剩餘 ${round2(100 - billed)}% 可繼續開立`}
+                  </p>
+                );
+              })()}
+            </div>
+          )}
         </div>
       </div>
 
@@ -357,78 +449,118 @@ export default function QuoteDetailPage() {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="px-5 py-4 border-b border-gray-200">
               <h3 className="text-base font-bold text-gray-900">轉請款單</h3>
-              <p className="text-xs text-gray-500 mt-0.5">
-                單期＝全額轉請款；新增多期即依百分比拆成多張分期請款單。
-              </p>
+              <div className="mt-1 text-xs text-gray-500 space-y-0.5">
+                <div className="flex items-center justify-between">
+                  <span>報價單總額</span>
+                  <span className="font-medium text-gray-900">${Number(quote.totalAmount).toLocaleString()}</span>
+                </div>
+                {billedPercent > 0 && (
+                  <>
+                    <div className="flex items-center justify-between text-purple-600">
+                      <span>已請款</span>
+                      <span className="font-medium">{billedPercent}%（${billedTotal.toLocaleString()}）</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>剩餘可請款</span>
+                      <span className="font-medium text-gray-900">{remainingPercent}%（${round2(Number(quote.totalAmount) - billedTotal).toLocaleString()}）</span>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
 
-            <div className="px-5 py-4 space-y-3">
-              <div className="flex items-center justify-between text-xs text-gray-500">
-                <span>報價單總額</span>
-                <span className="font-medium text-gray-900">${Number(quote.totalAmount).toLocaleString()}</span>
+            {/* 模式切換 */}
+            <div className="px-5 pt-4">
+              <div className="inline-flex rounded-lg border border-gray-200 p-0.5 text-sm">
+                <button
+                  onClick={() => setInvoiceMode("full")}
+                  disabled={billedPercent > 0}
+                  className={`px-3 py-1.5 rounded-md font-medium ${invoiceMode === "full" ? "bg-blue-600 text-white" : "text-gray-600"} disabled:opacity-40 disabled:cursor-not-allowed`}
+                  title={billedPercent > 0 ? "已部分請款，僅能用分期補開剩餘金額" : ""}
+                >
+                  全額請款
+                </button>
+                <button
+                  onClick={() => setInvoiceMode("installment")}
+                  className={`px-3 py-1.5 rounded-md font-medium ${invoiceMode === "installment" ? "bg-blue-600 text-white" : "text-gray-600"}`}
+                >
+                  分期請款
+                </button>
               </div>
+            </div>
 
-              <div className="space-y-2">
-                {installments.map((inst, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
-                    <span className="text-xs text-gray-400 w-5 shrink-0">{idx + 1}.</span>
-                    <input
-                      type="text"
-                      placeholder={`第${idx + 1}期款`}
-                      value={inst.label}
-                      onChange={(e) => {
-                        const next = [...installments];
-                        next[idx] = { ...next[idx], label: e.target.value };
-                        setInstallments(next);
-                      }}
-                      className="flex-1 min-w-0 px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <div className="flex items-center gap-1 shrink-0">
+            {invoiceMode === "full" ? (
+              <div className="px-5 py-4">
+                <p className="text-sm text-gray-700">
+                  將開立一張全額請款單 <span className="font-bold">${Number(quote.totalAmount).toLocaleString()}</span>，並把報價單標記為已轉請款。
+                </p>
+              </div>
+            ) : (
+              <div className="px-5 py-4 space-y-3">
+                <p className="text-xs text-gray-500">每一列產生一張「本期」請款單；可現在只開第一期，之後再回到此報價單補開下一期。</p>
+                <div className="space-y-2">
+                  {installments.map((inst, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <span className="text-xs text-gray-400 w-5 shrink-0">{idx + 1}.</span>
                       <input
-                        type="number"
-                        min={0}
-                        max={100}
-                        step="0.01"
-                        value={inst.percent}
+                        type="text"
+                        placeholder="期別（如：第一期款）"
+                        value={inst.label}
                         onChange={(e) => {
                           const next = [...installments];
-                          next[idx] = { ...next[idx], percent: e.target.value };
+                          next[idx] = { ...next[idx], label: e.target.value };
                           setInstallments(next);
                         }}
-                        className="w-20 px-2 py-1.5 border border-gray-200 rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 min-w-0 px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
-                      <span className="text-xs text-gray-500">%</span>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <input
+                          type="number"
+                          min={0}
+                          max={100}
+                          step="0.01"
+                          value={inst.percent}
+                          onChange={(e) => {
+                            const next = [...installments];
+                            next[idx] = { ...next[idx], percent: e.target.value };
+                            setInstallments(next);
+                          }}
+                          className="w-20 px-2 py-1.5 border border-gray-200 rounded-lg text-sm text-right focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <span className="text-xs text-gray-500">%</span>
+                      </div>
+                      <span className="w-24 text-right text-sm text-gray-900 shrink-0">
+                        ${previewAmounts[idx]?.toLocaleString() ?? "0"}
+                      </span>
+                      {installments.length > 1 && (
+                        <button
+                          onClick={() => setInstallments(installments.filter((_, i) => i !== idx))}
+                          className="text-gray-400 hover:text-red-500 text-sm shrink-0"
+                          title="移除此期"
+                        >
+                          ✕
+                        </button>
+                      )}
                     </div>
-                    <span className="w-24 text-right text-sm text-gray-900 shrink-0">
-                      ${previewAmounts[idx]?.toLocaleString() ?? "0"}
-                    </span>
-                    {installments.length > 1 && (
-                      <button
-                        onClick={() => setInstallments(installments.filter((_, i) => i !== idx))}
-                        className="text-gray-400 hover:text-red-500 text-sm shrink-0"
-                        title="移除此期"
-                      >
-                        ✕
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              <button
-                onClick={() => setInstallments([...installments, { label: "", percent: "0" }])}
-                className="text-sm text-blue-600 hover:text-blue-800"
-              >
-                ＋ 新增一期
-              </button>
-
-              {installments.length > 1 && (
-                <div className={`flex items-center justify-between text-sm pt-2 border-t border-gray-100 ${percentValid ? "text-gray-600" : "text-red-600"}`}>
-                  <span>百分比合計</span>
-                  <span className="font-medium">{totalPercent.toFixed(2)}%{!percentValid && "（須為 100%）"}</span>
+                  ))}
                 </div>
-              )}
-            </div>
+
+                <button
+                  onClick={() => setInstallments([...installments, { label: "", percent: "0" }])}
+                  className="text-sm text-blue-600 hover:text-blue-800"
+                >
+                  ＋ 新增一期
+                </button>
+
+                <div className={`flex items-center justify-between text-sm pt-2 border-t border-gray-100 ${installmentValid ? "text-gray-600" : "text-red-600"}`}>
+                  <span>本次合計</span>
+                  <span className="font-medium">
+                    {sumNewPercent}%
+                    {!installmentValid && `（需 > 0 且不超過剩餘 ${remainingPercent}%）`}
+                  </span>
+                </div>
+              </div>
+            )}
 
             <div className="px-5 py-4 border-t border-gray-200 flex justify-end gap-2">
               <button
@@ -439,10 +571,14 @@ export default function QuoteDetailPage() {
               </button>
               <button
                 onClick={submitInvoice}
-                disabled={submitting || (installments.length > 1 && !percentValid)}
+                disabled={submitting || (invoiceMode === "installment" && !installmentValid)}
                 className="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {submitting ? "處理中..." : installments.length > 1 ? `產生 ${installments.length} 張分期請款單` : "確定轉請款單"}
+                {submitting
+                  ? "處理中..."
+                  : invoiceMode === "full"
+                  ? "確定全額轉請款"
+                  : `產生 ${installments.length} 張請款單`}
               </button>
             </div>
           </div>
