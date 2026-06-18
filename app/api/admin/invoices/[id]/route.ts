@@ -145,7 +145,45 @@ export async function DELETE(
     }
     const { id } = await params;
 
+    // 先取得所屬報價單，刪除後需重算請款比例以決定是否解鎖
+    const [target] = await db
+      .select({ quoteId: invoices.quoteId })
+      .from(invoices)
+      .where(eq(invoices.id, id));
+
+    // 刪除請款單（連動的應收帳款 ledger 由 FK onDelete cascade 一併刪除）
     await db.delete(invoices).where(eq(invoices.id, id));
+
+    // 重算該報價單剩餘請款單的累計比例（全額單計為 100%，分期單以 % 累計）
+    if (target?.quoteId) {
+      const remaining = await db
+        .select({
+          installmentNo: invoices.installmentNo,
+          installmentPercent: invoices.installmentPercent,
+        })
+        .from(invoices)
+        .where(eq(invoices.quoteId, target.quoteId));
+
+      const billedPercent = remaining.reduce(
+        (s, e) => s + (e.installmentNo ? Number(e.installmentPercent || 0) : 100),
+        0
+      );
+
+      // 未達 100% 且報價單仍鎖在「已轉請款」→ 解鎖回可編輯狀態
+      if (billedPercent < 99.995) {
+        const [q] = await db
+          .select({ status: quotes.status })
+          .from(quotes)
+          .where(eq(quotes.id, target.quoteId));
+        if (q?.status === "invoiced") {
+          await db
+            .update(quotes)
+            .set({ status: "sent", updatedAt: new Date() })
+            .where(eq(quotes.id, target.quoteId));
+        }
+      }
+    }
+
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
     if (error instanceof Error && error.message === "Unauthorized") {
