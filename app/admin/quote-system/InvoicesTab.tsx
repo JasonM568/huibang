@@ -8,6 +8,7 @@ interface Invoice {
   invoiceNumber: string;
   quoteNumber: string | null;
   customerName: string | null;
+  installmentLabel: string | null;
   totalAmount: string;
   invoiceStatus: string;
   issuedDate: string | null;
@@ -104,7 +105,14 @@ export default function InvoicesTab() {
                 const ps = paymentStatusMap[inv.paymentStatus] || paymentStatusMap.unpaid;
                 return (
                   <tr key={inv.id} className="border-b border-gray-50 hover:bg-gray-50">
-                    <td className="px-4 py-3 font-mono text-gray-900">{inv.invoiceNumber}</td>
+                    <td className="px-4 py-3 font-mono text-gray-900">
+                      {inv.invoiceNumber}
+                      {inv.installmentLabel && (
+                        <span className="ml-2 inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 font-sans">
+                          {inv.installmentLabel}
+                        </span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 font-mono text-gray-600">{inv.quoteNumber || "-"}</td>
                     <td className="px-4 py-3 font-medium text-gray-900">{inv.customerName || "-"}</td>
                     <td className="px-4 py-3 text-gray-900 text-right">${Number(inv.totalAmount).toLocaleString()}</td>

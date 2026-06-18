@@ -27,6 +27,9 @@ interface InvoiceDetail {
   expectedPayDate: string | null;
   paidDate: string | null;
   bankAccountLast5: string | null;
+  installmentNo: number | null;
+  installmentLabel: string | null;
+  installmentPercent: string | null;
   notes: string | null;
   createdAt: string;
   items: {
@@ -39,10 +42,20 @@ interface InvoiceDetail {
   }[];
 }
 
+interface CompanyBank {
+  name: string;
+  bankName: string;
+  bankBranch: string;
+  bankCode: string;
+  bankAccountName: string;
+  bankAccountNumber: string;
+}
+
 export default function InvoiceDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const [invoice, setInvoice] = useState<InvoiceDetail | null>(null);
+  const [company, setCompany] = useState<CompanyBank | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchInvoice = async () => {
@@ -55,6 +68,9 @@ export default function InvoiceDetailPage() {
 
   useEffect(() => {
     fetchInvoice();
+    fetch("/api/admin/company")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => data && setCompany(data));
   }, [id]);
 
   const updateField = async (updates: Record<string, string | null>) => {
@@ -82,7 +98,15 @@ export default function InvoiceDetailPage() {
           <Link href="/admin/quote-system" className="text-sm text-blue-600 hover:text-blue-800">
             ← 返回報價系統
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900 mt-1">請款單 {invoice.invoiceNumber}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mt-1 flex items-center gap-2">
+            請款單 {invoice.invoiceNumber}
+            {invoice.installmentLabel && (
+              <span className="px-2.5 py-0.5 rounded-full text-sm font-medium bg-purple-100 text-purple-700">
+                {invoice.installmentLabel}
+                {invoice.installmentPercent ? `（${Number(invoice.installmentPercent)}%）` : ""}
+              </span>
+            )}
+          </h1>
           <p className="text-sm text-gray-500 mt-0.5">
             來自報價單 <Link href={`/admin/quote-system/${invoice.quoteId}`} className="text-blue-600 hover:underline">{invoice.quoteNumber}</Link>
           </p>
@@ -285,6 +309,37 @@ export default function InvoiceDetailPage() {
               )}
             </dl>
           </div>
+
+          {/* 匯款資訊 */}
+          {company && (company.bankName || company.bankAccountNumber) && (
+            <div className="bg-white rounded-xl border border-gray-200 p-5">
+              <h2 className="text-base font-bold text-gray-900 mb-3">匯款資訊</h2>
+              <dl className="space-y-2 text-sm">
+                {company.bankName && (
+                  <div>
+                    <dt className="text-gray-500">銀行</dt>
+                    <dd className="text-gray-900">
+                      {company.bankName}
+                      {company.bankBranch ? ` ${company.bankBranch}` : ""}
+                      {company.bankCode ? `（${company.bankCode}）` : ""}
+                    </dd>
+                  </div>
+                )}
+                {company.bankAccountName && (
+                  <div>
+                    <dt className="text-gray-500">戶名</dt>
+                    <dd className="text-gray-900">{company.bankAccountName}</dd>
+                  </div>
+                )}
+                {company.bankAccountNumber && (
+                  <div>
+                    <dt className="text-gray-500">帳號</dt>
+                    <dd className="font-mono text-gray-900">{company.bankAccountNumber}</dd>
+                  </div>
+                )}
+              </dl>
+            </div>
+          )}
         </div>
       </div>
     </div>

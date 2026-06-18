@@ -38,6 +38,7 @@ export async function GET(request: Request) {
         invoiceNumber: invoices.invoiceNumber,
         quoteNumber: quotes.quoteNumber,
         customerName: customers.companyName,
+        installmentLabel: invoices.installmentLabel,
         totalAmount: invoices.totalAmount,
         invoiceStatus: invoices.invoiceStatus,
         issuedDate: invoices.issuedDate,
@@ -107,6 +108,91 @@ export async function POST(request: Request) {
       .where(eq(customers.id, quote.customerId));
     const customerName = customer?.companyName || "未知客戶";
 
+    const round2 = (n: number) => Math.round(n * 100) / 100;
+
+    // ===== 分期請款：installments = [{ label, percent }] =====
+    const installments = Array.isArray(body.installments) ? body.installments : null;
+    if (installments && installments.length > 0) {
+      const totalPercent = installments.reduce(
+        (s: number, i: { percent: number | string }) => s + Number(i.percent),
+        0
+      );
+      if (Math.abs(totalPercent - 100) > 0.01) {
+        return NextResponse.json(
+          { error: "分期百分比總和必須為 100%" },
+          { status: 400 }
+        );
+      }
+
+      const qSub = Number(quote.subtotal);
+      const qTax = Number(quote.taxAmount);
+      const qTotal = Number(quote.totalAmount);
+      const baseNumber = generateInvoiceNumber(customerName);
+
+      const created = [];
+      let accSub = 0;
+      let accTax = 0;
+      let accTotal = 0;
+
+      for (let idx = 0; idx < installments.length; idx++) {
+        const inst = installments[idx];
+        const pct = Number(inst.percent);
+        const isLast = idx === installments.length - 1;
+        // 最後一期吸收四捨五入尾差，確保各期總和精確等於報價單總額
+        const sub = isLast ? round2(qSub - accSub) : round2((qSub * pct) / 100);
+        const tax = isLast ? round2(qTax - accTax) : round2((qTax * pct) / 100);
+        const total = isLast ? round2(qTotal - accTotal) : round2((qTotal * pct) / 100);
+        if (!isLast) {
+          accSub += sub;
+          accTax += tax;
+          accTotal += total;
+        }
+        const label = (inst.label && String(inst.label).trim()) || `第${idx + 1}期款`;
+
+        const [invoice] = await db
+          .insert(invoices)
+          .values({
+            invoiceNumber: `${baseNumber}-P${idx + 1}`,
+            quoteId: quote.id,
+            customerId: quote.customerId,
+            userId: session.userId,
+            subtotal: String(sub),
+            taxAmount: String(tax),
+            totalAmount: String(total),
+            installmentNo: idx + 1,
+            installmentLabel: label,
+            installmentPercent: String(pct),
+            notes: body.notes || null,
+          })
+          .returning();
+
+        await db.insert(ledgerEntries).values({
+          type: "receivable",
+          invoiceRefId: invoice.id,
+          description: `請款單 ${invoice.invoiceNumber}（${customerName}）${label}`,
+          amount: String(total),
+          counterparty: customerName,
+          invoiceNo: null,
+          invoiceDate: null,
+          paymentStatus: "pending_receive",
+          transactionDate: null,
+        });
+
+        created.push(invoice);
+      }
+
+      await db
+        .update(quotes)
+        .set({ status: "invoiced", updatedAt: new Date() })
+        .where(eq(quotes.id, quote.id));
+
+      return NextResponse.json(
+        { installments: created, count: created.length, first: created[0] },
+        { status: 201 }
+      );
+    }
+
+    // ===== 全額請款（維持原行為）=====
     const [invoice] = await db
       .insert(invoices)
       .values({

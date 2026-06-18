@@ -94,3 +94,16 @@ ALTER TABLE quotes ADD COLUMN IF NOT EXISTS tax_type varchar(20) DEFAULT 'exclus
 
 -- 2026-06-15: 報價項次各自折扣（amount 改存折後金額；quotes.subtotal 改存折後小計）
 ALTER TABLE quote_items ADD COLUMN IF NOT EXISTS discount numeric(5,2) DEFAULT 0 NOT NULL;
+
+-- 2026-06-18: 公司匯款資訊（附在請款單）
+ALTER TABLE company_info ADD COLUMN IF NOT EXISTS bank_name varchar(100) NOT NULL DEFAULT '';
+ALTER TABLE company_info ADD COLUMN IF NOT EXISTS bank_branch varchar(100) NOT NULL DEFAULT '';
+ALTER TABLE company_info ADD COLUMN IF NOT EXISTS bank_code varchar(10) NOT NULL DEFAULT '';
+ALTER TABLE company_info ADD COLUMN IF NOT EXISTS bank_account_name varchar(200) NOT NULL DEFAULT '';
+ALTER TABLE company_info ADD COLUMN IF NOT EXISTS bank_account_number varchar(50) NOT NULL DEFAULT '';
+
+-- 2026-06-18: 請款單分期請款（皆為空＝一般全額請款單）
+ALTER TABLE invoices ALTER COLUMN invoice_number TYPE varchar(40);
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS installment_no integer;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS installment_label varchar(50);
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS installment_percent numeric(5,2);

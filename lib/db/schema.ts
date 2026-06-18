@@ -352,12 +352,18 @@ export const companyInfo = pgTable("company_info", {
   taxId: varchar("tax_id", { length: 20 }).default("").notNull(),
   logoUrl: text("logo_url").default("").notNull(),
   stampUrl: text("stamp_url").default("").notNull(),
+  // 匯款資訊（附在請款單）
+  bankName: varchar("bank_name", { length: 100 }).default("").notNull(),          // 銀行
+  bankBranch: varchar("bank_branch", { length: 100 }).default("").notNull(),      // 分行
+  bankCode: varchar("bank_code", { length: 10 }).default("").notNull(),           // 銀行代號
+  bankAccountName: varchar("bank_account_name", { length: 200 }).default("").notNull(), // 戶名
+  bankAccountNumber: varchar("bank_account_number", { length: 50 }).default("").notNull(), // 帳號
 });
 
 // 請款單
 export const invoices = pgTable("invoices", {
   id: uuid("id").primaryKey().defaultRandom(),
-  invoiceNumber: varchar("invoice_number", { length: 30 }).unique().notNull(),
+  invoiceNumber: varchar("invoice_number", { length: 40 }).unique().notNull(),
   quoteId: uuid("quote_id").references(() => quotes.id).notNull(),
   customerId: uuid("customer_id").references(() => customers.id).notNull(),
   userId: uuid("user_id").references(() => adminUsers.id).notNull(),
@@ -377,6 +383,10 @@ export const invoices = pgTable("invoices", {
   expectedPayDate: timestamp("expected_pay_date"),  // 預計付款日期
   paidDate: timestamp("paid_date"),                 // 實際入帳日期
   bankAccountLast5: varchar("bank_account_last5", { length: 5 }),  // 匯款帳號末5碼
+  // 分期請款（皆為空＝一般全額請款單）
+  installmentNo: integer("installment_no"),                                  // 期別序號 1,2,3...
+  installmentLabel: varchar("installment_label", { length: 50 }),            // 期別標籤，如「第一期款」
+  installmentPercent: numeric("installment_percent", { precision: 5, scale: 2 }), // 本期占報價單百分比
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

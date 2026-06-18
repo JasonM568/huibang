@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import QuotesTab from "./QuotesTab";
 import CustomersTab from "./CustomersTab";
 import ServicesTab from "./ServicesTab";
 import InvoicesTab from "./InvoicesTab";
 import LedgerTab from "./LedgerTab";
+import CompanySettingsTab from "./CompanySettingsTab";
 
 const tabs = [
   { key: "quotes", label: "報價單" },
@@ -13,12 +14,20 @@ const tabs = [
   { key: "ledger", label: "收支表" },
   { key: "customers", label: "客戶資料" },
   { key: "services", label: "服務項目" },
+  { key: "company", label: "公司設定" },
 ] as const;
 
 type TabKey = (typeof tabs)[number]["key"];
 
 export default function QuoteSystemPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("quotes");
+
+  useEffect(() => {
+    const tab = new URLSearchParams(window.location.search).get("tab");
+    if (tab && tabs.some((t) => t.key === tab)) {
+      setActiveTab(tab as TabKey);
+    }
+  }, []);
 
   return (
     <div>
@@ -47,6 +56,7 @@ export default function QuoteSystemPage() {
       {activeTab === "ledger" && <LedgerTab />}
       {activeTab === "customers" && <CustomersTab />}
       {activeTab === "services" && <ServicesTab />}
+      {activeTab === "company" && <CompanySettingsTab />}
     </div>
   );
 }

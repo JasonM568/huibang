@@ -37,6 +37,9 @@ export async function GET(
         expectedPayDate: invoices.expectedPayDate,
         paidDate: invoices.paidDate,
         bankAccountLast5: invoices.bankAccountLast5,
+        installmentNo: invoices.installmentNo,
+        installmentLabel: invoices.installmentLabel,
+        installmentPercent: invoices.installmentPercent,
         notes: invoices.notes,
         createdAt: invoices.createdAt,
       })
@@ -50,11 +53,28 @@ export async function GET(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    // 取得報價單項目（請款單沿用報價單品項）
-    const items = await db
-      .select()
-      .from(quoteItems)
-      .where(eq(quoteItems.quoteId, invoice.quoteId));
+    // 分期請款單：以單行「本期款項」呈現；一般請款單沿用報價單品項
+    let items;
+    if (invoice.installmentNo) {
+      const pct = invoice.installmentPercent ? Number(invoice.installmentPercent) : null;
+      items = [
+        {
+          id: `installment-${invoice.id}`,
+          name: `${invoice.installmentLabel || `第${invoice.installmentNo}期款`}`,
+          specification: `報價單 ${invoice.quoteNumber || ""} ${
+            pct !== null ? `第${invoice.installmentNo}期（${pct}%）` : ""
+          }`.trim(),
+          unitPrice: invoice.subtotal,
+          quantity: 1,
+          amount: invoice.subtotal,
+        },
+      ];
+    } else {
+      items = await db
+        .select()
+        .from(quoteItems)
+        .where(eq(quoteItems.quoteId, invoice.quoteId));
+    }
 
     return NextResponse.json({ ...invoice, items });
   } catch (error: unknown) {
