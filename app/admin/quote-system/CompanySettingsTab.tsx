@@ -39,7 +39,7 @@ export default function CompanySettingsTab() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    fetch("/api/admin/company")
+    fetch("/api/admin/company", { cache: "no-store" })
       .then((r) => r.json())
       .then((data) => {
         setInfo({ ...empty, ...data });

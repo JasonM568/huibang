@@ -68,7 +68,7 @@ export default function InvoiceDetailPage() {
 
   useEffect(() => {
     fetchInvoice();
-    fetch("/api/admin/company")
+    fetch("/api/admin/company", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => data && setCompany(data));
   }, [id]);
@@ -112,6 +112,12 @@ export default function InvoiceDetailPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => window.open(`/admin/quote-system/invoice/${id}/print`, "_blank")}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
+          >
+            列印 / 輸出 PDF
+          </button>
           <button
             onClick={handleDelete}
             className="px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100"
