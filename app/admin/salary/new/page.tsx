@@ -80,7 +80,8 @@ export default function NewSalaryPage() {
   const baseSalaryNum = parseInt(form.baseSalary) || 0;
   const monthLastDay = new Date((parseInt(form.year) + 1911), parseInt(form.month), 0).getDate();
   const payDaysNum = parseInt(form.payDays) || 0;
-  const isFullMonth = payDaysNum >= monthLastDay;
+  // 日薪固定 ÷30，故足月門檻以 30 天為準（小月/二月取實際天數）
+  const isFullMonth = payDaysNum >= Math.min(30, monthLastDay);
 
   // 先算足月應領總額（底薪 + 所有獎金津貼 - 請假扣款）
   const bonusTotal = bonuses.reduce((s, b) => s + (parseInt(b.amount) || 0), 0);

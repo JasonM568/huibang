@@ -60,7 +60,8 @@ export async function POST(request: Request) {
     const year = parseInt(body.year) || 0;
     const month = parseInt(body.month) || 0;
     const monthLastDay = year > 0 && month > 0 ? new Date(year + 1911, month, 0).getDate() : 30;
-    const isFullMonth = payDays >= monthLastDay;
+    // 日薪固定 ÷30，故足月門檻以 30 天為準（小月/二月取實際天數）
+    const isFullMonth = payDays >= Math.min(30, monthLastDay);
 
     const bonusTotal = bonuses.reduce((s: number, b: { amount: string }) => s + (parseInt(b.amount) || 0), 0);
     const fullMonthEarnings = baseSalary

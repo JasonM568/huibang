@@ -111,7 +111,8 @@ export default function SalaryDetailPage() {
   const editBaseSalary = parseInt(form.baseSalary) || 0;
   const editMonthLastDay = record ? new Date((record.year + 1911), record.month, 0).getDate() : 30;
   const editPayDays = parseInt(form.payDays) || 0;
-  const editIsFullMonth = editPayDays >= editMonthLastDay;
+  // 日薪固定 ÷30，故足月門檻以 30 天為準（小月/二月取實際天數）
+  const editIsFullMonth = editPayDays >= Math.min(30, editMonthLastDay);
 
   const bonusTotal = bonuses.reduce((s, b) => s + (parseInt(b.amount) || 0), 0);
   // 足月應領總額
@@ -129,7 +130,8 @@ export default function SalaryDetailPage() {
   const viewBaseSalary = record ? Number(record.baseSalary) : 0;
   const viewPayDays = record?.payDays || 0;
   const viewMonthLastDay = record ? new Date((record.year + 1911), record.month, 0).getDate() : 30;
-  const viewIsFullMonth = viewPayDays >= viewMonthLastDay;
+  // 日薪固定 ÷30，故足月門檻以 30 天為準（小月/二月取實際天數）
+  const viewIsFullMonth = viewPayDays >= Math.min(30, viewMonthLastDay);
 
   const renderField = (label: string, field: string) => (
     <div key={field}>
