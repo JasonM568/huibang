@@ -5,6 +5,30 @@ Next.js 14 (App Router) + Drizzle ORM + PostgreSQL (Supabase) + Tailwind CSS
 Deployed on Vercel, auto-deploys on push to `main`.
 Repo: https://github.com/JasonM568/huibang.git
 
+## Work Context Protocol — 開工 / 收工（工作脈絡系統）
+
+專案根目錄有四個工作脈絡檔，用來跨對話保存與接軌工作脈絡：
+- `handoff.md` — 交接文件（待辦、進行中、卡關、當前脈絡）。**每次覆寫**，永遠反映最新狀態。
+- `memory.md` — 工作日誌。**Append 累積**，新紀錄加在最上方，不刪舊紀錄。
+- `decisions.md` — 重大決策紀錄（ADR），新決策加最上方。
+- `backlog.md` — 長期待辦池（不急但別忘記的事）。
+
+### 觸發詞與動作
+
+**當使用者輸入「開工」或「開始做」：**
+1. 讀 `handoff.md`，向使用者**複述**：上次脈絡、下次優先事項、進行中、卡關點。
+2. 必要時翻 `memory.md` / `decisions.md` 補上下文。
+3. 直接從「下次優先事項」接續執行，不用重問之前做到哪。
+
+**當使用者輸入「收工」或「今天先這樣」：**
+1. **覆寫** `handoff.md`：更新上次收工時間、下次優先事項、進行中、卡關、當前脈絡。
+2. 在 `memory.md` 最上方**新增一筆當日紀錄**（做了什麼 / 重大事件 / 備註）。
+3. 若本次有重大決策 → 在 `decisions.md` 補一筆。
+4. 若有「之後再說」的點子 → 丟進 `backlog.md`。
+5. 完成後向使用者簡短回報「已存檔，下次輸入開工即可接軌」。
+
+日期一律用絕對日期（從環境的 currentDate 取得）。
+
 ## Development Methodology — SDD (Spec-Driven Development)
 
 **所有系統優化與調整都必須以 SDD（Spec-Driven Development）方式進行。**
