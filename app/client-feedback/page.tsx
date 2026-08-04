@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { feedbackAccessCompany } from "@/lib/client-feedback";
 import { pagesForCompany } from "@/lib/feedback-clients";
 import { FeedbackClient } from "./feedback-client";
@@ -11,8 +12,15 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function ClientFeedbackPage() {
+export default async function ClientFeedbackPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ code?: string }>;
+}) {
   const company = await feedbackAccessCompany();
+  const { code } = await searchParams;
+  // 專屬直達連結：?code=通行碼 → 設 cookie 後回到乾淨網址
+  if (!company && code) redirect(`/api/client-feedback/auth?code=${encodeURIComponent(code)}`);
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-10">
       <div className="mx-auto max-w-2xl">

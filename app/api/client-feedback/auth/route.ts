@@ -20,3 +20,21 @@ export async function POST(request: NextRequest) {
   });
   return res;
 }
+
+/** 直達連結：/client-feedback?code=xxx 轉到此處設 cookie 後導回表單。碼錯直接回表單（顯示通行碼閘門）。 */
+export async function GET(request: NextRequest) {
+  const { searchParams, origin } = new URL(request.url);
+  const code = searchParams.get("code")?.trim();
+  const company = code ? accessCodeMap().get(code) : undefined;
+  const res = NextResponse.redirect(`${origin}/client-feedback`);
+  if (company) {
+    res.cookies.set(FEEDBACK_COOKIE, await issueFeedbackCookie(company), {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      maxAge: 30 * 24 * 3600,
+      path: "/",
+    });
+  }
+  return res;
+}
