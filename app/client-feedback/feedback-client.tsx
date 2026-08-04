@@ -88,8 +88,8 @@ export function FeedbackClient({ initialAuthed }: { initialAuthed: boolean }) {
           setFormError(`影片「${f.name}」超過 2 分鐘，請剪短後再上傳`);
           continue;
         }
-        if (f.size > 200 * 1024 * 1024) {
-          setFormError(`影片「${f.name}」超過 200MB，請壓縮後再上傳`);
+        if (f.size > 50 * 1024 * 1024) {
+          setFormError(`影片「${f.name}」超過 50MB，請以 1080p 以下畫質錄製或壓縮後再上傳`);
           continue;
         }
       } else if (f.size > 10 * 1024 * 1024) {
@@ -275,7 +275,7 @@ export function FeedbackClient({ initialAuthed }: { initialAuthed: boolean }) {
           className="mt-1 block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-orange-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-orange-600 hover:file:bg-orange-100"
         />
         <p className="mt-1 text-xs text-slate-400">
-          圖片 jpg/png/webp（每張 ≤10MB）；影片 mp4/mov（限 1–2 分鐘、≤200MB）。最多 10 件。
+          圖片 jpg/png/webp（每張 ≤10MB）；影片 mp4/mov（限 1–2 分鐘、≤50MB，建議 1080p 以下）。最多 10 件。
         </p>
         {picked.length > 0 && (
           <ul className="mt-2 space-y-1">

@@ -11,8 +11,8 @@ const secret = new TextEncoder().encode(process.env.JWT_SECRET || "fallback-secr
 export const FEEDBACK_COOKIE = "cf-access";
 export const FEEDBACK_BUCKET = "client-feedback";
 
-/** 影片上限：2 分鐘（前端驗時長）；大小 200MB（Supabase 免費層全域上限 50MB，超過需升級方案） */
-export const VIDEO_MAX_SIZE = 200 * 1024 * 1024;
+/** 影片上限：2 分鐘（前端驗時長）；大小 50MB（Supabase 免費層全域上限；升級方案後可調高） */
+export const VIDEO_MAX_SIZE = 50 * 1024 * 1024;
 export const IMAGE_MAX_SIZE = 10 * 1024 * 1024;
 
 export const ALLOWED_UPLOAD_TYPES: Record<string, string> = {

@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
   const max = isVideoType(contentType) ? VIDEO_MAX_SIZE : IMAGE_MAX_SIZE;
   if (size > max) {
     return NextResponse.json(
-      { error: isVideoType(contentType) ? "影片大小超過 200MB，請壓縮或縮短長度" : "圖片大小超過 10MB" },
+      { error: isVideoType(contentType) ? "影片大小超過 50MB，請以 1080p 以下畫質錄製或壓縮後上傳" : "圖片大小超過 10MB" },
       { status: 400 },
     );
   }
