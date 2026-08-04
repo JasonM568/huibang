@@ -492,6 +492,20 @@ export const salaryDeductions = pgTable("salary_deductions", {
   amount: numeric("amount", { precision: 10, scale: 0 }).default("0").notNull(),
 });
 
+// ===== 客戶系統回饋（2026-08-04；環安專用非公開頁 /client-feedback）=====
+export const clientFeedback = pgTable("client_feedback", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  status: varchar("status", { length: 20 }).default("new").notNull(), // new → logged(已登記) → closed
+  reporter: varchar("reporter", { length: 100 }).notNull(),
+  page: varchar("page", { length: 50 }).notNull(),
+  category: varchar("category", { length: 20 }).notNull(), // bug | 需求 | 操作問題
+  description: text("description").notNull(),
+  expected: text("expected"),
+  files: jsonb("files").notNull().default([]), // [{path,name,type,size}]
+  internalNote: text("internal_note"),
+});
+
 // ===== Types =====
 export type DiagnosticToken = typeof diagnosticTokens.$inferSelect;
 export type NewDiagnosticToken = typeof diagnosticTokens.$inferInsert;
@@ -524,3 +538,5 @@ export type EmployeeAllowance = typeof employeeAllowances.$inferSelect;
 export type SalaryRecord = typeof salaryRecords.$inferSelect;
 export type SalaryBonus = typeof salaryBonuses.$inferSelect;
 export type SalaryDeduction = typeof salaryDeductions.$inferSelect;
+export type ClientFeedback = typeof clientFeedback.$inferSelect;
+export type NewClientFeedback = typeof clientFeedback.$inferInsert;
