@@ -492,11 +492,12 @@ export const salaryDeductions = pgTable("salary_deductions", {
   amount: numeric("amount", { precision: 10, scale: 0 }).default("0").notNull(),
 });
 
-// ===== 客戶系統回饋（2026-08-04；環安專用非公開頁 /client-feedback）=====
+// ===== 客戶系統回饋（2026-08-04；非公開頁 /client-feedback，多客戶共用）=====
 export const clientFeedback = pgTable("client_feedback", {
   id: uuid("id").primaryKey().defaultRandom(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   status: varchar("status", { length: 20 }).default("new").notNull(), // new → logged(已登記) → closed
+  company: varchar("company", { length: 100 }).notNull(), // 客戶公司名稱（多客戶共用表單）
   reporter: varchar("reporter", { length: 100 }).notNull(),
   page: varchar("page", { length: 50 }).notNull(),
   category: varchar("category", { length: 20 }).notNull(), // bug | 需求 | 操作問題

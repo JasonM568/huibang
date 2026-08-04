@@ -6,14 +6,14 @@ import {
   VIDEO_MAX_SIZE,
   createUploadUrl,
   ensureFeedbackBucket,
-  hasFeedbackAccess,
+  feedbackAccessCompany,
   isVideoType,
 } from "@/lib/client-feedback";
 
 // 產生檔案直傳連結：客戶端拿到 signed URL 後直接 PUT 到 Supabase Storage，
 // 大影片不經 Vercel function（繞過 request body 限制）。
 export async function POST(request: NextRequest) {
-  if (!(await hasFeedbackAccess())) return NextResponse.json({ error: "請先輸入通行碼" }, { status: 401 });
+  if (!(await feedbackAccessCompany())) return NextResponse.json({ error: "請先輸入通行碼" }, { status: 401 });
 
   const { fileName, contentType, size } = (await request.json().catch(() => ({}))) as {
     fileName?: string;

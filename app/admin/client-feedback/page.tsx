@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { clientFeedback } from "@/lib/db/schema";
 import { feedbackSignedUrl } from "@/lib/client-feedback";
 
-// 環安系統回饋列表（server component；附件走 1 小時簽名連結）
+// 客戶系統回饋列表（server component；附件走 1 小時簽名連結）
 export const dynamic = "force-dynamic";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -41,9 +41,9 @@ export default async function ClientFeedbackAdminPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-xl font-bold text-gray-900">環安系統回饋</h1>
+      <h1 className="text-xl font-bold text-gray-900">客戶系統回饋</h1>
       <p className="mt-1 text-sm text-gray-500">
-        客戶自 /client-feedback 提交。處理流程：登記進 hawood repo 的 FEEDBACK-LOG → 修復 → 回覆辦理情況。附件連結有效 1 小時。
+        客戶自 /client-feedback 提交（通行碼識別公司）。處理流程：登記進該客戶專案的 FEEDBACK-LOG → 修復 → 回覆辦理情況。附件連結有效 1 小時。
       </p>
 
       <div className="mt-6 space-y-4">
@@ -63,6 +63,7 @@ export default async function ClientFeedbackAdminPage() {
                 >
                   {STATUS_LABELS[r.status] ?? r.status}
                 </span>
+                <span className="rounded bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">{r.company}</span>
                 <span className="font-semibold text-gray-900">{r.category}</span>
                 <span className="text-gray-500">{r.page}</span>
                 <span className="text-gray-400">｜{r.reporter}</span>

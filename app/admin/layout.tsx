@@ -72,7 +72,7 @@ export default function AdminLayout({
     { href: "/admin/orders", label: "訂單管理", icon: "🧾", show: true },
     { href: "/admin/trial-leads", label: "試用名單", icon: "🎁", show: true },
     { href: "/admin/edm", label: "電子報 EDM", icon: "📨", show: isAdmin },
-    { href: "/admin/client-feedback", label: "環安系統回饋", icon: "🛠", show: true },
+    { href: "/admin/client-feedback", label: "客戶系統回饋", icon: "🛠", show: true },
   ].filter((item) => item.show);
 
   return (

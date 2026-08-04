@@ -2,7 +2,7 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { Resend } from "resend";
 
-// 客戶系統回饋（2026-08-04）：環安專用非公開頁 /client-feedback。
+// 客戶系統回饋（2026-08-04）：非公開頁 /client-feedback（多客戶共用）。
 // 通行碼閘門（FEEDBACK_ACCESS_CODE）＋檔案直傳 Supabase Storage（signed upload URL，
 // 大影片不經 Vercel function）＋Email/Discord 通知。
 
@@ -28,25 +28,40 @@ export function isVideoType(contentType: string): boolean {
   return contentType.startsWith("video/");
 }
 
-// ── 通行碼閘門 ──
+// ── 通行碼閘門（每客戶一組碼；輸入通行碼即識別公司）──
 
-export async function issueFeedbackCookie(): Promise<string> {
-  return new SignJWT({ scope: "client-feedback" })
+/** 通行碼→客戶對應：env FEEDBACK_ACCESS_CODES="碼1:公司1,碼2:公司2"；
+ *  相容舊設定 FEEDBACK_ACCESS_CODE（單一碼＝環安傢俱）。 */
+export function accessCodeMap(): Map<string, string> {
+  const map = new Map<string, string>();
+  const legacy = process.env.FEEDBACK_ACCESS_CODE;
+  if (legacy) map.set(legacy.trim(), "環安傢俱");
+  for (const pair of (process.env.FEEDBACK_ACCESS_CODES ?? "").split(",")) {
+    const [code, company] = pair.split(":").map((x) => x?.trim());
+    if (code && company) map.set(code, company);
+  }
+  return map;
+}
+
+export async function issueFeedbackCookie(company: string): Promise<string> {
+  return new SignJWT({ scope: "client-feedback", company })
     .setProtectedHeader({ alg: "HS256" })
     .setExpirationTime("30d")
     .setIssuedAt()
     .sign(secret);
 }
 
-export async function hasFeedbackAccess(): Promise<boolean> {
+/** 驗 cookie；有效回公司名，無效回 null。 */
+export async function feedbackAccessCompany(): Promise<string | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(FEEDBACK_COOKIE)?.value;
-  if (!token) return false;
+  if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, secret);
-    return payload.scope === "client-feedback";
+    if (payload.scope !== "client-feedback") return null;
+    return typeof payload.company === "string" && payload.company ? payload.company : "環安傢俱";
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -103,6 +118,7 @@ export async function feedbackSignedUrl(path: string, expiresInSec = 3600): Prom
 
 export interface FeedbackNotifyInput {
   id: string;
+  company: string;
   reporter: string;
   page: string;
   category: string;
@@ -113,7 +129,7 @@ export interface FeedbackNotifyInput {
 export async function notifyFeedback(input: FeedbackNotifyInput): Promise<void> {
   const base = process.env.NEXT_PUBLIC_BASE_URL || "https://huibang.com.tw";
   const adminUrl = `${base}/admin/client-feedback`;
-  const summary = `【${input.category}】${input.page}｜${input.reporter}：${input.description.slice(0, 100)}${input.description.length > 100 ? "…" : ""}（附件 ${input.fileCount} 件）`;
+  const summary = `${input.company}【${input.category}】${input.page}｜${input.reporter}：${input.description.slice(0, 100)}${input.description.length > 100 ? "…" : ""}（附件 ${input.fileCount} 件）`;
 
   // Email（Resend；失敗不擋提交）
   try {
@@ -121,10 +137,11 @@ export async function notifyFeedback(input: FeedbackNotifyInput): Promise<void> 
     await resend.emails.send({
       from: "惠邦行銷 <hello@huibang.com.tw>",
       to: process.env.NOTIFY_EMAIL || "service@huibang.com.tw",
-      subject: `🛠 環安系統回饋：${input.category}｜${input.page}`,
+      subject: `🛠 系統回饋：${input.company}｜${input.category}｜${input.page}`,
       html: `
         <div style="font-family:'Noto Sans TC',sans-serif;max-width:600px;margin:0 auto;">
-          <h2 style="color:#1E293B;">環安系統回饋</h2>
+          <h2 style="color:#1E293B;">客戶系統回饋</h2>
+          <p style="color:#64748B;font-size:14px;margin:4px 0 12px;">${input.company}</p>
           <table style="width:100%;border-collapse:collapse;font-size:14px;">
             <tr><td style="padding:6px 0;color:#64748B;width:90px;">反應人</td><td>${input.reporter}</td></tr>
             <tr><td style="padding:6px 0;color:#64748B;">類別</td><td>${input.category}</td></tr>
@@ -146,7 +163,7 @@ export async function notifyFeedback(input: FeedbackNotifyInput): Promise<void> 
       await fetch(webhook, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: `🛠 環安系統回饋\n${summary}\n${adminUrl}` }),
+        body: JSON.stringify({ content: `🛠 客戶系統回饋\n${summary}\n${adminUrl}` }),
       });
     } catch (e) {
       console.error("feedback discord notify failed", e);

@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 
-const PAGES = ["訂單", "維修單", "工作報表", "佈告欄", "考勤", "薪資", "業績儀表板", "商品/庫存", "其他"];
 const CATEGORIES = [
   { value: "bug", label: "系統問題（功能異常）" },
   { value: "需求", label: "功能需求（想新增或調整）" },
@@ -19,14 +18,21 @@ interface PickedFile {
   path?: string;
 }
 
-export function FeedbackClient({ initialAuthed }: { initialAuthed: boolean }) {
-  const [authed, setAuthed] = useState(initialAuthed);
+export function FeedbackClient({
+  initialCompany,
+  initialPages,
+}: {
+  initialCompany: string | null;
+  initialPages: string[];
+}) {
+  const [company, setCompany] = useState<string | null>(initialCompany);
+  const [pages, setPages] = useState<string[]>(initialPages);
   const [code, setCode] = useState("");
   const [gateError, setGateError] = useState<string | null>(null);
   const [gateBusy, setGateBusy] = useState(false);
 
   const [reporter, setReporter] = useState("");
-  const [page, setPage] = useState(PAGES[0]!);
+  const [page, setPage] = useState(initialPages[0] ?? "");
   const [category, setCategory] = useState("bug");
   const [description, setDescription] = useState("");
   const [expected, setExpected] = useState("");
@@ -50,7 +56,8 @@ export function FeedbackClient({ initialAuthed }: { initialAuthed: boolean }) {
         setGateError(data.error ?? "驗證失敗");
         return;
       }
-      setAuthed(true);
+      // 依通行碼識別客戶，重新載入由伺服器帶入該客戶的模組清單
+      window.location.reload();
     } finally {
       setGateBusy(false);
     }
@@ -158,7 +165,7 @@ export function FeedbackClient({ initialAuthed }: { initialAuthed: boolean }) {
     }
   };
 
-  if (!authed) {
+  if (!company) {
     return (
       <div className="mt-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <p className="text-sm font-medium text-slate-700">此頁面僅供合作客戶使用，請輸入通行碼。</p>
@@ -207,6 +214,7 @@ export function FeedbackClient({ initialAuthed }: { initialAuthed: boolean }) {
 
   return (
     <div className="mt-8 space-y-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <p className="rounded-lg bg-orange-50 px-3 py-2 text-sm text-orange-700">公司：{company}</p>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className="block text-sm font-medium text-slate-700">反應人姓名</label>
@@ -215,7 +223,7 @@ export function FeedbackClient({ initialAuthed }: { initialAuthed: boolean }) {
         <div>
           <label className="block text-sm font-medium text-slate-700">系統頁面</label>
           <select value={page} onChange={(e) => setPage(e.target.value)} className={inputCls}>
-            {PAGES.map((p) => (
+            {pages.map((p) => (
               <option key={p} value={p}>{p}</option>
             ))}
           </select>
