@@ -4,13 +4,16 @@ import { getSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { clientFeedback } from "@/lib/db/schema";
 import { feedbackSignedUrl } from "@/lib/client-feedback";
+import { updateFeedbackAction } from "./actions";
 
 // 客戶系統回饋列表（server component；附件走 1 小時簽名連結）
 export const dynamic = "force-dynamic";
 
 const STATUS_LABELS: Record<string, string> = {
   new: "新回饋",
-  logged: "已登記處理",
+  logged: "處理中（已登記）",
+  waiting_client: "待客戶提供資料",
+  acceptance: "已上線待驗收",
   closed: "已結案",
 };
 
@@ -74,6 +77,31 @@ export default async function ClientFeedbackAdminPage() {
             </div>
             <p className="mt-2 whitespace-pre-wrap text-sm text-gray-700">{r.description}</p>
             {r.expected && <p className="mt-1 text-sm text-gray-500">期望結果：{r.expected}</p>}
+            {/* 處理狀態與客戶可見回覆（存檔即同步客戶處理進度頁） */}
+            <form action={updateFeedbackAction} className="mt-3 rounded-lg bg-gray-50 p-3">
+              <input type="hidden" name="id" value={r.id} />
+              <div className="flex flex-wrap items-end gap-2">
+                <div>
+                  <label className="block text-xs text-gray-500">狀態</label>
+                  <select name="status" defaultValue={r.status} className="mt-0.5 rounded-md border border-gray-300 px-2 py-1.5 text-sm">
+                    {Object.entries(STATUS_LABELS).map(([k, v]) => (
+                      <option key={k} value={k}>{v}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">FB 編號</label>
+                  <input name="fbNo" defaultValue={r.fbNo ?? ""} placeholder="FB-055" className="mt-0.5 w-24 rounded-md border border-gray-300 px-2 py-1.5 text-sm" />
+                </div>
+                <div className="min-w-64 flex-1">
+                  <label className="block text-xs text-gray-500">處理回覆（客戶可見）</label>
+                  <textarea name="reply" defaultValue={r.reply ?? ""} rows={2} className="mt-0.5 w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm" />
+                </div>
+                <button type="submit" className="rounded-md bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700">
+                  儲存
+                </button>
+              </div>
+            </form>
             {r.fileLinks.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-2">
                 {r.fileLinks.map((f, i) =>
