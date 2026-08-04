@@ -70,7 +70,8 @@ const have = new Set(existing.map((r) => r.fb_no));
 let inserted = 0, updated = 0;
 for (const [fbNo, created, page, category, status, description, reply] of ROWS) {
   if (have.has(fbNo)) {
-    await sql`UPDATE client_feedback SET reply = ${reply}, status = ${status}, description = ${description} WHERE fb_no = ${fbNo}`;
+    // 上線後 status 以 DB 為準（客戶驗收/留言流程會改動），重跑僅更新文案
+    await sql`UPDATE client_feedback SET reply = ${reply}, description = ${description} WHERE fb_no = ${fbNo}`;
     updated++;
   } else {
     await sql`INSERT INTO client_feedback (company, reporter, page, category, description, reply, status, fb_no, files, created_at)

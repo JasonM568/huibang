@@ -36,8 +36,19 @@ export default async function ClientFeedbackAdminPage() {
         .where(inArray(clientFeedbackComments.feedbackId, rows.map((r) => r.id)))
         .orderBy(clientFeedbackComments.createdAt)
     : [];
-  const commentsByFeedback = new Map<string, typeof comments>();
-  for (const c of comments) {
+  const commentsWithUrls = await Promise.all(
+    comments.map(async (c) => ({
+      ...c,
+      fileLinks: await Promise.all(
+        (Array.isArray(c.files) ? (c.files as FeedbackFile[]) : []).map(async (f) => ({
+          ...f,
+          url: await feedbackSignedUrl(f.path),
+        })),
+      ),
+    })),
+  );
+  const commentsByFeedback = new Map<string, typeof commentsWithUrls>();
+  for (const c of commentsWithUrls) {
     const list = commentsByFeedback.get(c.feedbackId) ?? [];
     list.push(c);
     commentsByFeedback.set(c.feedbackId, list);
@@ -100,8 +111,18 @@ export default async function ClientFeedbackAdminPage() {
                       {c.createdAt.toLocaleString("zh-TW", { timeZone: "Asia/Taipei" })}
                     </span>
                     <p className="whitespace-pre-wrap text-gray-700">{c.body}</p>
-                    {Array.isArray(c.files) && (c.files as FeedbackFile[]).length > 0 && (
-                      <p className="text-xs text-gray-500">附件：{(c.files as FeedbackFile[]).map((f) => f.name).join("、")}（於客戶頁或 Storage 檢視）</p>
+                    {c.fileLinks.length > 0 && (
+                      <div className="mt-1 flex flex-wrap gap-2">
+                        {c.fileLinks.map((f, i) =>
+                          f.url ? (
+                            <a key={i} href={f.url} target="_blank" rel="noreferrer" download className="rounded bg-white px-2 py-0.5 text-xs text-blue-600 hover:underline">
+                              ⬇ {f.name}
+                            </a>
+                          ) : (
+                            <span key={i} className="text-xs text-gray-400">{f.name}（連結失效，重整頁面）</span>
+                          ),
+                        )}
+                      </div>
                     )}
                   </div>
                 ))}
