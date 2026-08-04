@@ -510,6 +510,17 @@ export const clientFeedback = pgTable("client_feedback", {
   internalNote: text("internal_note"),
 });
 
+// 回饋留言串（2026-08-04）：客戶提供資料/留言＋我方回覆
+export const clientFeedbackComments = pgTable("client_feedback_comments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  feedbackId: uuid("feedback_id").references(() => clientFeedback.id, { onDelete: "cascade" }).notNull(),
+  author: varchar("author", { length: 10 }).notNull(), // client | admin
+  authorName: varchar("author_name", { length: 100 }),
+  body: text("body").notNull(),
+  files: jsonb("files").notNull().default([]),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // ===== Types =====
 export type DiagnosticToken = typeof diagnosticTokens.$inferSelect;
 export type NewDiagnosticToken = typeof diagnosticTokens.$inferInsert;
@@ -544,3 +555,4 @@ export type SalaryBonus = typeof salaryBonuses.$inferSelect;
 export type SalaryDeduction = typeof salaryDeductions.$inferSelect;
 export type ClientFeedback = typeof clientFeedback.$inferSelect;
 export type NewClientFeedback = typeof clientFeedback.$inferInsert;
+export type ClientFeedbackComment = typeof clientFeedbackComments.$inferSelect;

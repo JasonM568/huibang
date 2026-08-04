@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { clientFeedback } from "@/lib/db/schema";
+import { clientFeedback, clientFeedbackComments } from "@/lib/db/schema";
 
 const STATUSES = ["new", "logged", "waiting_client", "acceptance", "closed"];
 
@@ -24,6 +24,24 @@ export async function updateFeedbackAction(formData: FormData): Promise<void> {
     .set({ status, reply: reply || null, fbNo: fbNo || null })
     .where(eq(clientFeedback.id, id));
 
+  revalidatePath("/admin/client-feedback");
+  revalidatePath("/client-feedback");
+}
+
+/** 我方於留言串回覆（客戶進度頁可見）。 */
+export async function addAdminCommentAction(formData: FormData): Promise<void> {
+  const session = await getSession();
+  if (!session) throw new Error("Unauthorized");
+  const feedbackId = String(formData.get("feedbackId") ?? "");
+  const body = String(formData.get("body") ?? "").trim();
+  if (!feedbackId || !body || body.length > 3000) throw new Error("輸入格式錯誤");
+  await db.insert(clientFeedbackComments).values({
+    feedbackId,
+    author: "admin",
+    authorName: session.email.split("@")[0] ?? "惠邦",
+    body,
+    files: [],
+  });
   revalidatePath("/admin/client-feedback");
   revalidatePath("/client-feedback");
 }

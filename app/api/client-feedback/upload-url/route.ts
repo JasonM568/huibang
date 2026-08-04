@@ -23,11 +23,11 @@ export async function POST(request: NextRequest) {
   if (!fileName || !contentType || !size) return NextResponse.json({ error: "缺少檔案資訊" }, { status: 400 });
 
   const ext = ALLOWED_UPLOAD_TYPES[contentType];
-  if (!ext) return NextResponse.json({ error: "僅支援 jpg/png/webp 圖片與 mp4/mov/webm 影片" }, { status: 400 });
+  if (!ext) return NextResponse.json({ error: "僅支援圖片（jpg/png/webp）、影片（mp4/mov/webm）與文件（pdf/xlsx/xls/csv/docx）" }, { status: 400 });
   const max = isVideoType(contentType) ? VIDEO_MAX_SIZE : IMAGE_MAX_SIZE;
   if (size > max) {
     return NextResponse.json(
-      { error: isVideoType(contentType) ? "影片大小超過 50MB，請以 1080p 以下畫質錄製或壓縮後上傳" : "圖片大小超過 10MB" },
+      { error: isVideoType(contentType) ? "影片大小超過 50MB，請以 1080p 以下畫質錄製或壓縮後上傳" : "檔案大小超過 10MB" },
       { status: 400 },
     );
   }

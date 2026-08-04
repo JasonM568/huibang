@@ -1,10 +1,10 @@
-import { desc } from "drizzle-orm";
+import { desc, inArray } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { clientFeedback } from "@/lib/db/schema";
+import { clientFeedback, clientFeedbackComments } from "@/lib/db/schema";
 import { feedbackSignedUrl } from "@/lib/client-feedback";
-import { updateFeedbackAction } from "./actions";
+import { addAdminCommentAction, updateFeedbackAction } from "./actions";
 
 // 客戶系統回饋列表（server component；附件走 1 小時簽名連結）
 export const dynamic = "force-dynamic";
@@ -29,6 +29,19 @@ export default async function ClientFeedbackAdminPage() {
   if (!session) redirect("/admin/login");
 
   const rows = await db.select().from(clientFeedback).orderBy(desc(clientFeedback.createdAt)).limit(100);
+  const comments = rows.length
+    ? await db
+        .select()
+        .from(clientFeedbackComments)
+        .where(inArray(clientFeedbackComments.feedbackId, rows.map((r) => r.id)))
+        .orderBy(clientFeedbackComments.createdAt)
+    : [];
+  const commentsByFeedback = new Map<string, typeof comments>();
+  for (const c of comments) {
+    const list = commentsByFeedback.get(c.feedbackId) ?? [];
+    list.push(c);
+    commentsByFeedback.set(c.feedbackId, list);
+  }
 
   const withUrls = await Promise.all(
     rows.map(async (r) => ({
@@ -77,6 +90,28 @@ export default async function ClientFeedbackAdminPage() {
             </div>
             <p className="mt-2 whitespace-pre-wrap text-sm text-gray-700">{r.description}</p>
             {r.expected && <p className="mt-1 text-sm text-gray-500">期望結果：{r.expected}</p>}
+            {/* 留言串（客戶提供資料/往來） */}
+            {(commentsByFeedback.get(r.id) ?? []).length > 0 && (
+              <div className="mt-3 space-y-1.5">
+                {(commentsByFeedback.get(r.id) ?? []).map((c) => (
+                  <div key={c.id} className={`rounded-lg px-3 py-1.5 text-sm ${c.author === "client" ? "bg-orange-50" : "bg-gray-100"}`}>
+                    <span className="text-xs font-medium text-gray-400">
+                      {c.author === "client" ? `客戶${c.authorName ? `（${c.authorName}）` : ""}` : `惠邦（${c.authorName}）`}｜
+                      {c.createdAt.toLocaleString("zh-TW", { timeZone: "Asia/Taipei" })}
+                    </span>
+                    <p className="whitespace-pre-wrap text-gray-700">{c.body}</p>
+                    {Array.isArray(c.files) && (c.files as FeedbackFile[]).length > 0 && (
+                      <p className="text-xs text-gray-500">附件：{(c.files as FeedbackFile[]).map((f) => f.name).join("、")}（於客戶頁或 Storage 檢視）</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            <form action={addAdminCommentAction} className="mt-2 flex items-end gap-2">
+              <input type="hidden" name="feedbackId" value={r.id} />
+              <textarea name="body" rows={1} placeholder="回覆客戶留言（客戶可見）" className="min-w-64 flex-1 rounded-md border border-gray-300 px-2 py-1.5 text-sm" />
+              <button type="submit" className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm hover:bg-gray-50">回覆</button>
+            </form>
             {/* 處理狀態與客戶可見回覆（存檔即同步客戶處理進度頁） */}
             <form action={updateFeedbackAction} className="mt-3 rounded-lg bg-gray-50 p-3">
               <input type="hidden" name="id" value={r.id} />

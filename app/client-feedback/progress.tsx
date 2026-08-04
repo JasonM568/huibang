@@ -1,8 +1,9 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { clientFeedback } from "@/lib/db/schema";
+import { clientFeedback, clientFeedbackComments } from "@/lib/db/schema";
 import { feedbackSignedUrl } from "@/lib/client-feedback";
 import { AcceptButton } from "./accept-button";
+import { CommentForm } from "./comment-form";
 
 // 處理進度（2026-08-04 拍板：歷史全放＋「待貴司提供」突顯）。
 // 客戶可見狀態四種：處理中／待貴司提供資料／已上線待驗收／已結案。
@@ -29,6 +30,31 @@ export async function ProgressList({ company }: { company: string }) {
     .where(and(eq(clientFeedback.company, company)))
     .orderBy(desc(clientFeedback.createdAt))
     .limit(200);
+
+  const comments = rows.length
+    ? await db
+        .select()
+        .from(clientFeedbackComments)
+        .where(inArray(clientFeedbackComments.feedbackId, rows.map((r) => r.id)))
+        .orderBy(clientFeedbackComments.createdAt)
+    : [];
+  const commentsWithUrls = await Promise.all(
+    comments.map(async (c) => ({
+      ...c,
+      fileLinks: await Promise.all(
+        (Array.isArray(c.files) ? (c.files as FeedbackFile[]) : []).map(async (f) => ({
+          ...f,
+          url: await feedbackSignedUrl(f.path),
+        })),
+      ),
+    })),
+  );
+  const commentsByFeedback = new Map<string, typeof commentsWithUrls>();
+  for (const c of commentsWithUrls) {
+    const list = commentsByFeedback.get(c.feedbackId) ?? [];
+    list.push(c);
+    commentsByFeedback.set(c.feedbackId, list);
+  }
 
   const withUrls = await Promise.all(
     rows.map(async (r) => ({
@@ -80,7 +106,32 @@ export async function ProgressList({ company }: { company: string }) {
             )}
           </div>
         )}
+        {/* 留言串（提供資料/往來紀錄） */}
+        {(commentsByFeedback.get(r.id) ?? []).length > 0 && (
+          <div className="mt-3 space-y-2 border-t border-slate-100 pt-2">
+            {(commentsByFeedback.get(r.id) ?? []).map((c) => (
+              <div key={c.id} className={`rounded-lg px-3 py-2 text-sm ${c.author === "client" ? "bg-orange-50" : "bg-slate-100"}`}>
+                <p className="text-xs font-medium text-slate-400">
+                  {c.author === "client" ? `貴司${c.authorName ? `（${c.authorName}）` : ""}` : "惠邦"}｜{c.createdAt.toISOString().slice(0, 10)}
+                </p>
+                <p className="mt-0.5 whitespace-pre-wrap text-slate-700">{c.body}</p>
+                {c.fileLinks.length > 0 && (
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {c.fileLinks.map((f, i) =>
+                      f.url ? (
+                        <a key={i} href={f.url} target="_blank" rel="noreferrer" className="rounded bg-white px-2 py-0.5 text-xs text-slate-600 hover:bg-slate-50">
+                          📎 {f.name}
+                        </a>
+                      ) : null,
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
         {r.status === "acceptance" && <AcceptButton id={r.id} />}
+        {r.status !== "closed" && <CommentForm feedbackId={r.id} prominent={r.status === "waiting_client"} />}
         {r.status === "closed" && r.acceptedAt && (
           <p className="mt-2 text-xs text-emerald-600">✓ 貴司已於 {r.acceptedAt.toISOString().slice(0, 10)} 驗收通過</p>
         )}
@@ -91,7 +142,7 @@ export async function ProgressList({ company }: { company: string }) {
   return (
     <div className="mt-6 space-y-4">
       <p className="text-sm text-slate-500">
-        共 {stats.total} 項：已結案 {stats.closed}、待貴司驗收 {stats.acceptance}、其餘處理中或等待資料。「已上線待驗收」項目測試無誤後請按「驗收通過」結案。
+        共 {stats.total} 項：已結案 {stats.closed}、待貴司驗收 {stats.acceptance}、其餘處理中或等待資料。「已上線待驗收」項目測試無誤後請按「驗收通過」結案；「待貴司提供」項目請點「提供資料」上傳檔案或留言。
       </p>
 
       {/* 待貴司提供資料（突顯區） */}
