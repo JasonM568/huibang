@@ -505,6 +505,7 @@ export const clientFeedback = pgTable("client_feedback", {
   expected: text("expected"),
   files: jsonb("files").notNull().default([]), // [{path,name,type,size}]
   reply: text("reply"), // 給客戶看的處理回覆（處理進度頁顯示）
+  acceptedAt: timestamp("accepted_at"), // 客戶驗收通過時間（按鈕結案）
   fbNo: varchar("fb_no", { length: 20 }), // 對應內部 FEEDBACK-LOG 編號
   internalNote: text("internal_note"),
 });

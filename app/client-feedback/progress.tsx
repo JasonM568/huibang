@@ -2,6 +2,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { clientFeedback } from "@/lib/db/schema";
 import { feedbackSignedUrl } from "@/lib/client-feedback";
+import { AcceptButton } from "./accept-button";
 
 // 處理進度（2026-08-04 拍板：歷史全放＋「待貴司提供」突顯）。
 // 客戶可見狀態四種：處理中／待貴司提供資料／已上線待驗收／已結案。
@@ -79,6 +80,10 @@ export async function ProgressList({ company }: { company: string }) {
             )}
           </div>
         )}
+        {r.status === "acceptance" && <AcceptButton id={r.id} />}
+        {r.status === "closed" && r.acceptedAt && (
+          <p className="mt-2 text-xs text-emerald-600">✓ 貴司已於 {r.acceptedAt.toISOString().slice(0, 10)} 驗收通過</p>
+        )}
       </div>
     );
   };
@@ -86,7 +91,7 @@ export async function ProgressList({ company }: { company: string }) {
   return (
     <div className="mt-6 space-y-4">
       <p className="text-sm text-slate-500">
-        共 {stats.total} 項：已結案 {stats.closed}、已上線待驗收 {stats.acceptance}、其餘處理中或等待資料。
+        共 {stats.total} 項：已結案 {stats.closed}、待貴司驗收 {stats.acceptance}、其餘處理中或等待資料。「已上線待驗收」項目測試無誤後請按「驗收通過」結案。
       </p>
 
       {/* 待貴司提供資料（突顯區） */}
