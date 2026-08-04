@@ -521,6 +521,21 @@ export const clientFeedbackComments = pgTable("client_feedback_comments", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// ===== 講座邀請寄送（2026-08-04 admin 工具）=====
+export const webinarInvites = pgTable("webinar_invites", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  title: varchar("title", { length: 200 }).notNull(),
+  meetingTime: varchar("meeting_time", { length: 100 }).notNull(),
+  zoomLink: text("zoom_link").notNull(),
+  meetingId: varchar("meeting_id", { length: 30 }).notNull(),
+  passcode: varchar("passcode", { length: 30 }).notNull(),
+  note: text("note"),
+  recipients: jsonb("recipients").notNull().default([]),
+  sentCount: integer("sent_count").default(0).notNull(),
+  createdBy: varchar("created_by", { length: 100 }),
+});
+
 // ===== Types =====
 export type DiagnosticToken = typeof diagnosticTokens.$inferSelect;
 export type NewDiagnosticToken = typeof diagnosticTokens.$inferInsert;
