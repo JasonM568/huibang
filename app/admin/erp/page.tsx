@@ -6,14 +6,15 @@ import SpecsTab from "./SpecsTab";
 import WarehousesTab from "./WarehousesTab";
 import StockTab from "./StockTab";
 import ExpiryTab from "./ExpiryTab";
+import CustomersTab from "./CustomersTab";
 
-// 階段 C 將加入：ERP客戶
 const tabs = [
   { key: "products", label: "商品" },
   { key: "specs", label: "分類與規格" },
   { key: "warehouses", label: "倉庫" },
   { key: "stock", label: "庫存查詢" },
   { key: "expiry", label: "效期警示" },
+  { key: "customers", label: "ERP客戶" },
 ] as const;
 
 type TabKey = (typeof tabs)[number]["key"];
@@ -55,6 +56,7 @@ export default function ErpPage() {
       {activeTab === "warehouses" && <WarehousesTab />}
       {activeTab === "stock" && <StockTab />}
       {activeTab === "expiry" && <ExpiryTab />}
+      {activeTab === "customers" && <CustomersTab />}
     </div>
   );
 }
