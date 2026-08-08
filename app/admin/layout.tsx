@@ -65,6 +65,9 @@ export default function AdminLayout({
     { href: "/admin/clients", label: "客戶管理", icon: "🏢", show: hasRestricted },
     { href: "/admin/content-studio", label: "貼文產生器", icon: "✨", show: true },
     { href: "/admin/quote-system", label: "報價系統", icon: "📄", show: hasRestricted },
+    { href: "/admin/erp", label: "ERP 進銷存", icon: "📦", show: isAdmin || hasRestricted },
+    { href: "/admin/erp/sales-orders", label: "銷售訂單", icon: "📑", show: isAdmin || hasRestricted },
+    { href: "/admin/erp/shipments", label: "出貨單", icon: "🚚", show: isAdmin || hasRestricted },
     { href: "/admin/salary", label: "薪資管理", icon: "💰", show: hasRestricted },
     { href: "/admin/users", label: "人員管理", icon: "👥", show: isAdmin },
     { href: "/admin/tracking", label: "追蹤碼管理", icon: "📈", show: true },
@@ -120,7 +123,7 @@ export default function AdminLayout({
               href={item.href}
               onClick={() => setSidebarOpen(false)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                pathname.startsWith(item.href)
+                (item.href === "/admin/erp" ? pathname === "/admin/erp" : pathname.startsWith(item.href))
                   ? "bg-blue-50 text-blue-700"
                   : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
               }`}

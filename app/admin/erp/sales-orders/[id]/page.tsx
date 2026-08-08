@@ -64,17 +64,41 @@ const tierMeta: Record<string, { label: string; color: string }> = {
   custom: { label: "自訂", color: "text-amber-600" },
 };
 
+interface ShipmentSummary {
+  id: string;
+  shipmentNumber: string;
+  shipDate: string;
+  status: string;
+  signedBy: string | null;
+  items: { id: string; shippedQuantity: number }[];
+}
+
+const shipmentStatusMeta: Record<string, { label: string; badge: string }> = {
+  pending: { label: "待出貨", badge: "bg-gray-100 text-gray-600" },
+  shipped: { label: "已出貨", badge: "bg-indigo-50 text-indigo-700" },
+  signed: { label: "已簽收", badge: "bg-green-50 text-green-700" },
+  cancelled: { label: "已取消", badge: "bg-red-50 text-red-600" },
+};
+
 export default function SalesOrderDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const [order, setOrder] = useState<OrderDetail | null>(null);
+  const [shipments, setShipments] = useState<ShipmentSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [working, setWorking] = useState(false);
 
   const fetchOrder = useCallback(async () => {
-    const res = await fetch(`/api/admin/erp/sales-orders/${params.id}`);
+    const [res, shipRes] = await Promise.all([
+      fetch(`/api/admin/erp/sales-orders/${params.id}`),
+      fetch(`/api/admin/erp/shipments?salesOrderId=${params.id}`),
+    ]);
     if (res.ok) {
       setOrder(await res.json());
+    }
+    if (shipRes.ok) {
+      const data = await shipRes.json();
+      setShipments(data.data || []);
     }
     setLoading(false);
   }, [params.id]);
@@ -137,6 +161,14 @@ export default function SalesOrderDetailPage() {
           <span className={`px-2 py-0.5 rounded text-xs ${meta.badge}`}>{meta.label}</span>
         </div>
         <div className="flex gap-2">
+          {["confirmed", "processing"].includes(order.status) && (
+            <Link
+              href={`/admin/erp/sales-orders/${order.id}/ship`}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+            >
+              🚚 出貨
+            </Link>
+          )}
           {order.status === "confirmed" && (
             <button
               onClick={() => updateStatus("processing", "將訂單標記為「處理中」？")}
@@ -286,7 +318,7 @@ export default function SalesOrderDetailPage() {
       </div>
 
       {/* 合計 */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6 flex justify-end">
+      <div className="bg-white rounded-xl border border-gray-200 p-6 flex justify-end mb-4">
         <dl className="space-y-1.5 text-sm w-64">
           <div className="flex justify-between">
             <dt className="text-gray-500">未稅小計</dt>
@@ -304,6 +336,49 @@ export default function SalesOrderDetailPage() {
           </div>
         </dl>
       </div>
+
+      {/* 出貨紀錄 */}
+      {shipments.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h2 className="text-base font-semibold text-gray-900 mb-3">出貨紀錄</h2>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-100 text-left text-gray-500">
+                <th className="px-2 py-2 font-medium">出貨單號</th>
+                <th className="px-2 py-2 font-medium">出貨日</th>
+                <th className="px-2 py-2 font-medium text-right">件數</th>
+                <th className="px-2 py-2 font-medium">狀態</th>
+                <th className="px-2 py-2 font-medium">簽收人</th>
+              </tr>
+            </thead>
+            <tbody>
+              {shipments.map((s) => {
+                const sm = shipmentStatusMeta[s.status] || { label: s.status, badge: "bg-gray-100 text-gray-600" };
+                return (
+                  <tr key={s.id} className="border-b border-gray-50 last:border-0">
+                    <td className="px-2 py-2">
+                      <Link
+                        href={`/admin/erp/shipments/${s.id}`}
+                        className="font-mono text-blue-600 hover:underline"
+                      >
+                        {s.shipmentNumber}
+                      </Link>
+                    </td>
+                    <td className="px-2 py-2 text-gray-600">{s.shipDate}</td>
+                    <td className="px-2 py-2 text-right tabular-nums">
+                      {s.items.reduce((acc, it) => acc + it.shippedQuantity, 0)}
+                    </td>
+                    <td className="px-2 py-2">
+                      <span className={`px-1.5 py-0.5 rounded text-xs ${sm.badge}`}>{sm.label}</span>
+                    </td>
+                    <td className="px-2 py-2 text-gray-600">{s.signedBy || "-"}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
