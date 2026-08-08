@@ -536,6 +536,242 @@ export const webinarInvites = pgTable("webinar_invites", {
   createdBy: varchar("created_by", { length: 100 }),
 });
 
+// ===== ERP 進銷存模組（2026-08-08 移植自 erp-system，全部 erp_ 前綴）=====
+
+// 商品分類
+export const erpCategories = pgTable("erp_categories", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 100 }).notNull(),
+  parentId: uuid("parent_id"),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// 倉庫（主倉/子倉層級）
+export const erpWarehouses = pgTable("erp_warehouses", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  code: varchar("code", { length: 20 }).unique().notNull(),
+  name: varchar("name", { length: 100 }).notNull(),
+  warehouseType: varchar("warehouse_type", { length: 10 }).default("main").notNull(), // main | sub
+  parentId: uuid("parent_id"),
+  address: text("address"),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// 商品主檔（三階售價：selling=零售、wholesale=批發、group=團購；0 = fallback 零售價）
+export const erpProducts = pgTable("erp_products", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  sku: varchar("sku", { length: 50 }).unique().notNull(),
+  name: varchar("name", { length: 200 }).notNull(),
+  specification: text("specification"), // 補充說明（結構化規格走 erp_product_specs）
+  unit: varchar("unit", { length: 20 }).default("個").notNull(),
+  categoryId: uuid("category_id").references(() => erpCategories.id),
+  barcode: varchar("barcode", { length: 50 }),
+  costPrice: numeric("cost_price", { precision: 12, scale: 2 }).default("0").notNull(),
+  sellingPrice: numeric("selling_price", { precision: 12, scale: 2 }).default("0").notNull(),
+  wholesalePrice: numeric("wholesale_price", { precision: 12, scale: 2 }).default("0").notNull(),
+  groupPrice: numeric("group_price", { precision: 12, scale: 2 }).default("0").notNull(),
+  safetyStock: integer("safety_stock").default(0).notNull(),
+  hasExpiry: boolean("has_expiry").default(true).notNull(), // true = 分配入倉必須選批號
+  expiryAlertDays: integer("expiry_alert_days").default(30).notNull(), // 0 = 不警示
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// 規格維度（顏色/尺寸/容量…）
+export const erpSpecDimensions = pgTable("erp_spec_dimensions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 50 }).unique().notNull(),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// 規格選項（維度底下：紅/黑/S/M/300g…）
+export const erpSpecOptions = pgTable("erp_spec_options", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  dimensionId: uuid("dimension_id").references(() => erpSpecDimensions.id, { onDelete: "cascade" }).notNull(),
+  value: varchar("value", { length: 50 }).notNull(),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// 商品 × 維度 × 選項（一商品一維度一值）
+export const erpProductSpecs = pgTable("erp_product_specs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  productId: uuid("product_id").references(() => erpProducts.id, { onDelete: "cascade" }).notNull(),
+  dimensionId: uuid("dimension_id").references(() => erpSpecDimensions.id, { onDelete: "cascade" }).notNull(),
+  optionId: uuid("option_id").references(() => erpSpecOptions.id, { onDelete: "cascade" }).notNull(),
+});
+
+// 每商品總庫存（未分倉 + 已分倉合計）
+export const erpProductStock = pgTable("erp_product_stock", {
+  productId: uuid("product_id").primaryKey().references(() => erpProducts.id, { onDelete: "cascade" }),
+  totalQuantity: integer("total_quantity").default(0).notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// 商品 × 倉庫存量
+export const erpInventory = pgTable("erp_inventory", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  productId: uuid("product_id").references(() => erpProducts.id).notNull(),
+  warehouseId: uuid("warehouse_id").references(() => erpWarehouses.id).notNull(),
+  quantity: integer("quantity").default(0).notNull(),
+  reservedQuantity: integer("reserved_quantity").default(0).notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  productWarehouseIdx: uniqueIndex("erp_inventory_product_warehouse_idx").on(table.productId, table.warehouseId),
+}));
+
+// 批號庫存（warehouse_id 為空 = 已入總庫存但未分倉）
+export const erpInventoryBatches = pgTable("erp_inventory_batches", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  productId: uuid("product_id").references(() => erpProducts.id, { onDelete: "cascade" }).notNull(),
+  warehouseId: uuid("warehouse_id").references(() => erpWarehouses.id, { onDelete: "set null" }),
+  batchNo: varchar("batch_no", { length: 50 }).notNull(),
+  expiryDate: date("expiry_date"),
+  quantity: integer("quantity").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// 庫存異動流水（正 = 入、負 = 出）
+export const erpInventoryTransactions = pgTable("erp_inventory_transactions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  productId: uuid("product_id").references(() => erpProducts.id).notNull(),
+  warehouseId: uuid("warehouse_id").references(() => erpWarehouses.id),
+  transactionType: varchar("transaction_type", { length: 20 }).notNull(), // IN | OUT | ADJUST | TRANSFER
+  quantity: integer("quantity").notNull(),
+  balanceAfter: integer("balance_after").notNull(),
+  referenceType: varchar("reference_type", { length: 50 }), // stock_in | sales_order | shipment | adjustment | transfer
+  referenceId: uuid("reference_id"),
+  batchNo: varchar("batch_no", { length: 50 }),
+  note: text("note"),
+  createdBy: uuid("created_by").references(() => adminUsers.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// 倉間調撥
+export const erpInventoryTransfers = pgTable("erp_inventory_transfers", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  transferNumber: varchar("transfer_number", { length: 30 }).unique().notNull(), // TR-YYYYMM-NNNN
+  fromWarehouseId: uuid("from_warehouse_id").references(() => erpWarehouses.id).notNull(),
+  toWarehouseId: uuid("to_warehouse_id").references(() => erpWarehouses.id).notNull(),
+  status: varchar("status", { length: 20 }).default("completed").notNull(), // draft | in_transit | completed | cancelled
+  note: text("note"),
+  createdBy: uuid("created_by").references(() => adminUsers.id).notNull(),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const erpInventoryTransferItems = pgTable("erp_inventory_transfer_items", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  transferId: uuid("transfer_id").references(() => erpInventoryTransfers.id, { onDelete: "cascade" }).notNull(),
+  productId: uuid("product_id").references(() => erpProducts.id).notNull(),
+  quantity: integer("quantity").notNull(),
+  receivedQuantity: integer("received_quantity").default(0).notNull(),
+});
+
+// ERP 專用客戶（獨立於官網 customers，不打通）
+export const erpCustomers = pgTable("erp_customers", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  code: varchar("code", { length: 20 }).unique(),
+  companyName: varchar("company_name", { length: 200 }).notNull(),
+  taxId: varchar("tax_id", { length: 20 }),
+  customerType: varchar("customer_type", { length: 20 }).default("retail").notNull(), // wholesale=批發 | dealer=經銷 | retail=零售
+  contactName: varchar("contact_name", { length: 100 }),
+  phone: varchar("phone", { length: 30 }),
+  email: varchar("email", { length: 200 }),
+  address: text("address"),
+  paymentTerms: varchar("payment_terms", { length: 100 }),
+  note: text("note"),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// 銷售訂單
+export const erpSalesOrders = pgTable("erp_sales_orders", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orderNumber: varchar("order_number", { length: 30 }).unique().notNull(), // SO-YYYYMM-NNNN
+  customerId: uuid("customer_id").references(() => erpCustomers.id).notNull(),
+  warehouseId: uuid("warehouse_id").references(() => erpWarehouses.id).notNull(), // 出貨倉
+  orderDate: date("order_date").notNull(),
+  expectedShipDate: date("expected_ship_date"),
+  status: varchar("status", { length: 20 }).default("draft").notNull(),
+  // draft | confirmed | processing | shipped | completed | cancelled
+  taxMethod: varchar("tax_method", { length: 20 }).default("tax_excluded").notNull(), // tax_included | tax_excluded
+  subtotal: numeric("subtotal", { precision: 14, scale: 2 }).default("0").notNull(),
+  taxAmount: numeric("tax_amount", { precision: 14, scale: 2 }).default("0").notNull(),
+  discountAmount: numeric("discount_amount", { precision: 14, scale: 2 }).default("0").notNull(),
+  totalAmount: numeric("total_amount", { precision: 14, scale: 2 }).default("0").notNull(),
+  shippingAddress: text("shipping_address"),
+  note: text("note"),
+  createdBy: uuid("created_by").references(() => adminUsers.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const erpSalesOrderItems = pgTable("erp_sales_order_items", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  salesOrderId: uuid("sales_order_id").references(() => erpSalesOrders.id, { onDelete: "cascade" }).notNull(),
+  productId: uuid("product_id").references(() => erpProducts.id).notNull(),
+  batchId: uuid("batch_id").references(() => erpInventoryBatches.id, { onDelete: "set null" }), // 指定出貨批
+  quantity: integer("quantity").notNull(),
+  shippedQuantity: integer("shipped_quantity").default(0).notNull(),
+  unitPrice: numeric("unit_price", { precision: 12, scale: 2 }).notNull(),
+  priceTier: varchar("price_tier", { length: 20 }), // wholesale | group | retail | custom（帶價來源標籤）
+  discountRate: numeric("discount_rate", { precision: 5, scale: 2 }).default("0").notNull(),
+  subtotal: numeric("subtotal", { precision: 14, scale: 2 }).notNull(),
+  taxAmount: numeric("tax_amount", { precision: 14, scale: 2 }).default("0").notNull(),
+  total: numeric("total", { precision: 14, scale: 2 }).notNull(),
+  note: text("note"),
+});
+
+// 出貨單（一張 SO 可多張出貨單 = 分批出貨）
+export const erpShipments = pgTable("erp_shipments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  shipmentNumber: varchar("shipment_number", { length: 30 }).unique().notNull(), // SH-YYYYMM-NNNN
+  salesOrderId: uuid("sales_order_id").references(() => erpSalesOrders.id).notNull(),
+  warehouseId: uuid("warehouse_id").references(() => erpWarehouses.id).notNull(),
+  shipDate: date("ship_date").notNull(),
+  status: varchar("status", { length: 20 }).default("pending").notNull(), // pending | shipped | signed | cancelled
+  signedAt: timestamp("signed_at"),
+  signedBy: varchar("signed_by", { length: 100 }),
+  shippingAddress: text("shipping_address"),
+  note: text("note"),
+  createdBy: uuid("created_by").references(() => adminUsers.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const erpShipmentItems = pgTable("erp_shipment_items", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  shipmentId: uuid("shipment_id").references(() => erpShipments.id, { onDelete: "cascade" }).notNull(),
+  soItemId: uuid("so_item_id").references(() => erpSalesOrderItems.id).notNull(),
+  productId: uuid("product_id").references(() => erpProducts.id).notNull(),
+  batchId: uuid("batch_id").references(() => erpInventoryBatches.id, { onDelete: "set null" }),
+  batchNo: varchar("batch_no", { length: 50 }),
+  shippedQuantity: integer("shipped_quantity").notNull(),
+  note: text("note"),
+});
+
+// 單號序列（SO / SH / TR，transaction 遞增）
+export const erpNumberSequences = pgTable("erp_number_sequences", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  prefix: varchar("prefix", { length: 10 }).notNull(),
+  year: integer("year").notNull(),
+  month: integer("month").notNull(),
+  lastNumber: integer("last_number").default(0).notNull(),
+}, (table) => ({
+  prefixYearMonthIdx: uniqueIndex("erp_number_sequences_prefix_year_month_idx").on(table.prefix, table.year, table.month),
+}));
+
 // ===== Types =====
 export type DiagnosticToken = typeof diagnosticTokens.$inferSelect;
 export type NewDiagnosticToken = typeof diagnosticTokens.$inferInsert;
@@ -571,3 +807,23 @@ export type SalaryDeduction = typeof salaryDeductions.$inferSelect;
 export type ClientFeedback = typeof clientFeedback.$inferSelect;
 export type NewClientFeedback = typeof clientFeedback.$inferInsert;
 export type ClientFeedbackComment = typeof clientFeedbackComments.$inferSelect;
+
+// ERP types
+export type ErpCategory = typeof erpCategories.$inferSelect;
+export type ErpWarehouse = typeof erpWarehouses.$inferSelect;
+export type ErpProduct = typeof erpProducts.$inferSelect;
+export type ErpSpecDimension = typeof erpSpecDimensions.$inferSelect;
+export type ErpSpecOption = typeof erpSpecOptions.$inferSelect;
+export type ErpProductSpec = typeof erpProductSpecs.$inferSelect;
+export type ErpProductStock = typeof erpProductStock.$inferSelect;
+export type ErpInventory = typeof erpInventory.$inferSelect;
+export type ErpInventoryBatch = typeof erpInventoryBatches.$inferSelect;
+export type ErpInventoryTransaction = typeof erpInventoryTransactions.$inferSelect;
+export type ErpInventoryTransfer = typeof erpInventoryTransfers.$inferSelect;
+export type ErpInventoryTransferItem = typeof erpInventoryTransferItems.$inferSelect;
+export type ErpCustomer = typeof erpCustomers.$inferSelect;
+export type ErpSalesOrder = typeof erpSalesOrders.$inferSelect;
+export type ErpSalesOrderItem = typeof erpSalesOrderItems.$inferSelect;
+export type ErpShipment = typeof erpShipments.$inferSelect;
+export type ErpShipmentItem = typeof erpShipmentItems.$inferSelect;
+export type ErpNumberSequence = typeof erpNumberSequences.$inferSelect;
